@@ -115,7 +115,7 @@ All specs live in `/docs`. Read these before writing code for a module.
 - All API calls go through `lib/api.ts`. Components never call `fetch` directly.
 - Components in `components/`. Page-level layouts in `app/`.
 - Use Tailwind classes. No CSS modules or styled-components.
-- Paper-warm light design system. Page `#FAF7F2`, card `#FFFFFF`, ink `#15130F`, action `#E30018` (Sparkassen-Rot HKS 13). Source of truth: `frontend/claude design/colors_and_type.css` and `frontend/claude design/README.md`. Tokens loaded via `frontend/src/app/globals.css`.
+- Paper-warm light design system. Page `#FAF7F2`, card `#FFFFFF`, ink `#15130F`, action `#E30018` (Sparkassen-Rot HKS 13). Source of truth: `frontend/claude-design/colors_and_type.css` and `frontend/claude-design/README.md`. Tokens loaded via `frontend/src/app/globals.css`.
 
 ### API Contract
 

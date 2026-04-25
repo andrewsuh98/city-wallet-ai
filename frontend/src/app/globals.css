@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Design tokens — source of truth: frontend/claude design/colors_and_type.css
+/* Design tokens. Source of truth: frontend/claude-design/colors_and_type.css
    Fonts loaded via next/font in layout.tsx; --font-* vars resolved there. */
 
 :root {
