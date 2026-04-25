@@ -1,8 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import Link from "next/link";
-import { clearConsent } from "@/components/ConsentModal";
+import { clearConsent, getConsent } from "@/components/ConsentModal";
 import { useRouter } from "next/navigation";
 
 const page: CSSProperties = {
@@ -119,6 +118,7 @@ const dangerBtn: CSSProperties = {
 
 export default function PrivacyPage() {
   const router = useRouter();
+  const isOnboarded = getConsent() !== null;
 
   const handleClearData = () => {
     clearConsent();
@@ -127,13 +127,16 @@ export default function PrivacyPage() {
 
   return (
     <div style={page}>
-      <Link
-        href="/"
+      <button
+        onClick={() => router.back()}
         style={{
           fontFamily: "var(--font-body)",
           fontSize: "var(--fs-small)",
           color: "var(--fg-link)",
-          textDecoration: "none",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          padding: 0,
           display: "inline-flex",
           alignItems: "center",
           gap: "4px",
@@ -142,7 +145,7 @@ export default function PrivacyPage() {
       >
         <i className="ph ph-arrow-left" style={{ fontSize: "14px" }} />
         Back
-      </Link>
+      </button>
 
       <h1 style={heading}>How your data is handled</h1>
       <p style={body}>
@@ -274,15 +277,18 @@ export default function PrivacyPage() {
         ))}
       </div>
 
-      {/* Clear data */}
-      <h2 style={sectionTitle}>Clear my data</h2>
-      <p style={{ ...body, marginBottom: "16px" }}>
-        This removes your consent, session, and all locally stored data. The app will show the welcome screen again.
-      </p>
+      {isOnboarded && (
+        <>
+          <h2 style={sectionTitle}>Clear my data</h2>
+          <p style={{ ...body, marginBottom: "16px" }}>
+            This removes your consent, preferences, and all locally stored data. The app will show the welcome screen again.
+          </p>
 
-      <button onClick={handleClearData} style={dangerBtn}>
-        Clear all data and revoke consent
-      </button>
+          <button onClick={handleClearData} style={dangerBtn}>
+            Clear all data and revoke consent
+          </button>
+        </>
+      )}
     </div>
   );
 }

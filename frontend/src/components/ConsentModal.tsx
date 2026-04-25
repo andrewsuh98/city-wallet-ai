@@ -186,11 +186,11 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
       </div>
 
       <h1 style={hero}>
-        The right offer, right when you need it.
+        Shop local. Save local.
       </h1>
 
       <p style={subtitle}>
-        City Wallet finds what is nearby, open, and worth your time.
+        Discover real-time offers from small businesses near you.
       </p>
 
       <button onClick={onNext} style={primaryBtn}>
@@ -544,11 +544,29 @@ function LocationScreen({ onConsent }: ConsentModalProps) {
 
 // -- Main component: 4-step flow --
 
+const STEP_KEY = "city_wallet_onboarding_step";
+
+function readStep(): 1 | 2 | 3 | 4 {
+  if (typeof window === "undefined") return 1;
+  const n = Number(sessionStorage.getItem(STEP_KEY));
+  return n >= 1 && n <= 4 ? (n as 1 | 2 | 3 | 4) : 1;
+}
+
 export default function ConsentModal({ onConsent }: ConsentModalProps) {
-  const [step, setStep] = useState<1 | 2 | 3 | 4>(1);
+  const [step, setStepState] = useState<1 | 2 | 3 | 4>(readStep);
+
+  const setStep = (s: 1 | 2 | 3 | 4) => {
+    sessionStorage.setItem(STEP_KEY, String(s));
+    setStepState(s);
+  };
+
+  const handleConsent = (locationEnabled: boolean) => {
+    sessionStorage.removeItem(STEP_KEY);
+    onConsent(locationEnabled);
+  };
 
   if (step === 1) return <WelcomeScreen onNext={() => setStep(2)} />;
   if (step === 2) return <ProfileScreen onNext={() => setStep(3)} />;
   if (step === 3) return <TasteScreen onNext={() => setStep(4)} onSkip={() => setStep(4)} />;
-  return <LocationScreen onConsent={onConsent} />;
+  return <LocationScreen onConsent={handleConsent} />;
 }
