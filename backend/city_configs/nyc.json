@@ -6,7 +6,7 @@
   "timezone": "America/New_York",
   "language": "en",
   "center": {
-    "latitude": 40.7580,
+    "latitude": 40.758,
     "longitude": -73.9855
   },
   "default_radius_meters": 1000,
@@ -27,25 +27,36 @@
       "category": "cafe",
       "description": "Specialty coffee roaster known for single-origin pour-overs",
       "latitude": 40.7562,
-      "longitude": -73.9870,
+      "longitude": -73.987,
       "address": "1 Rockefeller Plaza, New York, NY 10020",
       "image_url": null,
       "brand_voice": "warm",
-      "signature_items": ["cappuccino", "single-origin pour-over", "almond croissant"],
+      "signature_items": [
+        "cappuccino",
+        "single-origin pour-over",
+        "almond croissant"
+      ],
       "target_demographics": ["young_professional", "tourist", "office_worker"],
       "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 50.00,
+      "daily_budget_usd": 50.0,
       "rules": [
         {
           "max_discount_percent": 20,
           "min_discount_percent": 10,
-          "active_hours_start": "13:00",
-          "active_hours_end": "17:00",
-          "trigger_conditions": ["quiet_period", "rainy", "cold"],
-          "goal": "Fill quiet afternoon hours with walk-in traffic",
+          "active_hours_start": "08:00",
+          "active_hours_end": "21:00",
+          "trigger_conditions": [
+            "quiet_period",
+            "rainy",
+            "cold",
+            "evening",
+            "weekend",
+            "event_nearby"
+          ],
+          "goal": "Drive walk-in traffic during quiet periods and evenings",
           "max_offers_per_day": 15,
           "offer_type": "percentage_discount",
-          "budget_daily_usd": 50.00
+          "budget_daily_usd": 50.0
         }
       ],
       "transaction_pattern": {
@@ -65,10 +76,14 @@
       "address": "7 Carmine St, New York, NY 10014",
       "image_url": null,
       "brand_voice": "neighborly",
-      "signature_items": ["pepperoni slice", "margherita slice", "fresh mozzarella slice"],
+      "signature_items": [
+        "pepperoni slice",
+        "margherita slice",
+        "fresh mozzarella slice"
+      ],
       "target_demographics": ["local", "student", "tourist"],
       "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 40.00,
+      "daily_budget_usd": 40.0,
       "rules": [
         {
           "max_discount_percent": 15,
@@ -79,7 +94,7 @@
           "goal": "Rainy day lunch specials to maintain foot traffic",
           "max_offers_per_day": 20,
           "offer_type": "percentage_discount",
-          "budget_daily_usd": 40.00
+          "budget_daily_usd": 40.0
         }
       ],
       "transaction_pattern": {
@@ -99,10 +114,14 @@
       "address": "828 Broadway, New York, NY 10003",
       "image_url": null,
       "brand_voice": "sophisticated",
-      "signature_items": ["rare first editions", "Strand tote bag", "staff picks"],
+      "signature_items": [
+        "rare first editions",
+        "Strand tote bag",
+        "staff picks"
+      ],
       "target_demographics": ["local", "tourist", "student"],
       "primary_goal": "loyalty_reward",
-      "daily_budget_usd": 30.00,
+      "daily_budget_usd": 30.0,
       "rules": [
         {
           "max_discount_percent": 20,
@@ -113,7 +132,7 @@
           "goal": "Weekend browse-and-buy incentive",
           "max_offers_per_day": 10,
           "offer_type": "percentage_discount",
-          "budget_daily_usd": 30.00
+          "budget_daily_usd": 30.0
         }
       ],
       "transaction_pattern": {
@@ -128,15 +147,18 @@
       "name": "Levain Bakery",
       "category": "bakery",
       "description": "Famous for giant, gooey chocolate chip cookies",
-      "latitude": 40.7800,
+      "latitude": 40.78,
       "longitude": -73.9804,
       "address": "167 W 74th St, New York, NY 10023",
       "image_url": null,
       "brand_voice": "playful",
-      "signature_items": ["chocolate chip walnut cookie", "dark chocolate peanut butter cookie"],
+      "signature_items": [
+        "chocolate chip walnut cookie",
+        "dark chocolate peanut butter cookie"
+      ],
       "target_demographics": ["tourist", "family", "young_professional"],
       "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 35.00,
+      "daily_budget_usd": 35.0,
       "rules": [
         {
           "max_discount_percent": 15,
@@ -147,7 +169,7 @@
           "goal": "Cold weather warm treats to boost afternoon sales",
           "max_offers_per_day": 12,
           "offer_type": "free_item",
-          "budget_daily_usd": 35.00
+          "budget_daily_usd": 35.0
         }
       ],
       "transaction_pattern": {
@@ -167,10 +189,14 @@
       "address": "Madison Square Park, New York, NY 10010",
       "image_url": null,
       "brand_voice": "playful",
-      "signature_items": ["ShackBurger", "crinkle-cut fries", "chocolate shake"],
+      "signature_items": [
+        "ShackBurger",
+        "crinkle-cut fries",
+        "chocolate shake"
+      ],
       "target_demographics": ["tourist", "office_worker", "family"],
       "primary_goal": "event_capture",
-      "daily_budget_usd": 60.00,
+      "daily_budget_usd": 60.0,
       "rules": [
         {
           "max_discount_percent": 15,
@@ -181,7 +207,7 @@
           "goal": "Post-event crowd deals and weekend lunch boost",
           "max_offers_per_day": 25,
           "offer_type": "percentage_discount",
-          "budget_daily_usd": 60.00
+          "budget_daily_usd": 60.0
         }
       ],
       "transaction_pattern": {
@@ -204,7 +230,7 @@
       "signature_items": ["staff picks", "literary fiction", "espresso"],
       "target_demographics": ["local", "young_professional", "tourist"],
       "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 25.00,
+      "daily_budget_usd": 25.0,
       "rules": [
         {
           "max_discount_percent": 20,
@@ -215,7 +241,7 @@
           "goal": "Quiet weekday afternoon foot traffic",
           "max_offers_per_day": 8,
           "offer_type": "percentage_discount",
-          "budget_daily_usd": 25.00
+          "budget_daily_usd": 25.0
         }
       ],
       "transaction_pattern": {
@@ -235,10 +261,14 @@
       "address": "373 Broome St, New York, NY 10013",
       "image_url": null,
       "brand_voice": "playful",
-      "signature_items": ["iced matcha latte", "pink drink", "matcha soft serve"],
+      "signature_items": [
+        "iced matcha latte",
+        "pink drink",
+        "matcha soft serve"
+      ],
       "target_demographics": ["young_professional", "student", "tourist"],
       "primary_goal": "loyalty_reward",
-      "daily_budget_usd": 40.00,
+      "daily_budget_usd": 40.0,
       "rules": [
         {
           "max_discount_percent": 15,
@@ -249,7 +279,7 @@
           "goal": "Morning energy boost for commuters",
           "max_offers_per_day": 20,
           "offer_type": "percentage_discount",
-          "budget_daily_usd": 40.00
+          "budget_daily_usd": 40.0
         }
       ],
       "transaction_pattern": {
@@ -272,18 +302,24 @@
       "signature_items": ["truffle mac & cheese", "burger", "ricotta gnocchi"],
       "target_demographics": ["young_professional", "couple", "tourist"],
       "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 45.00,
+      "daily_budget_usd": 45.0,
       "rules": [
         {
           "max_discount_percent": 20,
           "min_discount_percent": 10,
           "active_hours_start": "16:00",
-          "active_hours_end": "19:00",
-          "trigger_conditions": ["evening", "quiet_period", "weekday"],
-          "goal": "Early dinner fill before the rush",
+          "active_hours_end": "22:00",
+          "trigger_conditions": [
+            "evening",
+            "quiet_period",
+            "weekday",
+            "weekend",
+            "event_nearby"
+          ],
+          "goal": "Evening dinner deals to fill tables before and after peak",
           "max_offers_per_day": 10,
           "offer_type": "percentage_discount",
-          "budget_daily_usd": 45.00
+          "budget_daily_usd": 45.0
         }
       ],
       "transaction_pattern": {
@@ -299,14 +335,14 @@
       "category": "grocery",
       "description": "Organic and natural grocery at Columbus Circle",
       "latitude": 40.7688,
-      "longitude": -73.9830,
+      "longitude": -73.983,
       "address": "10 Columbus Cir, New York, NY 10019",
       "image_url": null,
       "brand_voice": "friendly",
       "signature_items": ["hot bar", "365 brand basics", "prepared salads"],
       "target_demographics": ["local", "office_worker", "family"],
       "primary_goal": "loyalty_reward",
-      "daily_budget_usd": 80.00,
+      "daily_budget_usd": 80.0,
       "rules": [
         {
           "max_discount_percent": 10,
@@ -317,7 +353,7 @@
           "goal": "Evening commuter quick-stop incentive",
           "max_offers_per_day": 30,
           "offer_type": "percentage_discount",
-          "budget_daily_usd": 80.00
+          "budget_daily_usd": 80.0
         }
       ],
       "transaction_pattern": {
@@ -337,10 +373,14 @@
       "address": "897 Broadway, New York, NY 10003",
       "image_url": null,
       "brand_voice": "sophisticated",
-      "signature_items": ["spin class", "personal training session", "recovery suite"],
+      "signature_items": [
+        "spin class",
+        "personal training session",
+        "recovery suite"
+      ],
       "target_demographics": ["young_professional", "couple"],
       "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 30.00,
+      "daily_budget_usd": 30.0,
       "rules": [
         {
           "max_discount_percent": 20,
@@ -351,7 +391,7 @@
           "goal": "Off-peak class promo to fill midday slots",
           "max_offers_per_day": 8,
           "offer_type": "free_item",
-          "budget_daily_usd": 30.00
+          "budget_daily_usd": 30.0
         }
       ],
       "transaction_pattern": {
@@ -371,10 +411,14 @@
       "address": "900 Broadway, New York, NY 10003",
       "image_url": null,
       "brand_voice": "neighborly",
-      "signature_items": ["Flagship cheddar", "world's best mac & cheese", "cheese flight"],
+      "signature_items": [
+        "Flagship cheddar",
+        "world's best mac & cheese",
+        "cheese flight"
+      ],
       "target_demographics": ["tourist", "office_worker", "couple"],
       "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 25.00,
+      "daily_budget_usd": 25.0,
       "rules": [
         {
           "max_discount_percent": 15,
@@ -385,7 +429,7 @@
           "goal": "Lunchtime tasting offer to drive walk-ins",
           "max_offers_per_day": 12,
           "offer_type": "free_item",
-          "budget_daily_usd": 25.00
+          "budget_daily_usd": 25.0
         }
       ],
       "transaction_pattern": {
@@ -400,15 +444,19 @@
       "name": "Stumptown Coffee Roasters",
       "category": "cafe",
       "description": "Portland-born coffee roaster in Greenwich Village",
-      "latitude": 40.7340,
+      "latitude": 40.734,
       "longitude": -74.0023,
       "address": "30 W 8th St, New York, NY 10011",
       "image_url": null,
       "brand_voice": "warm",
-      "signature_items": ["Hair Bender espresso", "cold brew", "Stumptown drip"],
+      "signature_items": [
+        "Hair Bender espresso",
+        "cold brew",
+        "Stumptown drip"
+      ],
       "target_demographics": ["local", "young_professional", "student"],
       "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 45.00,
+      "daily_budget_usd": 45.0,
       "rules": [
         {
           "max_discount_percent": 20,
@@ -419,7 +467,7 @@
           "goal": "Rainy afternoon refuge for neighborhood walkers",
           "max_offers_per_day": 15,
           "offer_type": "percentage_discount",
-          "budget_daily_usd": 45.00
+          "budget_daily_usd": 45.0
         }
       ],
       "transaction_pattern": {
@@ -438,7 +486,7 @@
       "category": "festival",
       "start_time": "2026-04-20T00:00:00",
       "end_time": "2026-04-27T23:59:59",
-      "latitude": 40.7580,
+      "latitude": 40.758,
       "longitude": -73.9855,
       "expected_attendance": 50000
     },

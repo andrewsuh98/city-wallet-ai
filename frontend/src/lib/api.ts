@@ -10,6 +10,7 @@ import type {
   OfferAnalytics,
   RedemptionResult,
   TokenValidationResponse,
+  WalletRedemption,
 } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
@@ -28,8 +29,12 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 // Context
 
-export async function getContext(req: ContextRequest): Promise<ContextState> {
-  return request("/context", {
+export async function getContext(
+  req: ContextRequest,
+  demo?: string,
+): Promise<ContextState> {
+  const path = demo ? `/context?demo=${encodeURIComponent(demo)}` : "/context";
+  return request(path, {
     method: "POST",
     body: JSON.stringify(req),
   });
@@ -38,7 +43,7 @@ export async function getContext(req: ContextRequest): Promise<ContextState> {
 // Offers
 
 export async function generateOffers(
-  req: GenerateOffersRequest
+  req: GenerateOffersRequest,
 ): Promise<GenerateOffersResponse> {
   return request("/offers/generate", {
     method: "POST",
@@ -46,13 +51,15 @@ export async function generateOffers(
   });
 }
 
-export async function getOffers(sessionId: string): Promise<{ offers: Offer[] }> {
+export async function getOffers(
+  sessionId: string,
+): Promise<{ offers: Offer[] }> {
   return request(`/offers?session_id=${encodeURIComponent(sessionId)}`);
 }
 
 export async function updateOffer(
   offerId: string,
-  action: OfferActionRequest
+  action: OfferActionRequest,
 ): Promise<{ offer: Offer }> {
   return request(`/offers/${encodeURIComponent(offerId)}`, {
     method: "PATCH",
@@ -71,14 +78,14 @@ export async function getMerchant(id: string): Promise<Merchant> {
 }
 
 export async function getMerchantRules(
-  id: string
+  id: string,
 ): Promise<{ rules: MerchantRule[] }> {
   return request(`/merchants/${encodeURIComponent(id)}/rules`);
 }
 
 export async function updateMerchantRules(
   id: string,
-  rules: MerchantRule[]
+  rules: MerchantRule[],
 ): Promise<{ rules: MerchantRule[] }> {
   return request(`/merchants/${encodeURIComponent(id)}/rules`, {
     method: "PUT",
@@ -87,7 +94,7 @@ export async function updateMerchantRules(
 }
 
 export async function getMerchantAnalytics(
-  id: string
+  id: string,
 ): Promise<OfferAnalytics> {
   return request(`/merchants/${encodeURIComponent(id)}/analytics`);
 }
@@ -96,7 +103,7 @@ export async function getMerchantAnalytics(
 
 export async function redeemOffer(
   offerId: string,
-  token: string
+  token: string,
 ): Promise<RedemptionResult> {
   return request("/redeem", {
     method: "POST",
@@ -105,7 +112,7 @@ export async function redeemOffer(
 }
 
 export async function validateToken(
-  token: string
+  token: string,
 ): Promise<TokenValidationResponse> {
   return request(`/redeem/validate/${encodeURIComponent(token)}`);
 }
@@ -116,14 +123,6 @@ export async function getOfferQR(offerId: string): Promise<{
   expires_at: string;
 }> {
   return request(`/redeem/qr/${encodeURIComponent(offerId)}`);
-}
-
-export interface WalletRedemption {
-  id: string;
-  offer_id: string;
-  merchant_name: string;
-  cashback_amount: number;
-  redeemed_at: string;
 }
 
 export async function getWalletBalance(sessionId: string): Promise<{
