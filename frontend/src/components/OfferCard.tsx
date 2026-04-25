@@ -4,6 +4,7 @@ interface OfferCardProps {
   offer: Offer;
   onAccept?: (id: string) => void;
   onDismiss?: (id: string) => void;
+  onShowQR?: (id: string) => void;
 }
 
 function getTimeRemaining(expiresAt: string): string {
@@ -20,7 +21,7 @@ const toneClasses: Record<string, string> = {
   sophisticated: "animate-fade-in",
 };
 
-export default function OfferCard({ offer, onAccept, onDismiss }: OfferCardProps) {
+export default function OfferCard({ offer, onAccept, onDismiss, onShowQR }: OfferCardProps) {
   const gradient = `linear-gradient(135deg, ${offer.style.background_gradient[0]}, ${offer.style.background_gradient[1]})`;
   const timeLeft = getTimeRemaining(offer.expires_at);
   const isExpired = timeLeft === "Expired";
@@ -68,9 +69,18 @@ export default function OfferCard({ offer, onAccept, onDismiss }: OfferCardProps
             Accept
           </button>
         ) : offer.status === "accepted" ? (
-          <span className="rounded-full bg-emerald-500/20 border border-emerald-400/50 px-4 py-2 text-sm font-semibold text-emerald-300">
-            Accepted
-          </span>
+          onShowQR ? (
+            <button
+              onClick={() => onShowQR(offer.id)}
+              className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition-transform hover:scale-105 active:scale-95"
+            >
+              Show QR
+            </button>
+          ) : (
+            <span className="rounded-full bg-emerald-500/20 border border-emerald-400/50 px-4 py-2 text-sm font-semibold text-emerald-300">
+              Accepted
+            </span>
+          )
         ) : (
           <span className="text-sm text-white/50">Expired</span>
         )}
