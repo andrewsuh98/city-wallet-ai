@@ -41,10 +41,36 @@ class TransactionDensity(BaseModel):
     trend: str
 
 
+class MerchantLiveSignal(BaseModel):
+    """Continuously-polled merchant state (simulated). Distinct from density:
+    density is a single ratio for the current hour, this is the richer
+    operating state used by Claude to ground offer copy.
+    """
+    merchant_id: str
+    recent_txns_60min: list[int]                 # 6 ten-minute buckets, oldest first
+    inventory_flags: list[str] = []              # e.g. ["fresh_batch:cappuccino", "low_stock:croissants"]
+    staff_capacity: str = "normal"               # "low", "normal", "high"
+    daily_budget_burned_pct: float = 0.0         # 0.0-1.0, fraction of today's offer budget already spent
+    active_offer_count: int = 0
+
+
 class UserLocation(BaseModel):
     latitude: float
     longitude: float
     accuracy_meters: Optional[float] = None
+
+
+class CustomerIntent(BaseModel):
+    """Opaque, on-device-derived hints. Raw customer profile and live signals
+    never leave the device; an SLM summarizes them into this object before it
+    reaches the backend. All fields are optional — the engine works without them.
+    """
+    intent_tags: list[str] = []                  # e.g. ["warm_drink", "sit_down", "browsing"]
+    preferred_categories: list[str] = []         # e.g. ["cafe", "bakery"]
+    price_sensitivity: Optional[str] = None      # "low", "mid", "high"
+    movement_state: Optional[str] = None         # "stationary", "walking", "transit"
+    session_dwell_seconds: Optional[int] = None
+    declined_categories_today: list[str] = []
 
 
 class ContextState(BaseModel):
@@ -56,6 +82,7 @@ class ContextState(BaseModel):
     is_weekend: bool
     nearby_events: list[EventData]
     merchant_densities: list[TransactionDensity]
+    merchant_live_signals: list[MerchantLiveSignal] = []
     context_tags: list[str]
     urgency_score: float
 
@@ -96,6 +123,12 @@ class Merchant(BaseModel):
     longitude: float
     address: str
     image_url: Optional[str] = None
+    # Onboarding profile — captured during merchant signup, slow-changing
+    brand_voice: Optional[str] = None             # "friendly", "playful", "sophisticated", "neighborly"
+    signature_items: list[str] = []               # e.g. ["cappuccino", "single-origin pour-over"]
+    target_demographics: list[str] = []           # e.g. ["young_professional", "tourist"]
+    primary_goal: Optional[str] = None            # "fill_quiet_hours", "event_capture", "loyalty_reward"
+    daily_budget_usd: Optional[float] = None      # overall daily spend cap
     rules: list[MerchantRule] = []
 
 
@@ -176,7 +209,8 @@ class GenerateOffersRequest(BaseModel):
     session_id: str
     context: ContextState
     max_offers: int = 3
-    user_preferences: Optional[dict] = None
+    customer_intent: Optional[CustomerIntent] = None  # opaque on-device summary; raw profile stays local
+    user_preferences: Optional[dict] = None  # legacy free-form hints, kept for compatibility
 
 
 class GenerateOffersResponse(BaseModel):

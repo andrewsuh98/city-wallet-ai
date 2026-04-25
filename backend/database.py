@@ -13,6 +13,11 @@ CREATE TABLE IF NOT EXISTS merchants (
     longitude REAL NOT NULL,
     address TEXT,
     image_url TEXT,
+    brand_voice TEXT,
+    signature_items TEXT,
+    target_demographics TEXT,
+    primary_goal TEXT,
+    daily_budget_usd REAL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -73,10 +78,30 @@ async def get_db() -> aiosqlite.Connection:
     return db
 
 
+MERCHANT_PROFILE_COLUMNS = [
+    ("brand_voice", "TEXT"),
+    ("signature_items", "TEXT"),
+    ("target_demographics", "TEXT"),
+    ("primary_goal", "TEXT"),
+    ("daily_budget_usd", "REAL"),
+]
+
+
+async def _migrate_merchant_profile(db: aiosqlite.Connection) -> None:
+    """Idempotently add merchant onboarding columns to existing databases."""
+    cursor = await db.execute("PRAGMA table_info(merchants)")
+    rows = await cursor.fetchall()
+    existing = {r["name"] for r in rows}
+    for name, col_type in MERCHANT_PROFILE_COLUMNS:
+        if name not in existing:
+            await db.execute(f"ALTER TABLE merchants ADD COLUMN {name} {col_type}")
+
+
 async def init_db():
     db = await get_db()
     try:
         await db.executescript(SCHEMA)
+        await _migrate_merchant_profile(db)
         await db.commit()
     finally:
         await db.close()
