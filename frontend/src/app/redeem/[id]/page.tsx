@@ -81,44 +81,64 @@ export default function RedeemPage() {
   void tick;
   const isRedeemed = offer?.status === "redeemed";
 
+  const remainingClass = remaining.expired
+    ? "text-status-danger"
+    : remaining.danger
+      ? "text-cw-warm"
+      : "text-fg-3";
+
   return (
-    <div className="min-h-screen px-6 py-8">
+    <div className="min-h-screen bg-page px-6 py-8">
       <button
         onClick={() => router.push("/wallet")}
-        className="mb-6 text-sm text-white/60 hover:text-white"
+        className="mb-6 inline-flex items-center gap-1 text-small text-fg-link hover:opacity-80"
       >
+        <i className="ph ph-arrow-left text-xs" />
         Back to wallet
       </button>
 
       {offer && isRedeemed ? (
-        <div className="mx-auto flex max-w-md flex-col items-center text-center animate-fade-in">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/20 text-4xl text-emerald-300">
-            v
+        <div className="mx-auto flex max-w-md flex-col items-center text-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-pill bg-cw-fresh-bg text-cw-fresh">
+            <i className="ph-bold ph-check text-4xl" />
           </div>
-          <h1 className="mt-5 text-3xl font-bold text-white">Redeemed!</h1>
-          <p className="mt-2 text-sm text-white/60">
+          <h1
+            className="mt-5 font-display text-display text-fg-1"
+            style={{ letterSpacing: "var(--ls-tight)", fontVariationSettings: '"opsz" 96, "SOFT" 50' }}
+          >
+            Redeemed
+          </h1>
+          <p className="mt-2 text-small text-fg-3">
             at {offer.merchant_name}
           </p>
           {cashback !== null && (
-            <p className="mt-6 text-4xl font-bold tabular-nums text-emerald-400">
+            <p
+              className="mt-6 font-display text-hero tabular-nums text-cw-fresh"
+              style={{ letterSpacing: "var(--ls-tight)", fontVariationSettings: '"opsz" 96, "SOFT" 50' }}
+            >
               +${cashback.toFixed(2)}
             </p>
           )}
-          <p className="mt-1 text-sm text-white/50">cashback applied</p>
+          <p className="mt-1 text-small text-fg-3">cashback applied</p>
           <button
             onClick={() => router.push("/wallet")}
-            className="mt-8 rounded-full bg-white px-6 py-3 text-sm font-semibold text-black hover:scale-105 active:scale-95 transition-transform"
+            className="mt-8 rounded-2 bg-action-primary px-6 py-3 text-small font-semibold text-fg-on-red hover:bg-action-primary-hover"
           >
             Back to wallet
           </button>
         </div>
       ) : offer ? (
         <div className="mx-auto flex max-w-md flex-col items-center text-center">
-          <p className="text-xs uppercase tracking-wider text-white/50">
+          <p className="text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
             {offer.merchant_name}
           </p>
-          <h1 className="mt-1 text-2xl font-bold text-white">{offer.headline}</h1>
-          <span className="mt-3 inline-block rounded-full border border-blue-400/40 px-3 py-1 text-sm font-semibold text-blue-300">
+          <h1
+            className="mt-1 font-display text-h1 text-fg-1"
+            style={{ letterSpacing: "var(--ls-tight)", fontVariationSettings: '"opsz" 96, "SOFT" 50' }}
+          >
+            {offer.headline}
+          </h1>
+          <span className="mt-3 inline-block rounded-pill bg-cw-cool-bg px-3 py-1 text-small font-semibold text-cw-cool">
             {offer.discount_value}
           </span>
 
@@ -126,26 +146,18 @@ export default function RedeemPage() {
             <QRDisplay offerId={offerId} size={280} />
           </div>
 
-          <p className="mt-6 text-sm text-white/70">
+          <p className="mt-6 text-body text-fg-2">
             Show this to the cashier
           </p>
-          <p
-            className={`mt-2 text-sm tabular-nums ${
-              remaining.expired
-                ? "text-red-400"
-                : remaining.danger
-                  ? "text-amber-300"
-                  : "text-white/50"
-            }`}
-          >
+          <p className={`mt-2 text-small tabular-nums font-semibold ${remainingClass}`}>
             {remaining.expired ? "Expired" : `Expires in ${remaining.label}`}
           </p>
-          <p className="mt-1 text-xs text-white/30">
+          <p className="mt-1 text-micro text-fg-4">
             Waiting for merchant scan...
           </p>
         </div>
       ) : (
-        <div className="mx-auto max-w-md text-center text-white/60">
+        <div className="mx-auto max-w-md text-center text-small text-fg-3">
           Loading offer...
         </div>
       )}

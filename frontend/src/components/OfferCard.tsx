@@ -7,106 +7,186 @@ interface OfferCardProps {
   onShowQR?: (id: string) => void;
 }
 
-function getTimeRemaining(expiresAt: string): string {
-  const diff = new Date(expiresAt).getTime() - Date.now();
-  if (diff <= 0) return "Expired";
-  const minutes = Math.ceil(diff / 60000);
-  return `${minutes}m`;
-}
+type ChipVariant = "cool" | "warm" | "fresh" | "dusk" | "neutral";
 
-const toneClasses: Record<string, string> = {
-  warm: "animate-fade-in",
-  urgent: "animate-slide-up",
-  playful: "animate-bounce-in",
-  sophisticated: "animate-fade-in",
+const TAG_VARIANT: Record<string, ChipVariant> = {
+  rainy: "cool",
+  rain: "cool",
+  cold: "cool",
+  snow: "cool",
+  storm: "cool",
+  sunny: "warm",
+  warm: "warm",
+  hot: "warm",
+  fresh: "fresh",
+  available: "fresh",
+  quiet: "fresh",
+  quiet_cafes: "fresh",
+  quiet_period: "fresh",
+  evening: "dusk",
+  dusk: "dusk",
+  events: "dusk",
+  concert: "dusk",
+  weekend: "dusk",
 };
 
+const TAG_ICON: Record<string, string> = {
+  rainy: "ph-cloud-rain",
+  rain: "ph-cloud-rain",
+  cold: "ph-thermometer-cold",
+  snow: "ph-snowflake",
+  storm: "ph-cloud-lightning",
+  sunny: "ph-sun",
+  warm: "ph-sun",
+  hot: "ph-sun",
+  fresh: "ph-coffee",
+  quiet: "ph-chart-bar",
+  quiet_cafes: "ph-coffee",
+  quiet_period: "ph-chart-bar",
+  lunch_hour: "ph-fork-knife",
+  weekend: "ph-calendar",
+  evening: "ph-moon",
+  dusk: "ph-moon",
+  events: "ph-music-notes",
+  concert: "ph-music-notes",
+};
+
+const CHIP_CLASSES: Record<ChipVariant, string> = {
+  cool:    "bg-cw-cool-bg text-cw-cool",
+  warm:    "bg-cw-warm-bg text-cw-warm",
+  fresh:   "bg-cw-fresh-bg text-cw-fresh",
+  dusk:    "bg-cw-dusk-bg text-cw-dusk",
+  neutral: "bg-cw-paper-100 text-fg-2",
+};
+
+const CHIP_BASE =
+  "inline-flex items-center gap-1 whitespace-nowrap rounded-pill px-2.5 py-1 font-body text-[10px] font-semibold uppercase tracking-[0.04em]";
+
+function pickPrimaryTag(tags: string[]): string | null {
+  for (const tag of tags) {
+    if (TAG_VARIANT[tag] || TAG_ICON[tag]) return tag;
+  }
+  return tags[0] ?? null;
+}
+
+function formatExpiry(expiresAt: string): string {
+  const target = new Date(expiresAt);
+  const diff = target.getTime() - Date.now();
+  if (diff <= 0) return "closed";
+  const h = target.getHours().toString().padStart(2, "0");
+  const m = target.getMinutes().toString().padStart(2, "0");
+  return `until ${h}:${m}`;
+}
+
+function formatDistance(meters: number): string {
+  if (meters < 1000) return `${Math.round(meters)}m`;
+  return `${(meters / 1000).toFixed(1)}km`;
+}
+
+function formatDiscount(value: string): string {
+  if (!value) return "Accept";
+  if (value.startsWith("\u2212") || value.startsWith("-")) return value;
+  if (value.endsWith("%")) return `\u2212${value}`;
+  return value;
+}
+
 export default function OfferCard({ offer, onAccept, onDismiss, onShowQR }: OfferCardProps) {
-  const gradient = `linear-gradient(135deg, ${offer.style.background_gradient[0]}, ${offer.style.background_gradient[1]})`;
-  const timeLeft = getTimeRemaining(offer.expires_at);
-  const isExpired = timeLeft === "Expired";
+  const expiresMs = new Date(offer.expires_at).getTime() - Date.now();
+  const isExpired = expiresMs <= 0;
+  const isActive = !isExpired && offer.status === "active";
+
+  const primaryTag = pickPrimaryTag(offer.context_tags);
+  const variant: ChipVariant = (primaryTag ? TAG_VARIANT[primaryTag] : undefined) ?? "neutral";
+  const tagIcon = (primaryTag ? TAG_ICON[primaryTag] : undefined) ?? "ph-tag";
+  const tagLabel = (primaryTag ?? "").replace(/_/g, " ");
+
+  const merchantInitial = offer.merchant_name.charAt(0).toUpperCase();
+  const expiry = formatExpiry(offer.expires_at);
+  const discountLabel = formatDiscount(offer.discount_value);
 
   return (
-    <div
-      className={`relative rounded-2xl p-5 shadow-lg ${toneClasses[offer.style.tone] || ""} ${isExpired ? "opacity-50" : ""}`}
-      style={{ background: gradient }}
+    <article
+      className={`rounded-4 border border-border-1 bg-card p-[18px] transition-shadow duration-200 ${
+        isActive ? "shadow-2" : "shadow-1"
+      } ${isExpired ? "opacity-50" : ""}`}
     >
-      {/* Top row: emoji + badges */}
-      <div className="flex items-start justify-between mb-3">
-        <span className="text-5xl leading-none">{offer.style.emoji}</span>
-        <div className="flex gap-2">
-          {offer.distance_meters != null && (
-            <span className="rounded-full bg-black/30 px-2.5 py-1 text-xs font-medium text-white/90">
-              {offer.distance_meters < 1000
-                ? `${Math.round(offer.distance_meters)}m`
-                : `${(offer.distance_meters / 1000).toFixed(1)}km`}
-            </span>
-          )}
-        </div>
+      <div className="mb-3 flex flex-wrap gap-1.5">
+        {primaryTag && (
+          <span className={`${CHIP_BASE} ${CHIP_CLASSES[variant]}`}>
+            <i className={`ph ${tagIcon} text-xs`} />
+            {tagLabel}
+          </span>
+        )}
+        {offer.distance_meters != null && (
+          <span className={`${CHIP_BASE} ${CHIP_CLASSES.neutral}`}>
+            <i className="ph ph-map-pin text-xs" />
+            {formatDistance(offer.distance_meters)}
+          </span>
+        )}
       </div>
 
-      {/* Headline */}
       <h3
-        className={`mb-1 leading-tight text-white ${
-          offer.style.headline_style === "emotional"
-            ? "text-2xl font-bold"
-            : "text-xl font-semibold"
-        }`}
+        className="mb-2 font-display text-[26px] font-medium leading-[1.05] text-fg-1"
+        style={{ letterSpacing: "var(--ls-tight)", textWrap: "balance", fontVariationSettings: '"opsz" 96, "SOFT" 50' }}
       >
         {offer.headline}
       </h3>
 
-      {/* Subtext */}
-      <p className="text-base font-medium text-white/90 mb-4">{offer.subtext}</p>
+      <div className="mb-4 text-small text-fg-3">
+        {offer.subtext}
+        {!isExpired && <> {"\u00b7"} {expiry}</>}
+      </div>
 
-      {/* Bottom row: CTA + expiry */}
-      <div className="flex items-center justify-between">
-        {!isExpired && offer.status === "active" ? (
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-cw-paper-200 font-display text-[14px] font-semibold text-fg-2">
+            {merchantInitial}
+          </div>
+          <div className="min-w-0">
+            <div className="truncate text-small font-semibold text-fg-1">
+              {offer.merchant_name}
+            </div>
+            <div className="text-micro text-fg-3">
+              {offer.merchant_category}
+            </div>
+          </div>
+        </div>
+
+        {isActive ? (
           <button
             onClick={() => onAccept?.(offer.id)}
-            className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition-transform hover:scale-105 active:scale-95"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-2 bg-action-primary px-3.5 py-2 text-small font-semibold text-fg-on-red transition-colors duration-150 hover:bg-action-primary-hover active:bg-action-primary-press"
           >
-            Accept
+            {discountLabel}
+            <i className="ph ph-arrow-right text-sm" />
+          </button>
+        ) : offer.status === "accepted" && onShowQR ? (
+          <button
+            onClick={() => onShowQR(offer.id)}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-2 bg-action-secondary px-3.5 py-2 text-small font-semibold text-fg-on-dark"
+          >
+            <i className="ph ph-qr-code text-sm" />
+            Show QR
           </button>
         ) : offer.status === "accepted" ? (
-          onShowQR ? (
-            <button
-              onClick={() => onShowQR(offer.id)}
-              className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition-transform hover:scale-105 active:scale-95"
-            >
-              Show QR
-            </button>
-          ) : (
-            <span className="rounded-full bg-emerald-500/20 border border-emerald-400/50 px-4 py-2 text-sm font-semibold text-emerald-300">
-              Accepted
-            </span>
-          )
-        ) : (
-          <span className="text-sm text-white/50">Expired</span>
-        )}
-
-        <div className="flex items-center gap-3">
-          <span
-            className={`text-xs font-medium ${
-              isExpired
-                ? "text-white/40"
-                : timeLeft <= "5m"
-                  ? "text-red-300"
-                  : "text-white/70"
-            }`}
-          >
-            {isExpired ? "Expired" : `expires in ${timeLeft}`}
+          <span className="rounded-pill bg-cw-fresh-bg px-3 py-1.5 text-small font-semibold text-status-success">
+            Accepted
           </span>
-          {!isExpired && offer.status === "active" && (
-            <button
-              onClick={() => onDismiss?.(offer.id)}
-              className="text-xs text-white/40 hover:text-white/70 transition-colors"
-            >
-              dismiss
-            </button>
-          )}
-        </div>
+        ) : (
+          <span className="text-small text-fg-3">Window closed</span>
+        )}
       </div>
-    </div>
+
+      {isActive && (
+        <div className="mt-2.5 text-right">
+          <button
+            onClick={() => onDismiss?.(offer.id)}
+            className="text-small text-fg-3 hover:text-fg-2"
+          >
+            Maybe later
+          </button>
+        </div>
+      )}
+    </article>
   );
 }

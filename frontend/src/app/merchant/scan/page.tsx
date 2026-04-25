@@ -57,13 +57,19 @@ export default function MerchantScanPage() {
   };
 
   return (
-    <div className="min-h-screen px-5 py-8">
+    <div className="min-h-screen bg-page px-5 py-10">
       <header className="mx-auto mb-6 flex max-w-md items-center justify-between">
-        <Link href="/merchant" className="text-sm text-white/60 hover:text-white">
-          Back to dashboard
+        <Link href="/merchant" className="inline-flex items-center gap-1 text-small text-fg-link no-underline">
+          <i className="ph ph-arrow-left text-xs" />
+          Back
         </Link>
-        <h1 className="text-lg font-semibold text-white">Scan</h1>
-        <span className="w-24" />
+        <h1
+          className="font-display text-h2 text-fg-1"
+          style={{ letterSpacing: "var(--ls-tight)", fontVariationSettings: '"opsz" 60, "SOFT" 30' }}
+        >
+          Scan
+        </h1>
+        <span className="w-16" />
       </header>
 
       <div className="mx-auto max-w-md space-y-5">
@@ -76,8 +82,8 @@ export default function MerchantScanPage() {
               }
             />
 
-            <div className="rounded-2xl bg-[#1A1A1A] p-4">
-              <label className="mb-2 block text-xs uppercase tracking-wider text-white/50">
+            <div className="rounded-4 border border-border-1 bg-card p-4 shadow-1">
+              <label className="mb-2 block text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
                 Or paste token
               </label>
               <div className="flex gap-2">
@@ -86,12 +92,12 @@ export default function MerchantScanPage() {
                   value={pasteValue}
                   onChange={(e) => setPasteValue(e.target.value)}
                   placeholder="Paste token here"
-                  className="flex-1 rounded-lg bg-black/40 px-3 py-2 font-mono text-sm text-white outline-none ring-1 ring-white/10 focus:ring-blue-400/50"
+                  className="flex-1 rounded-2 border border-border-2 bg-card-soft px-3 py-2 font-mono text-small text-fg-1 outline-none focus:border-action-primary"
                 />
                 <button
                   onClick={() => handleToken(pasteValue.trim())}
                   disabled={!pasteValue.trim() || validating}
-                  className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-black disabled:opacity-50"
+                  className="rounded-2 bg-action-primary px-4 py-2 text-small font-semibold text-fg-on-red disabled:opacity-40"
                 >
                   Validate
                 </button>
@@ -101,29 +107,32 @@ export default function MerchantScanPage() {
         )}
 
         {state.phase === "previewing" && (
-          <div className="space-y-4 rounded-2xl bg-[#1A1A1A] p-6">
+          <div className="space-y-4 rounded-4 border border-border-1 bg-card p-6 shadow-2">
             <div>
-              <p className="text-xs uppercase tracking-wider text-white/50">
+              <p className="text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
                 {state.offer.merchant_name}
               </p>
-              <h2 className="mt-1 text-xl font-bold text-white">
+              <h2
+                className="mt-1 font-display text-h2 text-fg-1"
+                style={{ letterSpacing: "var(--ls-tight)", fontVariationSettings: '"opsz" 96, "SOFT" 50' }}
+              >
                 {state.offer.headline}
               </h2>
-              <p className="mt-1 text-sm text-white/70">{state.offer.subtext}</p>
+              <p className="mt-1 text-small text-fg-2">{state.offer.subtext}</p>
             </div>
-            <span className="inline-block rounded-full border border-blue-400/40 px-3 py-1 text-sm font-semibold text-blue-300">
+            <span className="inline-block rounded-pill bg-cw-cool-bg px-3 py-1 text-small font-semibold text-cw-cool">
               {state.offer.discount_value}
             </span>
             <div className="flex gap-3 pt-2">
               <button
                 onClick={handleConfirm}
-                className="flex-1 rounded-full bg-emerald-500 px-5 py-3 text-sm font-semibold text-black hover:bg-emerald-400"
+                className="flex-1 rounded-2 bg-cw-fresh px-5 py-3 text-small font-semibold text-white hover:opacity-90"
               >
                 Confirm Redemption
               </button>
               <button
                 onClick={reset}
-                className="rounded-full bg-white/10 px-5 py-3 text-sm font-semibold text-white hover:bg-white/20"
+                className="rounded-2 border border-border-2 bg-card px-5 py-3 text-small font-semibold text-fg-2 hover:bg-card-soft"
               >
                 Cancel
               </button>
@@ -132,19 +141,22 @@ export default function MerchantScanPage() {
         )}
 
         {state.phase === "success" && (
-          <div className="rounded-2xl bg-emerald-500/10 p-8 text-center">
-            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 text-3xl text-emerald-300">
-              v
+          <div className="rounded-4 border border-cw-fresh/30 bg-cw-fresh-bg p-8 text-center shadow-2">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-pill bg-cw-fresh text-fg-on-dark">
+              <i className="ph-bold ph-check text-3xl" />
             </div>
-            <p className="text-lg font-semibold text-white">{state.result.message}</p>
+            <p className="text-h3 font-semibold text-fg-1">{state.result.message}</p>
             {state.result.cashback_amount != null && (
-              <p className="mt-2 text-3xl font-bold tabular-nums text-emerald-400">
+              <p
+                className="mt-2 font-display text-display tabular-nums text-cw-fresh"
+                style={{ letterSpacing: "var(--ls-tight)", fontVariationSettings: '"opsz" 96, "SOFT" 50' }}
+              >
                 +${state.result.cashback_amount.toFixed(2)}
               </p>
             )}
             <button
               onClick={reset}
-              className="mt-6 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black"
+              className="mt-6 rounded-2 bg-cw-paper-900 px-5 py-2 text-small font-semibold text-fg-on-dark"
             >
               Scan another
             </button>
@@ -152,11 +164,11 @@ export default function MerchantScanPage() {
         )}
 
         {state.phase === "error" && (
-          <div className="rounded-2xl bg-red-500/10 p-8 text-center">
-            <p className="text-lg font-semibold text-red-300">{state.message}</p>
+          <div className="rounded-4 border border-status-danger/30 bg-cw-red-50 p-8 text-center shadow-1">
+            <p className="text-h3 font-semibold text-status-danger">{state.message}</p>
             <button
               onClick={reset}
-              className="mt-5 rounded-full bg-white px-5 py-2 text-sm font-semibold text-black"
+              className="mt-5 rounded-2 bg-cw-paper-900 px-5 py-2 text-small font-semibold text-fg-on-dark"
             >
               Try again
             </button>

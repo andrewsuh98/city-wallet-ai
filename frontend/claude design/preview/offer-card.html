@@ -1,0 +1,39 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css"/>
+<style>
+  body { margin:0; padding:24px; background:var(--cw-paper-50); }
+  .label { font-family:var(--font-body); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--fg-3); margin-bottom:14px; font-weight:600; }
+  .card { background:#fff; border-radius:18px; padding:18px; border:1px solid var(--border-1); box-shadow:var(--shadow-2); max-width:340px; }
+  .chips { display:flex; gap:6px; margin-bottom:12px; }
+  .chip { display:inline-flex; align-items:center; gap:5px; padding:4px 9px; border-radius:999px; font-family:var(--font-body); font-size:10px; font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+  .hero { font-family:var(--font-display); font-size:26px; line-height:1.05; letter-spacing:-0.02em; font-weight:500; color:var(--fg-1); margin:0 0 10px; text-wrap:balance; }
+  .meta { font-family:var(--font-body); font-size:13px; color:var(--fg-3); margin-bottom:14px; }
+  .row { display:flex; align-items:center; justify-content:space-between; }
+  .merchant { display:flex; align-items:center; gap:8px; }
+  .ml { width:28px; height:28px; border-radius:6px; background:var(--cw-paper-200); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:600; color:var(--fg-2); font-size:14px; }
+  .mname { font-family:var(--font-body); font-size:13px; font-weight:600; color:var(--fg-1); }
+  .accept { font-family:var(--font-body); font-size:13px; font-weight:600; padding:8px 14px; border-radius:8px; background:var(--cw-red-500); color:#fff; border:none; display:inline-flex; align-items:center; gap:6px; }
+</style></head>
+<body>
+  <div class="label">Offer card · the hero element</div>
+  <div class="card">
+    <div class="chips">
+      <span class="chip" style="background:var(--cw-cool-bg); color:var(--cw-cool);"><i class="ph ph-cloud-rain"></i>Rain · 11°C</span>
+      <span class="chip" style="background:var(--cw-paper-100); color:var(--fg-2);"><i class="ph ph-map-pin"></i>80m</span>
+    </div>
+    <h3 class="hero">Cold outside? Cappuccino is waiting.</h3>
+    <div class="meta">Brewed 4 min ago · until 13:00</div>
+    <div class="row">
+      <div class="merchant">
+        <div class="ml">M</div>
+        <div>
+          <div class="mname">Café Müller</div>
+          <div style="font-family:var(--font-body); font-size:11px; color:var(--fg-3);">Stuttgart Mitte</div>
+        </div>
+      </div>
+      <button class="accept">−20% <i class="ph ph-arrow-right"></i></button>
+    </div>
+  </div>
+</body></html>

@@ -1,0 +1,257 @@
+/* ============================================================
+   CITY WALLET — Colors & Type
+   Foundational tokens for the City Wallet brand.
+
+   The system is anchored in Sparkassen-Rot (HKS 13, #E30018) —
+   warmed slightly for screen surfaces — and a paper-warm neutral
+   ramp inspired by European receipts, transit tickets, and the
+   walls of Stuttgart's old town on an overcast afternoon.
+   ============================================================ */
+
+/* ---------- Webfonts ---------- */
+/* Body / UI: Inter Tight (clean grotesque, tight tracking).
+   Display / situational: Fraunces (humanist serif, warm).
+   Mono / numerics: JetBrains Mono.
+   Loaded via @font-face if the .woff2 files in /fonts exist;
+   otherwise the @import below pulls them from Google Fonts. */
+@import url("https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Fraunces:opsz,wght,SOFT@9..144,400;9..144,500;9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500&display=swap");
+
+:root {
+  /* ===== Brand: Sparkassen heritage, warmed ===== */
+  --cw-red-50:  #fff1f2;
+  --cw-red-100: #ffd9dd;
+  --cw-red-200: #ffb3bb;
+  --cw-red-300: #ff8590;
+  --cw-red-400: #f54d5c;
+  --cw-red-500: #e30018;  /* HKS 13 — Sparkassen-Rot, the anchor */
+  --cw-red-600: #c20014;
+  --cw-red-700: #9c0010;
+  --cw-red-800: #6e000b;
+  --cw-red-900: #3d0006;
+
+  /* ===== Paper neutrals (warm off-whites + ink) ===== */
+  --cw-paper-0:  #ffffff;
+  --cw-paper-50: #faf7f2;  /* page background — warm receipt */
+  --cw-paper-100:#f3eee5;
+  --cw-paper-200:#e8e0d2;
+  --cw-paper-300:#d6cab5;
+  --cw-paper-400:#a89d87;
+  --cw-paper-500:#7a715f;
+  --cw-paper-600:#5a5346;
+  --cw-paper-700:#3d3830;
+  --cw-paper-800:#26221c;
+  --cw-paper-900:#15130f;  /* near-black ink */
+
+  /* ===== Situational accents — used for context chips ===== */
+  --cw-warm:    #f59e0b;   /* sun / warmth */
+  --cw-warm-bg: #fff4d6;
+  --cw-cool:    #1e6fb8;   /* rain / cold */
+  --cw-cool-bg: #e0eef9;
+  --cw-fresh:   #2f7d4f;   /* fresh / available now */
+  --cw-fresh-bg:#dcefe2;
+  --cw-dusk:    #7a4ca8;   /* evening / events */
+  --cw-dusk-bg: #ebe1f5;
+
+  /* ===== Semantic — surfaces ===== */
+  --bg-page:      var(--cw-paper-50);
+  --bg-card:      var(--cw-paper-0);
+  --bg-card-soft: var(--cw-paper-100);
+  --bg-sunken:    var(--cw-paper-100);
+  --bg-inverse:   var(--cw-paper-900);
+
+  /* ===== Semantic — text ===== */
+  --fg-1: var(--cw-paper-900);   /* primary ink */
+  --fg-2: var(--cw-paper-700);   /* secondary */
+  --fg-3: var(--cw-paper-500);   /* tertiary / metadata */
+  --fg-4: var(--cw-paper-400);   /* placeholder / disabled */
+  --fg-on-red: #ffffff;
+  --fg-on-dark:#faf7f2;
+  --fg-link:   var(--cw-red-600);
+
+  /* ===== Semantic — borders ===== */
+  --border-1: rgba(21, 19, 15, 0.08);   /* hairline */
+  --border-2: rgba(21, 19, 15, 0.14);   /* default */
+  --border-3: rgba(21, 19, 15, 0.22);   /* emphasised */
+  --border-red: var(--cw-red-500);
+
+  /* ===== Semantic — actions ===== */
+  --action-primary:        var(--cw-red-500);
+  --action-primary-hover:  var(--cw-red-600);
+  --action-primary-press:  var(--cw-red-700);
+  --action-secondary:      var(--cw-paper-900);
+  --action-secondary-hover:var(--cw-paper-800);
+
+  /* ===== Status ===== */
+  --status-success: #2f7d4f;
+  --status-warning: #b8860b;
+  --status-danger:  #c20014;
+  --status-info:    #1e6fb8;
+
+  /* ===== Typography — families ===== */
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-body:    "Inter Tight", -apple-system, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* ===== Typography — scale (mobile-first) ===== */
+  --fs-hero:    44px;   /* situational hero copy on offer cards */
+  --fs-display: 32px;
+  --fs-h1:      24px;
+  --fs-h2:      20px;
+  --fs-h3:      17px;
+  --fs-body:    15px;
+  --fs-small:   13px;
+  --fs-micro:   11px;   /* context chips, legal */
+
+  --lh-tight:   1.05;
+  --lh-snug:    1.2;
+  --lh-normal:  1.45;
+  --lh-loose:   1.6;
+
+  --ls-tight:   -0.02em;
+  --ls-snug:    -0.01em;
+  --ls-normal:  0;
+  --ls-wide:    0.04em;
+  --ls-caps:    0.08em;
+
+  /* ===== Spacing (4-pt grid, with a half-step at 2) ===== */
+  --space-0:  0;
+  --space-1:  2px;
+  --space-2:  4px;
+  --space-3:  8px;
+  --space-4:  12px;
+  --space-5:  16px;
+  --space-6:  20px;
+  --space-7:  24px;
+  --space-8:  32px;
+  --space-9:  40px;
+  --space-10: 56px;
+  --space-11: 72px;
+  --space-12: 96px;
+
+  /* ===== Radii — ticket-paper soft, never pill except on chips ===== */
+  --radius-1: 4px;
+  --radius-2: 8px;
+  --radius-3: 12px;   /* default cards */
+  --radius-4: 18px;   /* offer cards */
+  --radius-5: 24px;   /* sheets */
+  --radius-pill: 999px;
+
+  /* ===== Shadows — paper-stack, never glowy ===== */
+  --shadow-1: 0 1px 2px rgba(21, 19, 15, 0.06);
+  --shadow-2: 0 2px 6px rgba(21, 19, 15, 0.06), 0 1px 2px rgba(21, 19, 15, 0.04);
+  --shadow-3: 0 8px 20px rgba(21, 19, 15, 0.08), 0 2px 6px rgba(21, 19, 15, 0.04);
+  --shadow-4: 0 18px 40px rgba(21, 19, 15, 0.12), 0 4px 10px rgba(21, 19, 15, 0.06);
+  --shadow-press: inset 0 1px 2px rgba(21, 19, 15, 0.12);
+
+  /* ===== Motion ===== */
+  --ease-out:    cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.5, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+  --dur-4: 520ms;
+}
+
+/* ============================================================
+   Element-level defaults (semantic vars in use)
+   ============================================================ */
+
+html, body {
+  background: var(--bg-page);
+  color: var(--fg-1);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, .h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-tight);
+  font-weight: 500;
+  font-variation-settings: "opsz" 60, "SOFT" 30;
+  margin: 0;
+}
+
+h2, .h2 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-snug);
+  letter-spacing: var(--ls-snug);
+  font-weight: 500;
+  margin: 0;
+}
+
+h3, .h3 {
+  font-family: var(--font-body);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
+  font-weight: 600;
+  letter-spacing: var(--ls-snug);
+  margin: 0;
+}
+
+.display {
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  line-height: var(--lh-tight);
+  letter-spacing: var(--ls-tight);
+  font-weight: 500;
+  font-variation-settings: "opsz" 96, "SOFT" 50;
+}
+
+.hero {
+  font-family: var(--font-display);
+  font-size: var(--fs-hero);
+  line-height: 1.0;
+  letter-spacing: -0.025em;
+  font-weight: 500;
+  font-variation-settings: "opsz" 144, "SOFT" 60;
+  text-wrap: balance;
+}
+
+p, .body {
+  font-size: var(--fs-body);
+  line-height: var(--lh-normal);
+  color: var(--fg-2);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+.small {
+  font-size: var(--fs-small);
+  line-height: var(--lh-normal);
+  color: var(--fg-3);
+}
+
+.micro, .eyebrow {
+  font-size: var(--fs-micro);
+  line-height: 1.3;
+  letter-spacing: var(--ls-caps);
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--fg-3);
+}
+
+code, kbd, pre, .mono {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+}
+
+a {
+  color: var(--fg-link);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+a:hover { color: var(--cw-red-700); }
+
+::selection {
+  background: var(--cw-red-200);
+  color: var(--cw-paper-900);
+}

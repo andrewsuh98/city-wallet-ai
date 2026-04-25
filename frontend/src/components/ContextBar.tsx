@@ -1,6 +1,7 @@
 interface ContextBadge {
   icon: string;
   label: string;
+  variant?: "cool" | "warm" | "fresh" | "dusk" | "neutral";
 }
 
 interface ContextBarProps {
@@ -8,28 +9,31 @@ interface ContextBarProps {
 }
 
 const defaultBadges: ContextBadge[] = [
-  { icon: "Cloud with Rain", label: "Rain 11C" },
-  { icon: "Clock", label: "Saturday afternoon" },
-  { icon: "Ticket", label: "Broadway Week" },
-  { icon: "Chart Decreasing", label: "3 quiet cafes" },
+  { icon: "ph-cloud-rain", label: "Rain \u00b7 11\u00b0C", variant: "cool" },
+  { icon: "ph-clock",      label: "Saturday \u00b7 14:00", variant: "neutral" },
+  { icon: "ph-ticket",     label: "Broadway Week", variant: "dusk" },
+  { icon: "ph-coffee",     label: "3 quiet cafes", variant: "fresh" },
 ];
 
-const iconMap: Record<string, string> = {
-  "Cloud with Rain": "~",
-  Clock: "T",
-  Ticket: "*",
-  "Chart Decreasing": "v",
+const CHIP_CLASSES: Record<NonNullable<ContextBadge["variant"]>, string> = {
+  cool:    "bg-cw-cool-bg text-cw-cool",
+  warm:    "bg-cw-warm-bg text-cw-warm",
+  fresh:   "bg-cw-fresh-bg text-cw-fresh",
+  dusk:    "bg-cw-dusk-bg text-cw-dusk",
+  neutral: "bg-cw-paper-100 text-fg-2",
 };
 
 export default function ContextBar({ badges = defaultBadges }: ContextBarProps) {
   return (
-    <div className="flex gap-2 overflow-x-auto px-4 py-3 bg-[#1a1a1a] border-b border-white/10 no-scrollbar">
+    <div className="no-scrollbar flex gap-1.5 overflow-x-auto border-b border-border-1 bg-page px-5 py-3">
       {badges.map((badge) => (
         <span
           key={badge.label}
-          className="flex items-center gap-1.5 shrink-0 rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white/80"
+          className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-pill px-2.5 py-1 font-body text-micro font-semibold uppercase tracking-[0.08em] ${
+            CHIP_CLASSES[badge.variant ?? "neutral"]
+          }`}
         >
-          <span className="text-sm opacity-70">{iconMap[badge.icon] || "?"}</span>
+          <i className={`ph ${badge.icon} text-[13px]`} />
           {badge.label}
         </span>
       ))}
