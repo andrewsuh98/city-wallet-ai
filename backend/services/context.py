@@ -5,7 +5,6 @@ the signal sources in parallel, derives semantic tags, and scores urgency.
 """
 
 import asyncio
-import math
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 from zoneinfo import ZoneInfo
@@ -21,6 +20,7 @@ from models import (
 )
 from services import events as events_service
 from services import payone, weather as weather_service
+from services.geo import haversine_meters
 
 
 # --- time classification ---
@@ -39,22 +39,10 @@ def classify_time(hour: int) -> str:
     return "night"
 
 
-# --- haversine for distance filter ---
-
-def _haversine_meters(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
-    r = 6_371_000.0
-    p1 = math.radians(lat1)
-    p2 = math.radians(lat2)
-    dp = math.radians(lat2 - lat1)
-    dl = math.radians(lng2 - lng1)
-    a = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
-    return 2 * r * math.asin(math.sqrt(a))
-
-
 def _filter_nearby(merchants: list[dict], lat: float, lng: float, radius: float) -> list[dict]:
     return [
         m for m in merchants
-        if _haversine_meters(lat, lng, m["latitude"], m["longitude"]) <= radius
+        if haversine_meters(lat, lng, m["latitude"], m["longitude"]) <= radius
     ]
 
 
@@ -89,7 +77,7 @@ def derive_context_tags(
         tags.append("clear_sky")
 
     # time
-    tags.append(time_of_day if time_of_day != "lunch" else "lunch_hour")
+    tags.append(time_of_day)
     tags.append("weekend" if is_weekend else "weekday")
 
     # events
@@ -129,7 +117,7 @@ def compute_urgency(tags: list[str]) -> float:
     score = 0.3  # baseline
     if "rainy" in tags or "snowy" in tags:
         score += 0.20
-    if "lunch_hour" in tags:
+    if "lunch" in tags:
         score += 0.15
     if "quiet_period" in tags:
         score += 0.15
@@ -184,12 +172,16 @@ DEMO_PRESETS = {
 
 
 def _demo_now(preset: dict, tz: ZoneInfo) -> datetime:
-    """Anchor demo time on today, then shift to the preset's weekday."""
+    """Anchor demo time on the nearest matching weekday (forward or back),
+    so absolute-dated city events have a chance of falling inside the window.
+    """
     today = datetime.now(tz).replace(
         hour=preset["hour"], minute=preset["minute"], second=0, microsecond=0
     )
-    delta = (preset["weekday"] - today.weekday()) % 7
-    return today + timedelta(days=delta)
+    diff = (preset["weekday"] - today.weekday()) % 7
+    if diff > 3:
+        diff -= 7
+    return today + timedelta(days=diff)
 
 
 # --- main orchestrator ---
@@ -205,10 +197,11 @@ async def compose_context(
 
     if preset:
         local_now = _demo_now(preset, tz)
-        weather = preset["weather"]
-        # Make the cached weather match so any subsequent caller sees demo state.
-        weather_service.override_cache(weather)
-        events = await events_service.get_nearby_events(lat, lng, now=local_now)
+        # Per-request override: never poisons the shared cache for non-demo callers.
+        weather, events = await asyncio.gather(
+            weather_service.get_weather(override=preset["weather"]),
+            events_service.get_nearby_events(lat, lng, now=local_now),
+        )
     else:
         local_now = datetime.now(tz)
         weather, events = await asyncio.gather(
@@ -216,16 +209,17 @@ async def compose_context(
             events_service.get_nearby_events(lat, lng, now=local_now),
         )
 
-    # time-of-day and day-of-week are inherently local; the response timestamp is UTC
+    # time-of-day, day-of-week, and the hour passed to the merchant simulator
+    # are all inherently local; only the response timestamp is UTC.
     time_of_day = classify_time(local_now.hour)
     day_of_week = local_now.strftime("%A").lower()
     is_weekend = day_of_week in ("saturday", "sunday")
-    now = local_now.astimezone(timezone.utc)
+    now_utc = local_now.astimezone(timezone.utc)
 
     radius = city_config.get("default_radius_meters", 1000)
     nearby_merchants = _filter_nearby(payone.get_merchant_configs(), lat, lng, radius)
-    densities = payone.simulate_for_merchants(nearby_merchants, now.hour, weather, is_weekend)
-    live_signals = payone.simulate_live_signals_for(nearby_merchants, densities, now.hour)
+    densities = payone.simulate_for_merchants(nearby_merchants, local_now.hour, weather, is_weekend)
+    live_signals = payone.simulate_live_signals_for(nearby_merchants, densities, local_now.hour)
 
     merchant_lookup = {m["id"]: m for m in nearby_merchants}
     tags = derive_context_tags(
@@ -234,7 +228,7 @@ async def compose_context(
     urgency = compute_urgency(tags)
 
     return ContextState(
-        timestamp=now,
+        timestamp=now_utc,
         location=UserLocation(latitude=lat, longitude=lng, accuracy_meters=accuracy_meters),
         weather=weather,
         time_of_day=time_of_day,

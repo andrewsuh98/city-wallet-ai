@@ -40,7 +40,16 @@ def _fallback() -> WeatherData:
     )
 
 
-async def get_weather(force_refresh: bool = False) -> WeatherData:
+async def get_weather(
+    force_refresh: bool = False,
+    override: Optional[WeatherData] = None,
+) -> WeatherData:
+    # Per-request override (used by demo mode). Returns immediately and never
+    # touches the shared cache, so a demo call cannot poison subsequent
+    # non-demo callers for up to 10 minutes.
+    if override is not None:
+        return override
+
     now = time.time()
     if (
         not force_refresh
@@ -79,11 +88,3 @@ async def get_weather(force_refresh: bool = False) -> WeatherData:
     return weather
 
 
-def override_cache(weather: Optional[WeatherData]) -> None:
-    """For demo_mode: inject a preset reading without an API call."""
-    if weather is None:
-        _cache["weather"] = None
-        _cache["fetched_at"] = 0.0
-    else:
-        _cache["weather"] = weather
-        _cache["fetched_at"] = time.time()

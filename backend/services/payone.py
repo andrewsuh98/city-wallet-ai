@@ -43,7 +43,12 @@ def simulate_density(
 
     weekend_mod = pattern.get("weekend_modifier", 1.0) if is_weekend else 1.0
 
-    noise = random.gauss(0, 0.15)
+    # Seeded RNG: same (merchant, hour, weather, weekend) -> same density across
+    # consecutive calls. Keeps consecutive /api/context responses stable.
+    rng = random.Random(
+        hash((merchant_config["id"], current_hour, weather.condition.value, is_weekend))
+    )
+    noise = rng.gauss(0, 0.15)
 
     current_txns = int(base * hour_mod * weather_mod * weekend_mod * (1 + noise))
     current_txns = max(0, current_txns)
@@ -108,19 +113,14 @@ def simulate_live_signal(
     Buckets the last 60 minutes into 6 ten-minute slices using the same
     base rate the density used. Adds simulated inventory + staff state.
     """
-    avg = max(1.0, density.avg_hour_txns)
+    rng = random.Random(hash((merchant_config["id"], current_hour)))
     per_bucket = (density.current_hour_txns or 0) / 6.0
-    buckets = []
-    for _ in range(6):
-        n = max(0, int(round(per_bucket * (1 + random.gauss(0, 0.25)))))
-        buckets.append(n)
+    buckets = [
+        max(0, int(round(per_bucket * (1 + rng.gauss(0, 0.25)))))
+        for _ in range(6)
+    ]
 
-    rule_budgets = sum(
-        (r.get("budget_daily_usd") or 0.0)
-        for r in merchant_config.get("rules", [])
-    )
-    cap = merchant_config.get("daily_budget_usd") or rule_budgets or 50.0
-    burned = round(min(1.0, max(0.0, random.uniform(0.05, 0.65))), 2)
+    burned = round(min(1.0, max(0.0, rng.uniform(0.05, 0.65))), 2)
     active_offers = max(0, int(round(density.density_ratio * 2)))
 
     return MerchantLiveSignal(
