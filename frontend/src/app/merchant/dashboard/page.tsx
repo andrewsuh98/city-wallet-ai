@@ -84,7 +84,19 @@ function WeekdayAnalysisChart({ stats }: { stats: MerchantDashboardStats }) {
 
 function HourlyActivationChart({ stats }: { stats: MerchantDashboardStats }) {
   const deadRanges = stats.dead_hour_ranges;
-  const chartData = stats.hourly_redemptions.map((h) => ({ hour: h.hour, label: HOUR_LABEL(h.hour), count: h.count }));
+  
+  // Find the range of hours to show (adaptive to "active" hours)
+  const activeHours = stats.hourly_redemptions
+    .filter(h => h.count > 0 || deadRanges.some(([s, e]) => h.hour >= s && h.hour < e))
+    .map(h => h.hour);
+  
+  const minHour = Math.max(0, Math.min(...activeHours) - 1);
+  const maxHour = Math.min(23, Math.max(...activeHours) + 1);
+
+  const chartData = stats.hourly_redemptions
+    .filter(h => h.hour >= minHour && h.hour <= maxHour)
+    .map((h) => ({ hour: h.hour, label: HOUR_LABEL(h.hour), count: h.count }));
+
   const tooltipStyle = { background: "var(--bg-card)", border: "1px solid var(--border-2)", borderRadius: "var(--radius-2)", fontSize: 12, color: "var(--fg-1)", fontFamily: "var(--font-body)" };
 
   return (
@@ -102,14 +114,14 @@ function HourlyActivationChart({ stats }: { stats: MerchantDashboardStats }) {
       <ResponsiveContainer width="100%" height={240}>
         <BarChart data={chartData} margin={{ top: 0, right: 0, left: -24, bottom: 0 }} barCategoryGap="20%">
           <CartesianGrid stroke="var(--border-2)" strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="label" tick={{ fill: "var(--fg-3)", fontSize: 11, fontFamily: "var(--font-body)", fontWeight: 500 }} tickLine={false} axisLine={false} interval={2} />
+          <XAxis dataKey="label" tick={{ fill: "var(--fg-3)", fontSize: 11, fontFamily: "var(--font-body)", fontWeight: 500 }} tickLine={false} axisLine={false} interval={0} />
           <YAxis tick={{ fill: "var(--fg-3)", fontSize: 11, fontFamily: "var(--font-body)", fontWeight: 500 }} tickLine={false} axisLine={false} allowDecimals={false} />
           <Tooltip contentStyle={tooltipStyle} formatter={(v) => [Number(v ?? 0), "Redemptions"]} labelFormatter={(l) => `${l}`} cursor={{ fill: "var(--bg-card)" }} />
           {deadRanges.map(([s, e]) => {
             const startIdx = chartData.findIndex((d) => d.hour === s);
             const endIdx = chartData.findIndex((d) => d.hour === e - 1);
             if (startIdx === -1) return null;
-            return <ReferenceArea key={`${s}-${e}`} x1={chartData[startIdx]?.label} x2={chartData[Math.min(endIdx, chartData.length - 1)]?.label} fill="var(--cw-fresh-bg)" strokeOpacity={0} />;
+            return <ReferenceArea key={`${s}-${e}`} x1={chartData[startIdx]?.label} x2={chartData[endIdx === -1 ? chartData.length - 1 : endIdx]?.label} fill="var(--cw-fresh-bg)" strokeOpacity={0} />;
           })}
           <Bar dataKey="count" fill="var(--cw-fresh)" radius={[4, 4, 0, 0]} />
         </BarChart>
