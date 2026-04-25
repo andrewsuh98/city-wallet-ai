@@ -29,9 +29,9 @@ const mockOffers: Offer[] = [
     merchant_name: "Blue Bottle Coffee",
     merchant_category: "cafe",
     headline: "Cold outside? Your cappuccino is waiting.",
-    subtext: "2 min walk · Rockefeller Center",
+    subtext: "2 min walk \u00b7 Rockefeller Center",
     description:
-      "Warm up at Blue Bottle Coffee. Quiet right now — no queue, your usual spot by the window is free.",
+      "Warm up at Blue Bottle Coffee. Quiet right now, no queue, your usual spot by the window is free.",
     discount_value: "15%",
     discount_type: "percentage_discount",
     context_tags: ["rainy", "cold", "quiet_cafes"],
@@ -40,7 +40,6 @@ const mockOffers: Offer[] = [
     expires_at: new Date(Date.now() + 25 * 60000).toISOString(),
     style: {
       background_gradient: [],
-      emoji: "",
       tone: "warm",
       headline_style: "emotional",
     },
@@ -54,7 +53,7 @@ const mockOffers: Offer[] = [
     merchant_name: "Joe's Pizza",
     merchant_category: "restaurant",
     headline: "Rain keeping people away. The oven is not.",
-    subtext: "4 min walk · Greenwich Village",
+    subtext: "4 min walk \u00b7 Greenwich Village",
     description:
       "Iconic New York slices since 1975. Wet streets mean shorter wait. Fresh out of the oven.",
     discount_value: "10%",
@@ -65,7 +64,6 @@ const mockOffers: Offer[] = [
     expires_at: new Date(Date.now() + 18 * 60000).toISOString(),
     style: {
       background_gradient: [],
-      emoji: "",
       tone: "playful",
       headline_style: "emotional",
     },
@@ -76,22 +74,21 @@ const mockOffers: Offer[] = [
   {
     id: "off_mock_3",
     merchant_id: "m_003",
-    merchant_name: "Levain Bakery",
-    merchant_category: "bakery",
-    headline: "Fresh batch just came out. No line.",
-    subtext: "6 min walk · Upper West Side",
+    merchant_name: "The Strand Bookstore",
+    merchant_category: "bookstore",
+    headline: "18 miles of books. Perfect afternoon for it.",
+    subtext: "6 min walk \u00b7 Union Square",
     description:
-      "Weekend rain has cleared the usual crowds. The warm chocolate chip walnut cookies are fresh out of the oven.",
+      "Weekend rain has cleared the usual crowds. The stacks are yours.",
     discount_value: "20%",
     discount_type: "percentage_discount",
     context_tags: ["rainy", "weekend", "quiet_period"],
-    why_now: "Weekend rain cleared the crowds. Warm cookies straight from the oven.",
+    why_now: "Weekend rain cleared the crowds. Best browsing conditions in weeks.",
     created_at: new Date().toISOString(),
     expires_at: new Date(Date.now() + 45 * 60000).toISOString(),
     style: {
       background_gradient: [],
-      emoji: "",
-      tone: "warm",
+      tone: "sophisticated",
       headline_style: "emotional",
     },
     status: "active",
@@ -125,43 +122,14 @@ function useConsentStatus(): [ConsentStatus, (locationEnabled: boolean) => void]
 
 function LocationBanner({ onEnable }: { onEnable: () => void }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: "12px",
-        padding: "10px 20px",
-        background: "var(--cw-warm-bg)",
-        borderBottom: "1px solid var(--border-1)",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--fs-small)",
-          color: "var(--fg-2)",
-        }}
-      >
-        <i className="ph ph-map-pin" style={{ fontSize: "16px", color: "var(--cw-warm)" }} />
+    <div className="flex items-center justify-between gap-3 border-b border-border-1 bg-cw-warm-bg px-5 py-2.5">
+      <div className="flex items-center gap-2 text-small text-fg-2">
+        <i className="ph ph-map-pin text-base text-cw-warm" />
         Using default location. Enable for nearby offers.
       </div>
       <button
         onClick={onEnable}
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--fs-small)",
-          fontWeight: 600,
-          color: "var(--fg-link)",
-          background: "none",
-          border: "none",
-          cursor: "pointer",
-          padding: 0,
-          whiteSpace: "nowrap",
-        }}
+        className="whitespace-nowrap text-small font-semibold text-fg-link hover:opacity-80"
       >
         Enable
       </button>
@@ -178,7 +146,7 @@ export default function Home() {
   };
 
   if (consentStatus === "loading") {
-    return <div style={{ minHeight: "100vh", background: "var(--bg-page)" }} />;
+    return <div className="min-h-screen bg-page" />;
   }
 
   if (consentStatus === "none") {
@@ -194,59 +162,32 @@ export default function Home() {
     return filtered.length > 0 ? filtered : mockOffers;
   })();
 
+  const heading = consentStatus === "declined"
+    ? "Times Square"
+    : profile
+      ? `For you, ${profile.first_name}`
+      : "Near you";
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh", paddingBottom: "96px" }}>
+    <div className="flex min-h-screen flex-col bg-page pb-24">
       {consentStatus === "declined" && (
         <LocationBanner onEnable={handleEnableFromBanner} />
       )}
 
       <ContextBar />
 
-      {/* Map placeholder */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "35vh",
-          minHeight: "200px",
-          background: "var(--bg-sunken)",
-          borderBottom: "1px solid var(--border-1)",
-        }}
-      >
-        <div style={{ textAlign: "center" }}>
-          <div
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--fs-small)",
-              color: "var(--fg-4)",
-              letterSpacing: "var(--ls-caps)",
-              textTransform: "uppercase",
-              fontWeight: 600,
-            }}
-          >
-            {consentStatus === "declined" ? "Map · Times Square (default)" : "Map · Mapbox goes here"}
-          </div>
+      <div className="flex h-[35vh] min-h-[200px] items-center justify-center border-b border-border-1 bg-sunken">
+        <div className="text-center text-small font-semibold uppercase tracking-[0.08em] text-fg-4">
+          {consentStatus === "declined" ? "Map \u00b7 Times Square (default)" : "Map \u00b7 Mapbox goes here"}
         </div>
       </div>
 
-      {/* Offer feed */}
-      <div style={{ flex: 1, padding: "20px 20px 0" }}>
-        <div
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--fs-micro)",
-            fontWeight: 600,
-            letterSpacing: "var(--ls-caps)",
-            textTransform: "uppercase",
-            color: "var(--fg-3)",
-            marginBottom: "16px",
-          }}
-        >
-          {consentStatus === "declined" ? "Times Square" : profile ? `For you, ${profile.first_name}` : "Near you"} · {visibleOffers.length} {taste ? "matching" : ""} offers
+      <div className="flex-1 px-5 pt-5">
+        <div className="mb-4 text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
+          {heading} {"\u00b7"} {visibleOffers.length} {taste ? "matching" : ""} offers
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div className="flex flex-col gap-3">
           {visibleOffers.map((offer) => (
             <OfferCard
               key={offer.id}

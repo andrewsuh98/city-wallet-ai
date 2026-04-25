@@ -1,10 +1,10 @@
-import type { CSSProperties, MouseEvent } from "react";
 import type { Offer } from "@/lib/types";
 
 interface OfferCardProps {
   offer: Offer;
   onAccept?: (id: string) => void;
   onDismiss?: (id: string) => void;
+  onShowQR?: (id: string) => void;
 }
 
 type ChipVariant = "cool" | "warm" | "fresh" | "dusk" | "neutral";
@@ -51,27 +51,16 @@ const TAG_ICON: Record<string, string> = {
   concert: "ph-music-notes",
 };
 
-const CHIP_STYLE: Record<ChipVariant, { background: string; color: string }> = {
-  cool:    { background: "var(--cw-cool-bg)",   color: "var(--cw-cool)" },
-  warm:    { background: "var(--cw-warm-bg)",   color: "var(--cw-warm)" },
-  fresh:   { background: "var(--cw-fresh-bg)",  color: "var(--cw-fresh)" },
-  dusk:    { background: "var(--cw-dusk-bg)",   color: "var(--cw-dusk)" },
-  neutral: { background: "var(--cw-paper-100)", color: "var(--fg-2)" },
+const CHIP_CLASSES: Record<ChipVariant, string> = {
+  cool:    "bg-cw-cool-bg text-cw-cool",
+  warm:    "bg-cw-warm-bg text-cw-warm",
+  fresh:   "bg-cw-fresh-bg text-cw-fresh",
+  dusk:    "bg-cw-dusk-bg text-cw-dusk",
+  neutral: "bg-cw-paper-100 text-fg-2",
 };
 
-const chipBase: CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "5px",
-  padding: "4px 9px",
-  borderRadius: "var(--radius-pill)",
-  fontFamily: "var(--font-body)",
-  fontSize: "10px",
-  fontWeight: 600,
-  letterSpacing: "0.04em",
-  textTransform: "uppercase",
-  whiteSpace: "nowrap",
-};
+const CHIP_BASE =
+  "inline-flex items-center gap-1 whitespace-nowrap rounded-pill px-2.5 py-1 font-body text-[10px] font-semibold uppercase tracking-[0.04em]";
 
 function pickPrimaryTag(tags: string[]): string | null {
   for (const tag of tags) {
@@ -96,19 +85,18 @@ function formatDistance(meters: number): string {
 
 function formatDiscount(value: string): string {
   if (!value) return "Accept";
-  if (value.startsWith("−") || value.startsWith("-")) return value;
-  if (value.endsWith("%")) return `−${value}`;
+  if (value.startsWith("\u2212") || value.startsWith("-")) return value;
+  if (value.endsWith("%")) return `\u2212${value}`;
   return value;
 }
 
-export default function OfferCard({ offer, onAccept, onDismiss }: OfferCardProps) {
+export default function OfferCard({ offer, onAccept, onDismiss, onShowQR }: OfferCardProps) {
   const expiresMs = new Date(offer.expires_at).getTime() - Date.now();
   const isExpired = expiresMs <= 0;
   const isActive = !isExpired && offer.status === "active";
 
   const primaryTag = pickPrimaryTag(offer.context_tags);
   const variant: ChipVariant = (primaryTag ? TAG_VARIANT[primaryTag] : undefined) ?? "neutral";
-  const chipColor = CHIP_STYLE[variant];
   const tagIcon = (primaryTag ? TAG_ICON[primaryTag] : undefined) ?? "ph-tag";
   const tagLabel = (primaryTag ?? "").replace(/_/g, " ");
 
@@ -118,104 +106,47 @@ export default function OfferCard({ offer, onAccept, onDismiss }: OfferCardProps
 
   return (
     <article
-      style={{
-        background: "var(--bg-card)",
-        borderRadius: "var(--radius-4)",
-        padding: "18px",
-        border: "1px solid var(--border-1)",
-        boxShadow: isActive ? "var(--shadow-2)" : "var(--shadow-1)",
-        opacity: isExpired ? 0.5 : 1,
-        transition: `box-shadow var(--dur-2) var(--ease-out)`,
-      }}
+      className={`rounded-4 border border-border-1 bg-card p-[18px] transition-shadow duration-200 ${
+        isActive ? "shadow-2" : "shadow-1"
+      } ${isExpired ? "opacity-50" : ""}`}
     >
-      {/* Context chips */}
-      <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
+      <div className="mb-3 flex flex-wrap gap-1.5">
         {primaryTag && (
-          <span style={{ ...chipBase, ...chipColor }}>
-            <i className={`ph ${tagIcon}`} style={{ fontSize: "12px" }} />
+          <span className={`${CHIP_BASE} ${CHIP_CLASSES[variant]}`}>
+            <i className={`ph ${tagIcon} text-xs`} />
             {tagLabel}
           </span>
         )}
         {offer.distance_meters != null && (
-          <span style={{ ...chipBase, ...CHIP_STYLE.neutral }}>
-            <i className="ph ph-map-pin" style={{ fontSize: "12px" }} />
+          <span className={`${CHIP_BASE} ${CHIP_CLASSES.neutral}`}>
+            <i className="ph ph-map-pin text-xs" />
             {formatDistance(offer.distance_meters)}
           </span>
         )}
       </div>
 
-      {/* Hero — Fraunces */}
       <h3
-        style={{
-          fontFamily: "var(--font-display)",
-          fontSize: "26px",
-          lineHeight: "1.05",
-          letterSpacing: "var(--ls-tight)",
-          fontWeight: 500,
-          color: "var(--fg-1)",
-          margin: "0 0 8px",
-          fontVariationSettings: '"opsz" 96, "SOFT" 50',
-          textWrap: "balance",
-        }}
+        className="mb-2 font-display text-[26px] font-medium leading-[1.05] text-fg-1"
+        style={{ letterSpacing: "var(--ls-tight)", textWrap: "balance", fontVariationSettings: '"opsz" 96, "SOFT" 50' }}
       >
         {offer.headline}
       </h3>
 
-      {/* Meta */}
-      <div
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--fs-small)",
-          color: "var(--fg-3)",
-          marginBottom: "16px",
-        }}
-      >
+      <div className="mb-4 text-small text-fg-3">
         {offer.subtext}
-        {!isExpired && <> · {expiry}</>}
+        {!isExpired && <> {"\u00b7"} {expiry}</>}
       </div>
 
-      {/* Bottom row: merchant + CTA */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
-          <div
-            style={{
-              width: "28px",
-              height: "28px",
-              borderRadius: "6px",
-              background: "var(--cw-paper-200)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontFamily: "var(--font-display)",
-              fontWeight: 600,
-              color: "var(--fg-2)",
-              fontSize: "14px",
-              flexShrink: 0,
-            }}
-          >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-cw-paper-200 font-display text-[14px] font-semibold text-fg-2">
             {merchantInitial}
           </div>
-          <div style={{ minWidth: 0 }}>
-            <div
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--fs-small)",
-                fontWeight: 600,
-                color: "var(--fg-1)",
-                whiteSpace: "nowrap",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-              }}
-            >
+          <div className="min-w-0">
+            <div className="truncate text-small font-semibold text-fg-1">
               {offer.merchant_name}
             </div>
-            <div
-              style={{
-                fontFamily: "var(--font-body)",
-                fontSize: "var(--fs-micro)",
-                color: "var(--fg-3)",
-              }}
-            >
+            <div className="text-micro text-fg-3">
               {offer.merchant_category}
             </div>
           </div>
@@ -224,69 +155,33 @@ export default function OfferCard({ offer, onAccept, onDismiss }: OfferCardProps
         {isActive ? (
           <button
             onClick={() => onAccept?.(offer.id)}
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--fs-small)",
-              fontWeight: 600,
-              padding: "8px 14px",
-              borderRadius: "var(--radius-2)",
-              background: "var(--action-primary)",
-              color: "var(--fg-on-red)",
-              border: "none",
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "6px",
-              flexShrink: 0,
-              transition: `background var(--dur-1) var(--ease-out)`,
-            }}
-            onMouseDown={(e: MouseEvent<HTMLButtonElement>) => (e.currentTarget.style.background = "var(--action-primary-press)")}
-            onMouseUp={(e: MouseEvent<HTMLButtonElement>) => (e.currentTarget.style.background = "var(--action-primary)")}
-            onMouseLeave={(e: MouseEvent<HTMLButtonElement>) => (e.currentTarget.style.background = "var(--action-primary)")}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-2 bg-action-primary px-3.5 py-2 text-small font-semibold text-fg-on-red transition-colors duration-150 hover:bg-action-primary-hover active:bg-action-primary-press"
           >
             {discountLabel}
-            <i className="ph ph-arrow-right" style={{ fontSize: "14px" }} />
+            <i className="ph ph-arrow-right text-sm" />
+          </button>
+        ) : offer.status === "accepted" && onShowQR ? (
+          <button
+            onClick={() => onShowQR(offer.id)}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-2 bg-action-secondary px-3.5 py-2 text-small font-semibold text-fg-on-dark"
+          >
+            <i className="ph ph-qr-code text-sm" />
+            Show QR
           </button>
         ) : offer.status === "accepted" ? (
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--fs-small)",
-              fontWeight: 600,
-              color: "var(--status-success)",
-              padding: "6px 12px",
-              borderRadius: "var(--radius-pill)",
-              background: "var(--cw-fresh-bg)",
-            }}
-          >
+          <span className="rounded-pill bg-cw-fresh-bg px-3 py-1.5 text-small font-semibold text-status-success">
             Accepted
           </span>
         ) : (
-          <span
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--fs-small)",
-              color: "var(--fg-3)",
-            }}
-          >
-            Window closed
-          </span>
+          <span className="text-small text-fg-3">Window closed</span>
         )}
       </div>
 
       {isActive && (
-        <div style={{ marginTop: "10px", textAlign: "right" }}>
+        <div className="mt-2.5 text-right">
           <button
             onClick={() => onDismiss?.(offer.id)}
-            style={{
-              fontFamily: "var(--font-body)",
-              fontSize: "var(--fs-small)",
-              color: "var(--fg-3)",
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              padding: 0,
-            }}
+            className="text-small text-fg-3 hover:text-fg-2"
           >
             Maybe later
           </button>

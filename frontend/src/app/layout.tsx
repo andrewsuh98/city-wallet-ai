@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import "@phosphor-icons/web/regular";
+import "@phosphor-icons/web/bold";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -35,8 +37,7 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${interTight.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      {/* Phosphor Icons loaded locally via globals.css — no CDN dependency */}
-      <body className="min-h-full flex flex-col bg-[#faf7f2] text-[#15130f]">
+      <body className="min-h-full flex flex-col">
         {children}
       </body>
     </html>

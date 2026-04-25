@@ -1,121 +1,14 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import Link from "next/link";
 import { clearConsent } from "@/components/ConsentModal";
 import { useRouter } from "next/navigation";
 
-const page: CSSProperties = {
-  maxWidth: "480px",
-  margin: "0 auto",
-  padding: "40px 20px 96px",
-  background: "var(--bg-page)",
-  minHeight: "100vh",
-};
-
-const heading: CSSProperties = {
-  fontFamily: "var(--font-display)",
-  fontSize: "var(--fs-h1)",
-  lineHeight: "var(--lh-snug)",
-  letterSpacing: "var(--ls-tight)",
-  fontWeight: 500,
-  color: "var(--fg-1)",
-  marginBottom: "8px",
-  fontVariationSettings: '"opsz" 60, "SOFT" 30',
-};
-
-const body: CSSProperties = {
-  fontFamily: "var(--font-body)",
-  fontSize: "var(--fs-body)",
-  lineHeight: "var(--lh-normal)",
-  color: "var(--fg-2)",
-  marginBottom: "32px",
-};
-
-const sectionTitle: CSSProperties = {
-  fontFamily: "var(--font-body)",
-  fontSize: "var(--fs-h3)",
-  fontWeight: 600,
-  lineHeight: "var(--lh-snug)",
-  letterSpacing: "var(--ls-snug)",
-  color: "var(--fg-1)",
-  marginBottom: "12px",
-  marginTop: "32px",
-};
-
-const table: CSSProperties = {
-  width: "100%",
-  borderCollapse: "collapse",
-  fontFamily: "var(--font-body)",
-  fontSize: "var(--fs-small)",
-  marginBottom: "24px",
-};
-
-const th: CSSProperties = {
-  textAlign: "left",
-  padding: "8px 8px 8px 0",
-  fontWeight: 600,
-  color: "var(--fg-1)",
-  borderBottom: "1px solid var(--border-2)",
-  fontSize: "var(--fs-micro)",
-  letterSpacing: "var(--ls-caps)",
-  textTransform: "uppercase",
-};
-
-const td: CSSProperties = {
-  padding: "10px 8px 10px 0",
-  borderBottom: "1px solid var(--border-1)",
-  color: "var(--fg-2)",
-  verticalAlign: "top",
-};
-
-const diagram: CSSProperties = {
-  fontFamily: "var(--font-mono)",
-  fontSize: "11px",
-  lineHeight: "1.5",
-  color: "var(--fg-2)",
-  background: "var(--cw-paper-100)",
-  borderRadius: "var(--radius-3)",
-  padding: "16px",
-  overflowX: "auto",
-  whiteSpace: "pre",
-  marginBottom: "24px",
-};
-
-const card: CSSProperties = {
-  background: "var(--bg-card)",
-  borderRadius: "var(--radius-3)",
-  border: "1px solid var(--border-1)",
-  padding: "16px",
-  marginBottom: "16px",
-};
-
-const cardRow: CSSProperties = {
-  display: "flex",
-  alignItems: "flex-start",
-  gap: "12px",
-  marginBottom: "12px",
-};
-
-const cardIcon: CSSProperties = {
-  fontSize: "20px",
-  color: "var(--fg-3)",
-  flexShrink: 0,
-  marginTop: "1px",
-};
-
-const dangerBtn: CSSProperties = {
-  fontFamily: "var(--font-body)",
-  fontSize: "var(--fs-body)",
-  fontWeight: 600,
-  padding: "12px 24px",
-  borderRadius: "var(--radius-2)",
-  background: "transparent",
-  color: "var(--status-danger)",
-  border: "1px solid var(--status-danger)",
-  cursor: "pointer",
-  width: "100%",
-};
+const SECTION_TITLE = "mb-3 mt-8 font-body text-h3 font-semibold leading-snug text-fg-1";
+const BODY = "mb-8 font-body text-body leading-normal text-fg-2";
+const CARD = "mb-4 rounded-3 border border-border-1 bg-card p-4";
+const CARD_ROW = "mb-3 flex items-start gap-3 last:mb-0";
+const CARD_ICON = "shrink-0 mt-px text-xl text-fg-3";
 
 export default function PrivacyPage() {
   const router = useRouter();
@@ -126,147 +19,118 @@ export default function PrivacyPage() {
   };
 
   return (
-    <div style={page}>
+    <div className="mx-auto min-h-screen max-w-[480px] bg-page px-5 pt-10 pb-24">
       <Link
         href="/"
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--fs-small)",
-          color: "var(--fg-link)",
-          textDecoration: "none",
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "4px",
-          marginBottom: "24px",
-        }}
+        className="mb-6 inline-flex items-center gap-1 font-body text-small text-fg-link no-underline"
       >
-        <i className="ph ph-arrow-left" style={{ fontSize: "14px" }} />
+        <i className="ph ph-arrow-left text-sm" />
         Back
       </Link>
 
-      <h1 style={heading}>How your data is handled</h1>
-      <p style={body}>
+      <h1
+        className="mb-2 font-display text-h1 font-medium leading-snug text-fg-1"
+        style={{ letterSpacing: "var(--ls-tight)", fontVariationSettings: '"opsz" 60, "SOFT" 30' }}
+      >
+        How your data is handled
+      </h1>
+      <p className={BODY}>
         City Wallet is designed around a simple principle: your data stays on your phone. Here is exactly what happens when you use the app.
       </p>
 
-      {/* Architecture */}
-      <h2 style={sectionTitle}>How it works</h2>
+      <h2 className={SECTION_TITLE}>How it works</h2>
 
-      <div style={card}>
-        <div style={cardRow}>
-          <i className="ph ph-device-mobile" style={cardIcon} />
+      <div className={CARD}>
+        <div className={CARD_ROW}>
+          <i className={`ph ph-device-mobile ${CARD_ICON}`} />
           <div>
-            <div style={{ fontWeight: 600, color: "var(--fg-1)", fontSize: "var(--fs-body)", marginBottom: "4px" }}>
-              On your device
-            </div>
-            <div style={{ color: "var(--fg-2)", fontSize: "var(--fs-small)", lineHeight: "var(--lh-normal)" }}>
+            <div className="mb-1 text-body font-semibold text-fg-1">On your device</div>
+            <div className="text-small leading-normal text-fg-2">
               GPS coordinates, movement patterns, and preferences are processed locally. Raw data never leaves the phone.
             </div>
           </div>
         </div>
-        <div style={cardRow}>
-          <i className="ph ph-arrow-down" style={{ ...cardIcon, color: "var(--fg-4)" }} />
-          <div style={{ fontSize: "var(--fs-small)", color: "var(--fg-3)" }}>
+        <div className={CARD_ROW}>
+          <i className="ph ph-arrow-down shrink-0 mt-px text-xl text-fg-4" />
+          <div className="text-small text-fg-3">
             Only abstract intent signals cross the network
           </div>
         </div>
-        <div style={{ ...cardRow, marginBottom: 0 }}>
-          <i className="ph ph-cloud" style={cardIcon} />
+        <div className="flex items-start gap-3">
+          <i className={`ph ph-cloud ${CARD_ICON}`} />
           <div>
-            <div style={{ fontWeight: 600, color: "var(--fg-1)", fontSize: "var(--fs-body)", marginBottom: "4px" }}>
-              Server
-            </div>
-            <div style={{ color: "var(--fg-2)", fontSize: "var(--fs-small)", lineHeight: "var(--lh-normal)" }}>
+            <div className="mb-1 text-body font-semibold text-fg-1">Server</div>
+            <div className="text-small leading-normal text-fg-2">
               Receives intent tags and a single coordinate. Combines with public context (weather, time, events) to generate offers. No movement history, no browsing data, no personal info.
             </div>
           </div>
         </div>
       </div>
 
-      {/* Data table */}
-      <h2 style={sectionTitle}>What we collect</h2>
+      <h2 className={SECTION_TITLE}>What we collect</h2>
 
-      <table style={table}>
+      <table className="mb-6 w-full border-collapse font-body text-small">
         <thead>
           <tr>
-            <th style={th}>Data</th>
-            <th style={th}>Stored</th>
-            <th style={th}>Retention</th>
+            <th className="border-b border-border-2 px-0 py-2 pr-2 text-left text-micro font-semibold uppercase tracking-[0.08em] text-fg-1">Data</th>
+            <th className="border-b border-border-2 px-0 py-2 pr-2 text-left text-micro font-semibold uppercase tracking-[0.08em] text-fg-1">Stored</th>
+            <th className="border-b border-border-2 px-0 py-2 pr-2 text-left text-micro font-semibold uppercase tracking-[0.08em] text-fg-1">Retention</th>
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td style={td}>GPS coordinate</td>
-            <td style={td}>No</td>
-            <td style={td}>Discarded after request</td>
-          </tr>
-          <tr>
-            <td style={td}>Session ID (random UUID)</td>
-            <td style={td}>24h</td>
-            <td style={td}>Then purged</td>
-          </tr>
-          <tr>
-            <td style={td}>Offer interactions</td>
-            <td style={td}>Aggregated</td>
-            <td style={td}>Not linked to you after 24h</td>
-          </tr>
-          <tr>
-            <td style={td}>Intent signals</td>
-            <td style={td}>No</td>
-            <td style={td}>Current request only</td>
-          </tr>
+          {[
+            ["GPS coordinate", "No", "Discarded after request"],
+            ["Session ID (random UUID)", "24h", "Then purged"],
+            ["Offer interactions", "Aggregated", "Not linked to you after 24h"],
+            ["Intent signals", "No", "Current request only"],
+          ].map((row) => (
+            <tr key={row[0]}>
+              {row.map((cell, i) => (
+                <td key={i} className="border-b border-border-1 px-0 py-2.5 pr-2 align-top text-fg-2">
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
         </tbody>
       </table>
 
-      {/* What we don't collect */}
-      <h2 style={sectionTitle}>What we do not collect</h2>
+      <h2 className={SECTION_TITLE}>What we do not collect</h2>
 
-      <div style={{ ...body, marginBottom: "24px" }}>
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          {[
-            "Name, email, phone, or any personal information",
-            "Movement history or GPS traces",
-            "Browsing history or app usage",
-            "Device identifiers or IP addresses",
-            "Cookies or cross-session tracking",
-          ].map((item) => (
-            <div key={item} style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <i className="ph ph-x" style={{ fontSize: "14px", color: "var(--fg-4)", flexShrink: 0 }} />
-              <span style={{ fontSize: "var(--fs-small)", color: "var(--fg-2)" }}>{item}</span>
-            </div>
-          ))}
-        </div>
+      <div className="mb-6 flex flex-col gap-2">
+        {[
+          "Name, email, phone, or any personal information",
+          "Movement history or GPS traces",
+          "Browsing history or app usage",
+          "Device identifiers or IP addresses",
+          "Cookies or cross-session tracking",
+        ].map((item) => (
+          <div key={item} className="flex items-center gap-2">
+            <i className="ph ph-x shrink-0 text-sm text-fg-4" />
+            <span className="text-small text-fg-2">{item}</span>
+          </div>
+        ))}
       </div>
 
-      {/* GDPR */}
-      <h2 style={sectionTitle}>GDPR compliance</h2>
+      <h2 className={SECTION_TITLE}>GDPR compliance</h2>
 
-      <div style={card}>
+      <div className={CARD}>
         {[
           { article: "Art. 5", label: "Data minimization", desc: "Only the minimum data needed for offer generation." },
           { article: "Art. 6", label: "Lawful basis", desc: "Explicit consent via the location prompt. Works without it." },
           { article: "Art. 7", label: "Consent", desc: "Freely given, specific, informed, and revocable." },
           { article: "Art. 17", label: "Right to erasure", desc: "Clear your data below. Server purges after 24h." },
           { article: "Art. 25", label: "Privacy by design", desc: "On-device processing. No PII touches the server." },
-        ].map((item, i, arr) => (
-          <div key={item.article} style={{ ...cardRow, marginBottom: i === arr.length - 1 ? 0 : "12px" }}>
-            <span
-              style={{
-                fontFamily: "var(--font-mono)",
-                fontSize: "var(--fs-micro)",
-                fontWeight: 500,
-                color: "var(--fg-3)",
-                flexShrink: 0,
-                width: "48px",
-              }}
-            >
+        ].map((item) => (
+          <div key={item.article} className="mb-3 flex items-start gap-3 last:mb-0">
+            <span className="w-12 shrink-0 font-mono text-micro font-medium text-fg-3">
               {item.article}
             </span>
             <div>
-              <div style={{ fontWeight: 600, color: "var(--fg-1)", fontSize: "var(--fs-small)", marginBottom: "2px" }}>
+              <div className="mb-0.5 text-small font-semibold text-fg-1">
                 {item.label}
               </div>
-              <div style={{ color: "var(--fg-2)", fontSize: "var(--fs-small)", lineHeight: "var(--lh-normal)" }}>
+              <div className="text-small leading-normal text-fg-2">
                 {item.desc}
               </div>
             </div>
@@ -274,13 +138,15 @@ export default function PrivacyPage() {
         ))}
       </div>
 
-      {/* Clear data */}
-      <h2 style={sectionTitle}>Clear my data</h2>
-      <p style={{ ...body, marginBottom: "16px" }}>
+      <h2 className={SECTION_TITLE}>Clear my data</h2>
+      <p className="mb-4 font-body text-body leading-normal text-fg-2">
         This removes your consent, session, and all locally stored data. The app will show the welcome screen again.
       </p>
 
-      <button onClick={handleClearData} style={dangerBtn}>
+      <button
+        onClick={handleClearData}
+        className="w-full rounded-2 border border-status-danger bg-transparent px-6 py-3 font-body text-body font-semibold text-status-danger hover:bg-cw-red-50"
+      >
         Clear all data and revoke consent
       </button>
     </div>

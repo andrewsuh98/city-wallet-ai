@@ -1,5 +1,3 @@
-import type { CSSProperties } from "react";
-
 interface ContextBadge {
   icon: string;
   label: string;
@@ -11,57 +9,34 @@ interface ContextBarProps {
 }
 
 const defaultBadges: ContextBadge[] = [
-  { icon: "ph-cloud-rain", label: "Rain · 11°C", variant: "cool" },
-  { icon: "ph-clock",      label: "Saturday · 14:00", variant: "neutral" },
+  { icon: "ph-cloud-rain", label: "Rain \u00b7 11\u00b0C", variant: "cool" },
+  { icon: "ph-clock",      label: "Saturday \u00b7 14:00", variant: "neutral" },
   { icon: "ph-ticket",     label: "Broadway Week", variant: "dusk" },
   { icon: "ph-coffee",     label: "3 quiet cafes", variant: "fresh" },
 ];
 
-const CHIP_STYLES = {
-  cool:    { background: "var(--cw-cool-bg)",   color: "var(--cw-cool)" },
-  warm:    { background: "var(--cw-warm-bg)",   color: "var(--cw-warm)" },
-  fresh:   { background: "var(--cw-fresh-bg)",  color: "var(--cw-fresh)" },
-  dusk:    { background: "var(--cw-dusk-bg)",   color: "var(--cw-dusk)" },
-  neutral: { background: "var(--cw-paper-100)", color: "var(--fg-2)" },
-};
-
-const chipBase: CSSProperties = {
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "5px",
-  padding: "4px 10px",
-  borderRadius: "var(--radius-pill)",
-  fontFamily: "var(--font-body)",
-  fontSize: "var(--fs-micro)",
-  fontWeight: 600,
-  letterSpacing: "var(--ls-caps)",
-  textTransform: "uppercase",
-  whiteSpace: "nowrap",
-  flexShrink: 0,
+const CHIP_CLASSES: Record<NonNullable<ContextBadge["variant"]>, string> = {
+  cool:    "bg-cw-cool-bg text-cw-cool",
+  warm:    "bg-cw-warm-bg text-cw-warm",
+  fresh:   "bg-cw-fresh-bg text-cw-fresh",
+  dusk:    "bg-cw-dusk-bg text-cw-dusk",
+  neutral: "bg-cw-paper-100 text-fg-2",
 };
 
 export default function ContextBar({ badges = defaultBadges }: ContextBarProps) {
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: "6px",
-        overflowX: "auto",
-        padding: "12px 20px",
-        background: "var(--bg-page)",
-        borderBottom: "1px solid var(--border-1)",
-        scrollbarWidth: "none",
-      }}
-    >
-      {badges.map((badge) => {
-        const chipStyle = CHIP_STYLES[badge.variant ?? "neutral"];
-        return (
-          <span key={badge.label} style={{ ...chipBase, ...chipStyle }}>
-            <i className={`ph ${badge.icon}`} style={{ fontSize: "13px" }} />
-            {badge.label}
-          </span>
-        );
-      })}
+    <div className="no-scrollbar flex gap-1.5 overflow-x-auto border-b border-border-1 bg-page px-5 py-3">
+      {badges.map((badge) => (
+        <span
+          key={badge.label}
+          className={`inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-pill px-2.5 py-1 font-body text-micro font-semibold uppercase tracking-[0.08em] ${
+            CHIP_CLASSES[badge.variant ?? "neutral"]
+          }`}
+        >
+          <i className={`ph ${badge.icon} text-[13px]`} />
+          {badge.label}
+        </span>
+      ))}
     </div>
   );
 }

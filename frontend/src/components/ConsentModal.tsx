@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { CSSProperties, KeyboardEvent } from "react";
+import type { KeyboardEvent } from "react";
 import Link from "next/link";
 
 // -- Types --
@@ -98,104 +98,42 @@ export function clearConsent(): void {
   localStorage.removeItem(TASTE_KEY);
 }
 
-// -- Shared styles --
+// -- Shared classes --
 
-const screen: CSSProperties = {
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  justifyContent: "center",
-  minHeight: "100vh",
-  padding: "40px 24px",
-  background: "var(--bg-page)",
-  textAlign: "center",
-};
+const SCREEN_BASE = "flex min-h-screen flex-col items-center bg-page px-6 py-10 text-center";
+const SCREEN_CENTER = `${SCREEN_BASE} justify-center`;
+const SCREEN_TOP = `${SCREEN_BASE} justify-start pt-20`;
 
-const hero: CSSProperties = {
-  fontFamily: "var(--font-display)",
-  fontSize: "36px",
-  lineHeight: "1.08",
-  letterSpacing: "var(--ls-tight)",
-  fontWeight: 500,
-  color: "var(--fg-1)",
-  marginBottom: "16px",
-  maxWidth: "300px",
-  fontVariationSettings: '"opsz" 96, "SOFT" 50',
-  textWrap: "balance",
-};
+const HERO_STYLE = { letterSpacing: "var(--ls-tight)", textWrap: "balance" as const, fontVariationSettings: '"opsz" 96, "SOFT" 50' };
+const HERO_CLS = "mb-4 max-w-[300px] font-display text-[36px] font-medium leading-[1.08] text-fg-1";
+const SUBTITLE_CLS = "mb-10 max-w-[280px] font-body text-body leading-normal text-fg-2";
 
-const subtitle: CSSProperties = {
-  fontFamily: "var(--font-body)",
-  fontSize: "var(--fs-body)",
-  lineHeight: "var(--lh-normal)",
-  color: "var(--fg-2)",
-  maxWidth: "280px",
-  marginBottom: "40px",
-};
+const PRIMARY_BTN =
+  "inline-flex w-full max-w-[320px] items-center justify-center gap-2 rounded-2 bg-action-primary px-7 py-3.5 font-body text-body font-semibold text-fg-on-red transition-colors duration-150 hover:bg-action-primary-hover disabled:opacity-40 disabled:cursor-default";
 
-const primaryBtn: CSSProperties = {
-  fontFamily: "var(--font-body)",
-  fontSize: "var(--fs-body)",
-  fontWeight: 600,
-  padding: "14px 28px",
-  borderRadius: "var(--radius-2)",
-  background: "var(--action-primary)",
-  color: "var(--fg-on-red)",
-  border: "none",
-  cursor: "pointer",
-  display: "inline-flex",
-  alignItems: "center",
-  gap: "8px",
-  width: "100%",
-  maxWidth: "320px",
-  justifyContent: "center",
-};
-
-const ghostBtn: CSSProperties = {
-  fontFamily: "var(--font-body)",
-  fontSize: "var(--fs-body)",
-  fontWeight: 600,
-  padding: "14px 28px",
-  borderRadius: "var(--radius-2)",
-  background: "transparent",
-  color: "var(--fg-1)",
-  border: "1px solid var(--border-2)",
-  cursor: "pointer",
-  width: "100%",
-  maxWidth: "320px",
-};
+const GHOST_BTN =
+  "w-full max-w-[320px] rounded-2 border border-border-2 bg-transparent px-7 py-3.5 font-body text-body font-semibold text-fg-1 hover:bg-card-soft";
 
 // -- Screen 1: Welcome --
 
 function WelcomeScreen({ onNext }: { onNext: () => void }) {
   return (
-    <div style={screen}>
-      <div
-        style={{
-          width: "56px",
-          height: "56px",
-          borderRadius: "var(--radius-3)",
-          background: "var(--cw-red-500)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: "32px",
-        }}
-      >
-        <i className="ph ph-wallet" style={{ fontSize: "28px", color: "var(--fg-on-red)" }} />
+    <div className={SCREEN_CENTER}>
+      <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-3 bg-cw-red-500">
+        <i className="ph ph-wallet text-[28px] text-fg-on-red" />
       </div>
 
-      <h1 style={hero}>
+      <h1 className={HERO_CLS} style={HERO_STYLE}>
         The right offer, right when you need it.
       </h1>
 
-      <p style={subtitle}>
+      <p className={SUBTITLE_CLS}>
         City Wallet finds what is nearby, open, and worth your time.
       </p>
 
-      <button onClick={onNext} style={primaryBtn}>
+      <button onClick={onNext} className={PRIMARY_BTN}>
         Get started
-        <i className="ph ph-arrow-right" style={{ fontSize: "16px" }} />
+        <i className="ph ph-arrow-right text-base" />
       </button>
     </div>
   );
@@ -204,20 +142,6 @@ function WelcomeScreen({ onNext }: { onNext: () => void }) {
 // -- Screen 2: Profile --
 
 const GENDER_OPTIONS = ["Male", "Female", "Non-binary", "Prefer not to say"];
-
-const inputStyle: CSSProperties = {
-  fontFamily: "var(--font-body)",
-  fontSize: "var(--fs-body)",
-  padding: "14px 16px",
-  borderRadius: "var(--radius-2)",
-  border: "1px solid var(--border-2)",
-  background: "var(--bg-card)",
-  color: "var(--fg-1)",
-  width: "100%",
-  maxWidth: "320px",
-  outline: "none",
-  textAlign: "center",
-};
 
 function ProfileScreen({ onNext }: { onNext: () => void }) {
   const [name, setName] = useState("");
@@ -235,24 +159,13 @@ function ProfileScreen({ onNext }: { onNext: () => void }) {
   };
 
   return (
-    <div style={{ ...screen, justifyContent: "flex-start", paddingTop: "80px" }}>
-      <div
-        style={{
-          width: "56px",
-          height: "56px",
-          borderRadius: "var(--radius-pill)",
-          background: "var(--cw-fresh-bg)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: "32px",
-        }}
-      >
-        <i className="ph ph-user" style={{ fontSize: "28px", color: "var(--cw-fresh)" }} />
+    <div className={SCREEN_TOP}>
+      <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-pill bg-cw-fresh-bg">
+        <i className="ph ph-user text-[28px] text-cw-fresh" />
       </div>
 
-      <h1 style={hero}>What should we call you?</h1>
-      <p style={subtitle}>Just a first name. Nothing formal.</p>
+      <h1 className={HERO_CLS} style={HERO_STYLE}>What should we call you?</h1>
+      <p className={SUBTITLE_CLS}>Just a first name. Nothing formal.</p>
 
       <input
         type="text"
@@ -261,42 +174,25 @@ function ProfileScreen({ onNext }: { onNext: () => void }) {
         onKeyDown={handleKeyDown}
         placeholder="First name"
         autoFocus
-        style={inputStyle}
+        className="w-full max-w-[320px] rounded-2 border border-border-2 bg-card px-4 py-3.5 text-center font-body text-body text-fg-1 outline-none focus:border-action-primary"
       />
 
-      <div style={{ width: "100%", maxWidth: "320px", marginTop: "28px", marginBottom: "32px" }}>
-        <div
-          style={{
-            fontFamily: "var(--font-body)",
-            fontSize: "var(--fs-micro)",
-            fontWeight: 600,
-            letterSpacing: "var(--ls-caps)",
-            textTransform: "uppercase",
-            color: "var(--fg-4)",
-            marginBottom: "10px",
-          }}
-        >
-          Gender · optional
+      <div className="mb-8 mt-7 w-full max-w-[320px]">
+        <div className="mb-2.5 text-micro font-semibold uppercase tracking-[0.08em] text-fg-4">
+          Gender {"\u00b7"} optional
         </div>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", justifyContent: "center" }}>
+        <div className="flex flex-wrap justify-center gap-2">
           {GENDER_OPTIONS.map((opt) => {
             const isSelected = gender === opt;
             return (
               <button
                 key={opt}
                 onClick={() => setGender(isSelected ? null : opt)}
-                style={{
-                  fontFamily: "var(--font-body)",
-                  fontSize: "var(--fs-small)",
-                  fontWeight: 600,
-                  padding: "8px 14px",
-                  borderRadius: "var(--radius-pill)",
-                  border: isSelected ? "2px solid var(--cw-fresh)" : "1px solid var(--border-2)",
-                  background: isSelected ? "var(--cw-fresh-bg)" : "var(--bg-card)",
-                  color: isSelected ? "var(--cw-fresh)" : "var(--fg-2)",
-                  cursor: "pointer",
-                  transition: "all 120ms ease",
-                }}
+                className={`rounded-pill px-3.5 py-2 font-body text-small font-semibold transition-colors duration-150 ${
+                  isSelected
+                    ? "border-2 border-cw-fresh bg-cw-fresh-bg text-cw-fresh"
+                    : "border border-border-2 bg-card text-fg-2 hover:bg-card-soft"
+                }`}
               >
                 {opt}
               </button>
@@ -305,17 +201,9 @@ function ProfileScreen({ onNext }: { onNext: () => void }) {
         </div>
       </div>
 
-      <button
-        onClick={handleNext}
-        disabled={!canProceed}
-        style={{
-          ...primaryBtn,
-          opacity: canProceed ? 1 : 0.4,
-          cursor: canProceed ? "pointer" : "default",
-        }}
-      >
+      <button onClick={handleNext} disabled={!canProceed} className={PRIMARY_BTN}>
         Continue
-        <i className="ph ph-arrow-right" style={{ fontSize: "16px" }} />
+        <i className="ph ph-arrow-right text-base" />
       </button>
     </div>
   );
@@ -346,7 +234,6 @@ function BubbleTeaIcon({ size = 24 }: { size?: number }) {
   );
 }
 
-
 // -- Screen 3: Taste preferences --
 
 interface TasteOption {
@@ -372,23 +259,6 @@ const TASTE_OPTIONS: TasteOption[] = [
 
 const MIN_SELECTIONS = 3;
 
-const tasteItem = (isSelected: boolean): CSSProperties => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-  gap: "6px",
-  padding: "14px 4px",
-  borderRadius: "var(--radius-3)",
-  border: isSelected ? "2px solid var(--cw-warm)" : "1px solid var(--border-2)",
-  background: isSelected ? "var(--cw-warm-bg)" : "var(--bg-card)",
-  cursor: "pointer",
-  fontFamily: "var(--font-body)",
-  fontSize: "var(--fs-small)",
-  fontWeight: 600,
-  color: isSelected ? "var(--cw-warm)" : "var(--fg-2)",
-  transition: "all 120ms ease",
-});
-
 function TasteScreen({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
 
@@ -410,67 +280,46 @@ function TasteScreen({ onNext, onSkip }: { onNext: () => void; onSkip: () => voi
   };
 
   return (
-    <div style={{ ...screen, justifyContent: "flex-start", paddingTop: "80px" }}>
-      <div
-        style={{
-          width: "56px",
-          height: "56px",
-          borderRadius: "var(--radius-pill)",
-          background: "var(--cw-warm-bg)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: "32px",
-        }}
-      >
-        <i className="ph ph-heart" style={{ fontSize: "28px", color: "var(--cw-warm)" }} />
+    <div className={SCREEN_TOP}>
+      <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-pill bg-cw-warm-bg">
+        <i className="ph ph-heart text-[28px] text-cw-warm" />
       </div>
 
-      <h1 style={hero}>What catches your eye?</h1>
-      <p style={subtitle}>Pick at least 3. We will show you relevant offers first.</p>
+      <h1 className={HERO_CLS} style={HERO_STYLE}>What catches your eye?</h1>
+      <p className={SUBTITLE_CLS}>Pick at least 3. We will show you relevant offers first.</p>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: "10px",
-          width: "100%",
-          maxWidth: "320px",
-          marginBottom: "28px",
-        }}
-      >
-        {TASTE_OPTIONS.map((option) => (
-          <button
-            key={option.id}
-            onClick={() => toggle(option.id)}
-            style={tasteItem(selected.has(option.id))}
-          >
-            {option.id === "bubble_tea" ? (
-              <BubbleTeaIcon size={24} />
-            ) : (
-              <i className={`ph ${option.icon}`} style={{ fontSize: "24px" }} />
-            )}
-            {option.label}
-          </button>
-        ))}
+      <div className="mb-7 grid w-full max-w-[320px] grid-cols-3 gap-2.5">
+        {TASTE_OPTIONS.map((option) => {
+          const isSel = selected.has(option.id);
+          return (
+            <button
+              key={option.id}
+              onClick={() => toggle(option.id)}
+              className={`flex flex-col items-center gap-1.5 rounded-3 px-1 py-3.5 font-body text-small font-semibold transition-colors duration-150 ${
+                isSel
+                  ? "border-2 border-cw-warm bg-cw-warm-bg text-cw-warm"
+                  : "border border-border-2 bg-card text-fg-2 hover:bg-card-soft"
+              }`}
+            >
+              {option.id === "bubble_tea" ? (
+                <BubbleTeaIcon size={24} />
+              ) : (
+                <i className={`ph ${option.icon} text-2xl`} />
+              )}
+              {option.label}
+            </button>
+          );
+        })}
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", maxWidth: "320px" }}>
-        <button
-          onClick={handleNext}
-          disabled={!canProceed}
-          style={{
-            ...primaryBtn,
-            opacity: canProceed ? 1 : 0.4,
-            cursor: canProceed ? "pointer" : "default",
-          }}
-        >
-          {canProceed ? "Show me what's nearby" : remaining === MIN_SELECTIONS ? `Pick ${MIN_SELECTIONS} to continue` : `Pick ${remaining} more`}
-          {canProceed && <i className="ph ph-arrow-right" style={{ fontSize: "16px" }} />}
+      <div className="flex w-full max-w-[320px] flex-col gap-3">
+        <button onClick={handleNext} disabled={!canProceed} className={PRIMARY_BTN}>
+          {canProceed ? "Show me what is nearby" : remaining === MIN_SELECTIONS ? `Pick ${MIN_SELECTIONS} to continue` : `Pick ${remaining} more`}
+          {canProceed && <i className="ph ph-arrow-right text-base" />}
         </button>
 
-        <button onClick={onSkip} style={ghostBtn}>
-          Skip — show me everything
+        <button onClick={onSkip} className={GHOST_BTN}>
+          Skip, show me everything
         </button>
       </div>
     </div>
@@ -491,52 +340,35 @@ function LocationScreen({ onConsent }: ConsentModalProps) {
   };
 
   return (
-    <div style={screen}>
-      <div
-        style={{
-          width: "56px",
-          height: "56px",
-          borderRadius: "var(--radius-pill)",
-          background: "var(--cw-cool-bg)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          marginBottom: "32px",
-        }}
-      >
-        <i className="ph ph-map-pin" style={{ fontSize: "28px", color: "var(--cw-cool)" }} />
+    <div className={SCREEN_CENTER}>
+      <div className="mb-8 flex h-14 w-14 items-center justify-center rounded-pill bg-cw-cool-bg">
+        <i className="ph ph-map-pin text-[28px] text-cw-cool" />
       </div>
 
-      <h1 style={hero}>
+      <h1 className={HERO_CLS} style={HERO_STYLE}>
         Find offers within walking distance.
       </h1>
 
-      <p style={subtitle}>
+      <p className={SUBTITLE_CLS}>
         Location is used for 4 seconds per refresh. Nothing leaves your phone.
       </p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", maxWidth: "320px", marginBottom: "28px" }}>
-        <button onClick={handleEnable} style={primaryBtn}>
+      <div className="mb-7 flex w-full max-w-[320px] flex-col gap-3">
+        <button onClick={handleEnable} className={PRIMARY_BTN}>
           Enable location
-          <i className="ph ph-arrow-right" style={{ fontSize: "16px" }} />
+          <i className="ph ph-arrow-right text-base" />
         </button>
 
-        <button onClick={handleSkip} style={ghostBtn}>
-          Not now — use default location
+        <button onClick={handleSkip} className={GHOST_BTN}>
+          Not now, use default location
         </button>
       </div>
 
       <Link
         href="/privacy"
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: "var(--fs-small)",
-          color: "var(--fg-link)",
-          textDecoration: "none",
-          borderBottom: "1px solid currentColor",
-        }}
+        className="border-b border-current font-body text-small text-fg-link no-underline"
       >
-        How your data is handled →
+        How your data is handled {"\u2192"}
       </Link>
     </div>
   );
