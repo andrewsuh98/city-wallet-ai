@@ -1,0 +1,36 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin:0; padding:24px; background:var(--bg-card); }
+  .grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; }
+  .accent { border-radius:12px; padding:14px; border:1px solid var(--border-1); display:flex; flex-direction:column; gap:8px; }
+  .swatch { display:flex; gap:6px; align-items:center; }
+  .dot { width:24px; height:24px; border-radius:999px; border:1px solid var(--border-1); }
+  .name { font-family:var(--font-body); font-size:12px; font-weight:600; color:var(--fg-1); }
+  .hex { font-family:var(--font-mono); font-size:10px; color:var(--fg-3); }
+  .label { font-family:var(--font-body); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--fg-3); margin-bottom:12px; font-weight:600; }
+  .chip { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-family:var(--font-body); font-size:11px; font-weight:600; letter-spacing:.04em; }
+  .chip .d { width:6px; height:6px; border-radius:99px; }
+</style></head>
+<body>
+  <div class="label">Situational accents · context chips only</div>
+  <div class="grid">
+    <div class="accent" style="background:var(--cw-warm-bg);">
+      <div class="swatch"><div class="dot" style="background:var(--cw-warm)"></div><div><div class="name">Warm</div><div class="hex">#f59e0b</div></div></div>
+      <span class="chip" style="background:#fff;color:var(--cw-warm);"><span class="d" style="background:var(--cw-warm)"></span>SUNNY · 18°C</span>
+    </div>
+    <div class="accent" style="background:var(--cw-cool-bg);">
+      <div class="swatch"><div class="dot" style="background:var(--cw-cool)"></div><div><div class="name">Cool</div><div class="hex">#1e6fb8</div></div></div>
+      <span class="chip" style="background:#fff;color:var(--cw-cool);"><span class="d" style="background:var(--cw-cool)"></span>RAIN · 11°C</span>
+    </div>
+    <div class="accent" style="background:var(--cw-fresh-bg);">
+      <div class="swatch"><div class="dot" style="background:var(--cw-fresh)"></div><div><div class="name">Fresh</div><div class="hex">#2f7d4f</div></div></div>
+      <span class="chip" style="background:#fff;color:var(--cw-fresh);"><span class="d" style="background:var(--cw-fresh)"></span>BREWED 4 MIN AGO</span>
+    </div>
+    <div class="accent" style="background:var(--cw-dusk-bg);">
+      <div class="swatch"><div class="dot" style="background:var(--cw-dusk)"></div><div><div class="name">Dusk</div><div class="hex">#7a4ca8</div></div></div>
+      <span class="chip" style="background:#fff;color:var(--cw-dusk);"><span class="d" style="background:var(--cw-dusk)"></span>EVENT NEARBY</span>
+    </div>
+  </div>
+</body></html>

@@ -1,7 +1,6 @@
 import asyncio
 import json
 import logging
-import uuid
 
 import anthropic
 from fastapi import APIRouter, HTTPException, Query
@@ -10,13 +9,11 @@ from database import get_db
 from models import (
     GenerateOffersRequest,
     GenerateOffersResponse,
-    Offer,
     OfferActionRequest,
     OfferListResponse,
     OfferStatus,
-    OfferStyle,
-    MerchantCategory,
 )
+from services import redemption as svc
 from services.offer_engine import generate_offers
 
 logger = logging.getLogger(__name__)
@@ -28,28 +25,6 @@ _ACTION_TO_STATUS = {
     "decline": OfferStatus.DECLINED.value,
     "dismiss": OfferStatus.DECLINED.value,
 }
-
-
-def _row_to_offer(row) -> Offer:
-    return Offer(
-        id=row["id"],
-        merchant_id=row["merchant_id"],
-        merchant_name=row["merchant_name"],
-        merchant_category=MerchantCategory(row["merchant_category"]),
-        headline=row["headline"],
-        subtext=row["subtext"],
-        description=row["description"],
-        discount_value=row["discount_value"],
-        discount_type=row["discount_type"],
-        context_tags=json.loads(row["context_tags"] or "[]"),
-        why_now=row["why_now"],
-        created_at=row["created_at"],
-        expires_at=row["expires_at"],
-        style=OfferStyle(**json.loads(row["style"] or "{}")),
-        status=OfferStatus(row["status"]),
-        distance_meters=row["distance_meters"],
-        redemption_token=row["redemption_token"],
-    )
 
 
 @router.post("/generate", response_model=GenerateOffersResponse)
@@ -82,7 +57,7 @@ async def list_offers(
     finally:
         await db.close()
 
-    return OfferListResponse(offers=[_row_to_offer(r) for r in rows])
+    return OfferListResponse(offers=[svc._row_to_offer(r) for r in rows])
 
 
 @router.patch("/{offer_id}")
@@ -110,7 +85,7 @@ async def update_offer_status(offer_id: str, body: OfferActionRequest):
             )
 
         if body.action == "accept":
-            new_token = str(uuid.uuid4())
+            new_token = svc.generate_token()
             await db.execute(
                 "UPDATE offers SET status = ?, redemption_token = ? WHERE id = ?",
                 (new_status, new_token, offer_id),
@@ -127,4 +102,4 @@ async def update_offer_status(offer_id: str, body: OfferActionRequest):
     finally:
         await db.close()
 
-    return {"offer": _row_to_offer(updated_row).model_dump(mode="json")}
+    return {"offer": svc._row_to_offer(updated_row).model_dump(mode="json")}

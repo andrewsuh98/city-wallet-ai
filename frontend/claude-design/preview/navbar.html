@@ -1,0 +1,22 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css"/>
+<style>
+  body { margin:0; padding:24px; background:var(--cw-paper-50); }
+  .label { font-family:var(--font-body); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--fg-3); margin-bottom:14px; font-weight:600; }
+  .nav { display:inline-flex; gap:4px; padding:6px; border-radius:999px; background:rgba(255,255,255,0.7); backdrop-filter:blur(20px) saturate(140%); -webkit-backdrop-filter:blur(20px) saturate(140%); border:1px solid var(--border-1); box-shadow:var(--shadow-3); }
+  .item { padding:10px 16px; border-radius:999px; font-family:var(--font-body); font-size:13px; font-weight:600; color:var(--fg-2); display:inline-flex; align-items:center; gap:6px; cursor:pointer; }
+  .item.active { background:var(--cw-paper-900); color:#faf7f2; }
+  .item i { font-size:16px; }
+  .cap { font-family:var(--font-body); font-size:11px; color:var(--fg-3); margin-top:14px; }
+</style></head>
+<body>
+  <div class="label">Bottom navigation · floating capsule, blur</div>
+  <div class="nav">
+    <span class="item active"><i class="ph ph-storefront"></i>Now</span>
+    <span class="item"><i class="ph ph-wallet"></i>Wallet</span>
+    <span class="item"><i class="ph ph-map-trifold"></i>Map</span>
+  </div>
+  <div class="cap">backdrop-filter blur 20 + saturate 140 · the only blur in the consumer app</div>
+</body></html>
