@@ -15,7 +15,7 @@ AI-powered city wallet for the DSV-Gruppe hackathon challenge (April 25-26, 2026
 ```bash
 # Backend (terminal 1)
 cd backend
-source venv/bin/activate
+source .venv/bin/activate
 uvicorn main:app --reload --port 8000
 
 # Frontend (terminal 2)
@@ -70,18 +70,18 @@ frontend/src/
 
 All specs live in `/docs`. Read these before writing code for a module.
 
-| Doc | What it covers |
-|-----|----------------|
-| [architecture.md](docs/architecture.md) | System diagram, data flow, tech rationale, component responsibilities |
-| [data-models.md](docs/data-models.md) | Pydantic models, SQLite schema, TypeScript types. **The single source of truth for the API contract.** |
-| [api-reference.md](docs/api-reference.md) | All endpoints with request/response JSON, error format, demo mode |
-| [context-sensing.md](docs/context-sensing.md) | Module 01: signal sources, context tags, urgency scoring |
-| [offer-engine.md](docs/offer-engine.md) | Module 02: Claude prompt, merchant rules, GenUI style system |
-| [checkout-redemption.md](docs/checkout-redemption.md) | Module 03: QR flow, token lifecycle, cashback, merchant scan |
-| [ux-design.md](docs/ux-design.md) | OfferCard layout, 3-second hierarchy, animations, dark mode, typography |
-| [privacy-gdpr.md](docs/privacy-gdpr.md) | On-device SLM architecture, consent flow, GDPR compliance |
-| [demo-guide.md](docs/demo-guide.md) | Setup, demo mode scenarios, full demo script, backup plans |
-| [city-config.md](docs/city-config.md) | Config schema, how to add a city, NYC merchant list |
+| Doc                                                   | What it covers                                                                                         |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| [architecture.md](docs/architecture.md)               | System diagram, data flow, tech rationale, component responsibilities                                  |
+| [data-models.md](docs/data-models.md)                 | Pydantic models, SQLite schema, TypeScript types. **The single source of truth for the API contract.** |
+| [api-reference.md](docs/api-reference.md)             | All endpoints with request/response JSON, error format, demo mode                                      |
+| [context-sensing.md](docs/context-sensing.md)         | Module 01: signal sources, context tags, urgency scoring                                               |
+| [offer-engine.md](docs/offer-engine.md)               | Module 02: Claude prompt, merchant rules, GenUI style system                                           |
+| [checkout-redemption.md](docs/checkout-redemption.md) | Module 03: QR flow, token lifecycle, cashback, merchant scan                                           |
+| [ux-design.md](docs/ux-design.md)                     | OfferCard layout, 3-second hierarchy, animations, dark mode, typography                                |
+| [privacy-gdpr.md](docs/privacy-gdpr.md)               | On-device SLM architecture, consent flow, GDPR compliance                                              |
+| [demo-guide.md](docs/demo-guide.md)                   | Setup, demo mode scenarios, full demo script, backup plans                                             |
+| [city-config.md](docs/city-config.md)                 | Config schema, how to add a city, NYC merchant list                                                    |
 
 ## Key Architecture Concepts
 
@@ -119,6 +119,7 @@ All specs live in `/docs`. Read these before writing code for a module.
 ### API Contract
 
 The backend and frontend communicate over REST. The contract is defined in:
+
 - Python: `backend/models.py` (Pydantic)
 - TypeScript: `frontend/src/lib/types.ts`
 - Human-readable: [api-reference.md](docs/api-reference.md)

@@ -1,0 +1,431 @@
+{
+  "city": "New York City",
+  "country": "US",
+  "currency": "USD",
+  "currency_symbol": "$",
+  "timezone": "America/New_York",
+  "language": "en",
+  "center": {
+    "latitude": 40.7580,
+    "longitude": -73.9855
+  },
+  "default_radius_meters": 1000,
+  "weather": {
+    "openweathermap_city_id": 5128581,
+    "units": "imperial"
+  },
+  "context_tag_rules": {
+    "cold_threshold_celsius": 10,
+    "hot_threshold_celsius": 30,
+    "quiet_density_ratio": 0.5,
+    "busy_density_ratio": 1.5,
+    "nearby_event_radius_meters": 500
+  },
+  "merchants": [
+    {
+      "id": "m_001",
+      "name": "Blue Bottle Coffee",
+      "category": "cafe",
+      "description": "Specialty coffee roaster known for single-origin pour-overs",
+      "latitude": 40.7562,
+      "longitude": -73.9870,
+      "address": "1 Rockefeller Plaza, New York, NY 10020",
+      "image_url": null,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "13:00",
+          "active_hours_end": "17:00",
+          "trigger_conditions": ["quiet_period", "rainy", "cold"],
+          "goal": "Fill quiet afternoon hours with walk-in traffic",
+          "max_offers_per_day": 15,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 50.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [8, 9, 10],
+        "quiet_hours": [14, 15, 16],
+        "avg_hourly_txns": 25,
+        "weekend_modifier": 0.7
+      }
+    },
+    {
+      "id": "m_002",
+      "name": "Joe's Pizza",
+      "category": "restaurant",
+      "description": "Iconic New York slice joint since 1975",
+      "latitude": 40.7306,
+      "longitude": -74.0021,
+      "address": "7 Carmine St, New York, NY 10014",
+      "image_url": null,
+      "rules": [
+        {
+          "max_discount_percent": 15,
+          "min_discount_percent": 5,
+          "active_hours_start": "11:00",
+          "active_hours_end": "15:00",
+          "trigger_conditions": ["rainy", "lunch_hour", "weekday"],
+          "goal": "Rainy day lunch specials to maintain foot traffic",
+          "max_offers_per_day": 20,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 40.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [12, 13, 18, 19],
+        "quiet_hours": [10, 15, 16],
+        "avg_hourly_txns": 40,
+        "weekend_modifier": 1.2
+      }
+    },
+    {
+      "id": "m_003",
+      "name": "The Strand Bookstore",
+      "category": "bookstore",
+      "description": "18 miles of books in the heart of NYC since 1927",
+      "latitude": 40.7333,
+      "longitude": -73.9909,
+      "address": "828 Broadway, New York, NY 10003",
+      "image_url": null,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "10:00",
+          "active_hours_end": "20:00",
+          "trigger_conditions": ["weekend", "rainy", "quiet_period"],
+          "goal": "Weekend browse-and-buy incentive",
+          "max_offers_per_day": 10,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 30.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [14, 15, 16],
+        "quiet_hours": [10, 11, 19],
+        "avg_hourly_txns": 15,
+        "weekend_modifier": 1.4
+      }
+    },
+    {
+      "id": "m_004",
+      "name": "Levain Bakery",
+      "category": "bakery",
+      "description": "Famous for giant, gooey chocolate chip cookies",
+      "latitude": 40.7800,
+      "longitude": -73.9804,
+      "address": "167 W 74th St, New York, NY 10023",
+      "image_url": null,
+      "rules": [
+        {
+          "max_discount_percent": 15,
+          "min_discount_percent": 5,
+          "active_hours_start": "14:00",
+          "active_hours_end": "18:00",
+          "trigger_conditions": ["cold", "rainy", "afternoon"],
+          "goal": "Cold weather warm treats to boost afternoon sales",
+          "max_offers_per_day": 12,
+          "offer_type": "free_item",
+          "budget_daily_usd": 35.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [11, 12, 13],
+        "quiet_hours": [15, 16, 17],
+        "avg_hourly_txns": 30,
+        "weekend_modifier": 1.3
+      }
+    },
+    {
+      "id": "m_005",
+      "name": "Shake Shack",
+      "category": "restaurant",
+      "description": "Modern day roadside burger stand in Madison Square Park",
+      "latitude": 40.7408,
+      "longitude": -73.9881,
+      "address": "Madison Square Park, New York, NY 10010",
+      "image_url": null,
+      "rules": [
+        {
+          "max_discount_percent": 15,
+          "min_discount_percent": 5,
+          "active_hours_start": "11:00",
+          "active_hours_end": "21:00",
+          "trigger_conditions": ["event_nearby", "weekend", "lunch_hour"],
+          "goal": "Post-event crowd deals and weekend lunch boost",
+          "max_offers_per_day": 25,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 60.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [12, 13, 18, 19],
+        "quiet_hours": [10, 15, 16],
+        "avg_hourly_txns": 50,
+        "weekend_modifier": 1.5
+      }
+    },
+    {
+      "id": "m_006",
+      "name": "McNally Jackson Books",
+      "category": "bookstore",
+      "description": "Independent bookstore and cafe in Nolita",
+      "latitude": 40.7234,
+      "longitude": -73.9959,
+      "address": "52 Prince St, New York, NY 10012",
+      "image_url": null,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "13:00",
+          "active_hours_end": "18:00",
+          "trigger_conditions": ["quiet_period", "weekday", "afternoon"],
+          "goal": "Quiet weekday afternoon foot traffic",
+          "max_offers_per_day": 8,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 25.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [11, 12, 15],
+        "quiet_hours": [13, 14, 17],
+        "avg_hourly_txns": 12,
+        "weekend_modifier": 1.3
+      }
+    },
+    {
+      "id": "m_007",
+      "name": "Cha Cha Matcha",
+      "category": "cafe",
+      "description": "Trendy matcha bar with vibrant aesthetic",
+      "latitude": 40.7437,
+      "longitude": -73.9882,
+      "address": "373 Broome St, New York, NY 10013",
+      "image_url": null,
+      "rules": [
+        {
+          "max_discount_percent": 15,
+          "min_discount_percent": 5,
+          "active_hours_start": "07:00",
+          "active_hours_end": "11:00",
+          "trigger_conditions": ["morning", "early_morning", "weekday"],
+          "goal": "Morning energy boost for commuters",
+          "max_offers_per_day": 20,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 40.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [8, 9, 10],
+        "quiet_hours": [14, 15, 16],
+        "avg_hourly_txns": 20,
+        "weekend_modifier": 0.6
+      }
+    },
+    {
+      "id": "m_008",
+      "name": "The Smith",
+      "category": "restaurant",
+      "description": "American brasserie with upscale comfort food",
+      "latitude": 40.7527,
+      "longitude": -73.9772,
+      "address": "956 2nd Ave, New York, NY 10022",
+      "image_url": null,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "16:00",
+          "active_hours_end": "19:00",
+          "trigger_conditions": ["evening", "quiet_period", "weekday"],
+          "goal": "Early dinner fill before the rush",
+          "max_offers_per_day": 10,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 45.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [12, 13, 19, 20],
+        "quiet_hours": [15, 16, 17],
+        "avg_hourly_txns": 35,
+        "weekend_modifier": 1.2
+      }
+    },
+    {
+      "id": "m_009",
+      "name": "Whole Foods Market",
+      "category": "grocery",
+      "description": "Organic and natural grocery at Columbus Circle",
+      "latitude": 40.7688,
+      "longitude": -73.9830,
+      "address": "10 Columbus Cir, New York, NY 10019",
+      "image_url": null,
+      "rules": [
+        {
+          "max_discount_percent": 10,
+          "min_discount_percent": 5,
+          "active_hours_start": "17:00",
+          "active_hours_end": "20:00",
+          "trigger_conditions": ["evening", "weekday"],
+          "goal": "Evening commuter quick-stop incentive",
+          "max_offers_per_day": 30,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 80.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [12, 17, 18],
+        "quiet_hours": [9, 10, 15],
+        "avg_hourly_txns": 60,
+        "weekend_modifier": 0.8
+      }
+    },
+    {
+      "id": "m_010",
+      "name": "Equinox",
+      "category": "fitness",
+      "description": "Premium fitness club in Midtown",
+      "latitude": 40.7571,
+      "longitude": -73.9712,
+      "address": "897 Broadway, New York, NY 10003",
+      "image_url": null,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "10:00",
+          "active_hours_end": "15:00",
+          "trigger_conditions": ["quiet_period", "weekday", "morning"],
+          "goal": "Off-peak class promo to fill midday slots",
+          "max_offers_per_day": 8,
+          "offer_type": "free_item",
+          "budget_daily_usd": 30.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [7, 8, 17, 18],
+        "quiet_hours": [11, 12, 13, 14],
+        "avg_hourly_txns": 20,
+        "weekend_modifier": 0.9
+      }
+    },
+    {
+      "id": "m_011",
+      "name": "Beecher's Handmade Cheese",
+      "category": "retail",
+      "description": "Artisan cheese shop and cafe in the Flatiron District",
+      "latitude": 40.7421,
+      "longitude": -73.9891,
+      "address": "900 Broadway, New York, NY 10003",
+      "image_url": null,
+      "rules": [
+        {
+          "max_discount_percent": 15,
+          "min_discount_percent": 5,
+          "active_hours_start": "11:00",
+          "active_hours_end": "14:00",
+          "trigger_conditions": ["lunch_hour", "quiet_period"],
+          "goal": "Lunchtime tasting offer to drive walk-ins",
+          "max_offers_per_day": 12,
+          "offer_type": "free_item",
+          "budget_daily_usd": 25.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [12, 13, 17],
+        "quiet_hours": [10, 14, 15],
+        "avg_hourly_txns": 18,
+        "weekend_modifier": 1.1
+      }
+    },
+    {
+      "id": "m_012",
+      "name": "Stumptown Coffee Roasters",
+      "category": "cafe",
+      "description": "Portland-born coffee roaster in Greenwich Village",
+      "latitude": 40.7340,
+      "longitude": -74.0023,
+      "address": "30 W 8th St, New York, NY 10011",
+      "image_url": null,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "13:00",
+          "active_hours_end": "17:00",
+          "trigger_conditions": ["rainy", "afternoon", "quiet_period"],
+          "goal": "Rainy afternoon refuge for neighborhood walkers",
+          "max_offers_per_day": 15,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 45.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [8, 9, 10],
+        "quiet_hours": [14, 15, 16],
+        "avg_hourly_txns": 22,
+        "weekend_modifier": 0.8
+      }
+    }
+  ],
+  "events": [
+    {
+      "id": "e_001",
+      "name": "Broadway Week Spring 2026",
+      "venue": "Times Square Area",
+      "category": "festival",
+      "start_time": "2026-04-20T00:00:00",
+      "end_time": "2026-04-27T23:59:59",
+      "latitude": 40.7580,
+      "longitude": -73.9855,
+      "expected_attendance": 50000
+    },
+    {
+      "id": "e_002",
+      "name": "Smorgasburg",
+      "venue": "World Trade Center",
+      "category": "market",
+      "start_time": "2026-04-25T11:00:00",
+      "end_time": "2026-04-25T18:00:00",
+      "latitude": 40.7127,
+      "longitude": -74.0134,
+      "expected_attendance": 10000
+    },
+    {
+      "id": "e_003",
+      "name": "Knicks vs Celtics",
+      "venue": "Madison Square Garden",
+      "category": "sports",
+      "start_time": "2026-04-25T19:30:00",
+      "end_time": "2026-04-25T22:00:00",
+      "latitude": 40.7505,
+      "longitude": -73.9934,
+      "expected_attendance": 20000
+    },
+    {
+      "id": "e_004",
+      "name": "Central Park Spring Concert",
+      "venue": "Central Park SummerStage",
+      "category": "music",
+      "start_time": "2026-04-26T14:00:00",
+      "end_time": "2026-04-26T20:00:00",
+      "latitude": 40.7694,
+      "longitude": -73.9712,
+      "expected_attendance": 5000
+    },
+    {
+      "id": "e_005",
+      "name": "Union Square Greenmarket",
+      "venue": "Union Square",
+      "category": "market",
+      "start_time": "2026-04-25T08:00:00",
+      "end_time": "2026-04-25T18:00:00",
+      "latitude": 40.7359,
+      "longitude": -73.9911,
+      "expected_attendance": 8000
+    }
+  ]
+}
