@@ -4,16 +4,33 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/wallet", label: "Wallet" },
-  { href: "/merchant", label: "Merchant" },
+  { href: "/",         label: "Now",    icon: "ph-storefront" },
+  { href: "/wallet",   label: "Wallet", icon: "ph-wallet" },
+  { href: "/merchant", label: "Map",    icon: "ph-map-trifold" },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-around border-t border-white/10 bg-[#0f0f0f]/95 backdrop-blur-sm px-4 py-3">
+    <nav
+      style={{
+        position: "fixed",
+        bottom: "20px",
+        left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 50,
+        display: "inline-flex",
+        gap: "4px",
+        padding: "6px",
+        borderRadius: "var(--radius-pill)",
+        background: "rgba(255, 255, 255, 0.7)",
+        backdropFilter: "blur(20px) saturate(140%)",
+        WebkitBackdropFilter: "blur(20px) saturate(140%)",
+        border: "1px solid var(--border-1)",
+        boxShadow: "var(--shadow-3)",
+      }}
+    >
       {navItems.map((item) => {
         const isActive =
           item.href === "/"
@@ -24,10 +41,23 @@ export default function BottomNav() {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center gap-1 text-xs font-medium transition-colors ${
-              isActive ? "text-white" : "text-white/40 hover:text-white/70"
-            }`}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "10px 16px",
+              borderRadius: "var(--radius-pill)",
+              fontFamily: "var(--font-body)",
+              fontSize: "var(--fs-small)",
+              fontWeight: 600,
+              textDecoration: "none",
+              border: "none",
+              transition: `background var(--dur-1) var(--ease-out), color var(--dur-1) var(--ease-out)`,
+              background: isActive ? "var(--cw-paper-900)" : "transparent",
+              color: isActive ? "var(--fg-on-dark)" : "var(--fg-2)",
+            }}
           >
+            <i className={`ph ${item.icon}`} style={{ fontSize: "16px" }} />
             {item.label}
           </Link>
         );
