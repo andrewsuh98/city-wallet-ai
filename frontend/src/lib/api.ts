@@ -109,3 +109,27 @@ export async function validateToken(
 ): Promise<TokenValidationResponse> {
   return request(`/redeem/validate/${encodeURIComponent(token)}`);
 }
+
+export async function getOfferQR(offerId: string): Promise<{
+  qr_base64: string;
+  token: string;
+  expires_at: string;
+}> {
+  return request(`/redeem/qr/${encodeURIComponent(offerId)}`);
+}
+
+export interface WalletRedemption {
+  id: string;
+  offer_id: string;
+  merchant_name: string;
+  cashback_amount: number;
+  redeemed_at: string;
+}
+
+export async function getWalletBalance(sessionId: string): Promise<{
+  balance_usd: number;
+  redemption_count: number;
+  redemptions: WalletRedemption[];
+}> {
+  return request(`/wallet/${encodeURIComponent(sessionId)}`);
+}

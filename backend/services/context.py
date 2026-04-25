@@ -6,7 +6,7 @@ the signal sources in parallel, derives semantic tags, and scores urgency.
 
 import asyncio
 import math
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 from zoneinfo import ZoneInfo
 
@@ -204,22 +204,23 @@ async def compose_context(
     preset = DEMO_PRESETS.get(demo_mode) if demo_mode else None
 
     if preset:
-        now = _demo_now(preset, tz)
+        local_now = _demo_now(preset, tz)
         weather = preset["weather"]
         # Make the cached weather match so any subsequent caller sees demo state.
         weather_service.override_cache(weather)
-        events_task = events_service.get_nearby_events(lat, lng, now=now)
-        events = await events_task
+        events = await events_service.get_nearby_events(lat, lng, now=local_now)
     else:
-        now = datetime.now(tz)
+        local_now = datetime.now(tz)
         weather, events = await asyncio.gather(
             weather_service.get_weather(),
-            events_service.get_nearby_events(lat, lng, now=now),
+            events_service.get_nearby_events(lat, lng, now=local_now),
         )
 
-    time_of_day = classify_time(now.hour)
-    day_of_week = now.strftime("%A").lower()
+    # time-of-day and day-of-week are inherently local; the response timestamp is UTC
+    time_of_day = classify_time(local_now.hour)
+    day_of_week = local_now.strftime("%A").lower()
     is_weekend = day_of_week in ("saturday", "sunday")
+    now = local_now.astimezone(timezone.utc)
 
     radius = city_config.get("default_radius_meters", 1000)
     nearby_merchants = _filter_nearby(payone.get_merchant_configs(), lat, lng, radius)

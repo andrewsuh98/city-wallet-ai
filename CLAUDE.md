@@ -105,6 +105,7 @@ All specs live in `/docs`. Read these before writing code for a module.
 - All API routes go through `routers/`. Services contain business logic only, no HTTP concerns.
 - Use `async def` for all route handlers and service functions that do I/O.
 - JSON arrays/objects stored in SQLite as TEXT. Serialize with `json.dumps()`, deserialize with `json.loads()`.
+- All timestamps are UTC. Use `datetime.now(timezone.utc)` for new timestamps and treat naive strings from SQLite (`CURRENT_TIMESTAMP`) as UTC. Never use `datetime.now()` (local-time, naive) for stored or compared values.
 - Cache external API responses (weather: 10 min). Never block offer generation on a failed external call.
 - When installing new packages: `pip install <package>`, then `pip freeze > requirements.txt`.
 
