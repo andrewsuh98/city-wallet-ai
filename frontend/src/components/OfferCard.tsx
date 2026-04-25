@@ -5,6 +5,7 @@ interface OfferCardProps {
   offer: Offer;
   onAccept?: (id: string) => void;
   onDismiss?: (id: string) => void;
+  onShowQR?: (id: string) => void;
 }
 
 type ChipVariant = "cool" | "warm" | "fresh" | "dusk" | "neutral";
@@ -96,12 +97,12 @@ function formatDistance(meters: number): string {
 
 function formatDiscount(value: string): string {
   if (!value) return "Accept";
-  if (value.startsWith("−") || value.startsWith("-")) return value;
-  if (value.endsWith("%")) return `−${value}`;
+  if (value.startsWith("\u2212") || value.startsWith("-")) return value;
+  if (value.endsWith("%")) return `\u2212${value}`;
   return value;
 }
 
-export default function OfferCard({ offer, onAccept, onDismiss }: OfferCardProps) {
+export default function OfferCard({ offer, onAccept, onDismiss, onShowQR }: OfferCardProps) {
   const expiresMs = new Date(offer.expires_at).getTime() - Date.now();
   const isExpired = expiresMs <= 0;
   const isActive = !isExpired && offer.status === "active";
@@ -144,7 +145,7 @@ export default function OfferCard({ offer, onAccept, onDismiss }: OfferCardProps
         )}
       </div>
 
-      {/* Hero — Fraunces */}
+      {/* Hero */}
       <h3
         style={{
           fontFamily: "var(--font-display)",
@@ -171,7 +172,7 @@ export default function OfferCard({ offer, onAccept, onDismiss }: OfferCardProps
         }}
       >
         {offer.subtext}
-        {!isExpired && <> · {expiry}</>}
+        {!isExpired && <> {"\u00b7"} {expiry}</>}
       </div>
 
       {/* Bottom row: merchant + CTA */}
@@ -246,6 +247,28 @@ export default function OfferCard({ offer, onAccept, onDismiss }: OfferCardProps
           >
             {discountLabel}
             <i className="ph ph-arrow-right" style={{ fontSize: "14px" }} />
+          </button>
+        ) : offer.status === "accepted" && onShowQR ? (
+          <button
+            onClick={() => onShowQR(offer.id)}
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "var(--fs-small)",
+              fontWeight: 600,
+              padding: "8px 14px",
+              borderRadius: "var(--radius-2)",
+              background: "var(--action-secondary)",
+              color: "var(--fg-on-dark)",
+              border: "none",
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              flexShrink: 0,
+            }}
+          >
+            <i className="ph ph-qr-code" style={{ fontSize: "14px" }} />
+            Show QR
           </button>
         ) : offer.status === "accepted" ? (
           <span

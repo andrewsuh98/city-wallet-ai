@@ -22,11 +22,12 @@ Offer status -> "accepted"
     |
     v
 User navigates to /redeem/{offer_id}
-Frontend displays QR code encoding: {base_url}/api/redeem/validate/{token}
+Frontend fetches GET /api/redeem/qr/{offer_id}
+Backend renders QR encoding the raw token (no URL, deploy-portable)
     |
     v
 Merchant opens /merchant/scan on their device
-Camera scans QR code
+Camera scans QR code (or merchant pastes the token as a fallback)
     |
     v
 Frontend calls GET /api/redeem/validate/{token}
@@ -65,27 +66,39 @@ For a hackathon, UUID v4 tokens provide sufficient uniqueness and unpredictabili
 - Rate limiting on validation endpoint
 - Time-based expiry enforcement on the server
 
+### Atomic Redeem
+
+`commit_redemption` claims the offer with a single conditional update:
+
+```sql
+UPDATE offers SET status = 'redeemed' WHERE id = ? AND status = 'accepted'
+```
+
+It only inserts into `redemptions` if `rowcount == 1`. Two concurrent `POST /api/redeem` calls on the same token cannot both succeed. The losing call returns `success=false, message="Offer already redeemed"`.
+
+### Datetime Convention
+
+All timestamps are UTC. SQLite's `CURRENT_TIMESTAMP` is naive UTC; the redemption service parses stored timestamps as aware UTC and uses `datetime.now(timezone.utc)` for comparisons. Do not introduce `datetime.now()` (local-time, naive) anywhere in this module.
+
 ---
 
 ## QR Code Generation
 
 **Implementation:** `backend/services/redemption.py`
 
-The QR code is generated server-side using Python's `qrcode` library and returned as a base64-encoded PNG.
+The QR code is generated server-side using Python's `qrcode` library and returned as a base64-encoded PNG via `GET /api/redeem/qr/{offer_id}`.
 
 ```python
 import qrcode
 import io
 import base64
 
-def generate_qr_code(token: str, base_url: str) -> str:
-    """Generate a QR code that encodes the validation URL."""
-    url = f"{base_url}/api/redeem/validate/{token}"
-    qr = qrcode.make(url)
-    buffer = io.BytesIO()
-    qr.save(buffer, format="PNG")
-    buffer.seek(0)
-    return base64.b64encode(buffer.read()).decode("utf-8")
+def generate_qr_png_base64(token: str) -> str:
+    """Render a QR encoding the token only (no host URL)."""
+    img = qrcode.make(token, box_size=10, border=2)
+    buf = io.BytesIO()
+    img.save(buf, "PNG")
+    return base64.b64encode(buf.getvalue()).decode("ascii")
 ```
 
 The frontend displays this as:
@@ -95,12 +108,12 @@ The frontend displays this as:
 
 ### What the QR Encodes
 
-The QR code contains a URL:
+The QR encodes the raw UUID token only, not a URL:
 ```
-http://localhost:8000/api/redeem/validate/a7f3b2c1-4d5e-6f7a-8b9c-0d1e2f3a4b5c
+a7f3b2c1-4d5e-6f7a-8b9c-0d1e2f3a4b5c
 ```
 
-When the merchant scans this with their phone camera (or the in-app scanner), it opens the validation endpoint. The merchant dashboard at `/merchant/scan` uses a camera-based QR scanner component that reads this URL, extracts the token, and calls the validation API.
+This keeps the demo deploy-portable: the merchant scanner is responsible for calling its configured backend with the scanned token, so the same QR works whether the backend is on localhost, a tunnel, or production. The merchant page at `/merchant/scan` uses `html5-qrcode` to read the token, then calls the validate and redeem endpoints. A paste-token textbox is provided as a fallback for when the camera is unavailable (browser permissions denied, no camera, demo on a desktop).
 
 ---
 
@@ -230,6 +243,6 @@ active ---+------+---> expired (time ran out)
 | `frontend/src/app/wallet/page.tsx` | Consumer wallet (accepted/redeemed offers) |
 | `frontend/src/app/merchant/page.tsx` | Merchant dashboard with analytics |
 | `frontend/src/app/merchant/scan/page.tsx` | Merchant QR scanner |
-| `frontend/src/components/QRCode.tsx` | QR code display component |
-| `frontend/src/components/QRScanner.tsx` | Camera-based QR scanning component |
-| `frontend/src/components/PerformanceChart.tsx` | Analytics chart for merchant dashboard |
+| `frontend/src/components/QRDisplay.tsx` | QR code display component (fetches base64 PNG from backend) |
+| `frontend/src/components/QRScanner.tsx` | Camera-based QR scanning component (html5-qrcode) |
+| `frontend/src/components/CashbackBalance.tsx` | Wallet balance card |
