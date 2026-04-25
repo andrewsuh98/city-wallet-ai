@@ -5,6 +5,8 @@ import { useSearchParams } from "next/navigation";
 import {
   BarChart,
   Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -25,10 +27,43 @@ const HOUR_LABEL = (h: number) => {
 
 function HeroCard({ label, value, sub, accent }: { label: string; value: string; sub: string; accent?: boolean }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "6px", padding: "24px 0", borderBottom: "1px solid var(--border-2)" }}>
-      <span style={{ fontFamily: "var(--font-body)", fontSize: "11px", fontWeight: 700, letterSpacing: "var(--ls-caps)", textTransform: "uppercase", color: "var(--fg-4)" }}>{label}</span>
-      <span style={{ fontFamily: "var(--font-display)", fontSize: "48px", lineHeight: "1", fontWeight: 500, color: accent ? "var(--cw-fresh)" : "var(--fg-1)", letterSpacing: "-0.04em" }}>{value}</span>
-      <span style={{ fontFamily: "var(--font-body)", fontSize: "13px", color: "var(--fg-2)" }}>{sub}</span>
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px", padding: "20px", background: "var(--bg-card)", border: "1px solid var(--border-2)", borderRadius: "var(--radius-3)" }}>
+      <span style={{ fontFamily: "var(--font-body)", fontSize: "10px", fontWeight: 700, letterSpacing: "var(--ls-caps)", textTransform: "uppercase", color: "var(--fg-4)" }}>{label}</span>
+      <span style={{ fontFamily: "var(--font-display)", fontSize: "32px", lineHeight: "1", fontWeight: 500, color: accent ? "var(--cw-fresh)" : "var(--fg-1)", letterSpacing: "-0.02em", margin: "4px 0" }}>{value}</span>
+      <span style={{ fontFamily: "var(--font-body)", fontSize: "12px", color: "var(--fg-3)", lineHeight: "1.3" }}>{sub}</span>
+    </div>
+  );
+}
+
+function RevenueTrendChart({ stats }: { stats: MerchantDashboardStats }) {
+  const chartData = stats.daily_series.map((d) => {
+    const [, m, day] = d.date.split("-");
+    return { ...d, label: `${parseInt(m)}/${parseInt(day)}` };
+  });
+  const tooltipStyle = { background: "var(--bg-card)", border: "1px solid var(--border-2)", borderRadius: "var(--radius-2)", fontSize: 12, color: "var(--fg-1)", fontFamily: "var(--font-body)" };
+
+  return (
+    <div style={{ paddingTop: "32px", paddingBottom: "16px", borderBottom: "1px solid var(--border-2)", marginBottom: "16px" }}>
+      <h2 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 500, color: "var(--fg-1)", marginBottom: "8px", letterSpacing: "var(--ls-tight)" }}>30-Day Revenue Trend</h2>
+      <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--fg-2)", marginBottom: "32px", lineHeight: 1.4 }}>
+        Total incremental revenue driven by activated deals over the past month.
+      </p>
+
+      <ResponsiveContainer width="100%" height={200}>
+        <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -24, bottom: 0 }}>
+          <defs>
+            <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor="var(--cw-fresh)" stopOpacity={0.15} />
+              <stop offset="95%" stopColor="var(--cw-fresh)" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <CartesianGrid stroke="var(--border-2)" strokeDasharray="3 3" vertical={false} />
+          <XAxis dataKey="label" tick={{ fill: "var(--fg-3)", fontSize: 11, fontFamily: "var(--font-body)", fontWeight: 500 }} tickLine={false} axisLine={false} interval={6} />
+          <YAxis tick={{ fill: "var(--fg-3)", fontSize: 11, fontFamily: "var(--font-body)", fontWeight: 500 }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
+          <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`$${Number(v ?? 0).toFixed(0)}`, "Revenue"]} labelStyle={{ color: "var(--fg-3)", marginBottom: "4px" }} cursor={{ stroke: "var(--border-2)" }} />
+          <Area type="monotone" dataKey="revenue_usd" stroke="var(--cw-fresh)" strokeWidth={2} fill="url(#revenueFill)" dot={false} activeDot={{ r: 4, fill: "var(--cw-fresh)", stroke: "var(--bg-page)", strokeWidth: 2 }} />
+        </AreaChart>
+      </ResponsiveContainer>
     </div>
   );
 }
@@ -40,7 +75,7 @@ function HourlyActivationChart({ stats }: { stats: MerchantDashboardStats }) {
 
   return (
     <div style={{ paddingTop: "32px", paddingBottom: "16px" }}>
-      <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", fontWeight: 500, color: "var(--fg-1)", marginBottom: "8px", letterSpacing: "var(--ls-tight)" }}>Weekly Activation</h2>
+      <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", fontWeight: 500, color: "var(--fg-1)", marginBottom: "8px", letterSpacing: "var(--ls-tight)" }}>Hourly Activations</h2>
       <p style={{ fontFamily: "var(--font-body)", fontSize: "var(--fs-body)", color: "var(--fg-2)", marginBottom: "32px", lineHeight: 1.4 }}>
         Average redemptions by hour across the week. Notice how offers fire precisely during your target slow periods to boost foot traffic.
       </p>
@@ -127,12 +162,15 @@ function DashboardContent() {
           <p style={{ fontSize: "14px", color: "var(--fg-2)", textTransform: "capitalize" }}>{category} · Weekly Pulse</p>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-          <HeroCard label="Incremental Revenue" value={`$${stats.incremental_revenue_usd.toLocaleString("en-US", { maximumFractionDigits: 0 })}`} sub="From coupon-linked checks" accent />
-          <HeroCard label="Empty Seats Filled" value={`${stats.total_redemptions}`} sub="Coupons successfully validated" />
-          <HeroCard label="Avg Ticket Size" value={`$${stats.avg_ticket_usd.toFixed(2)}`} sub={`Versus $${Math.round(stats.min_spend_usd)} min spend rule`} />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "32px" }}>
+          <div style={{ gridColumn: "1 / -1" }}>
+            <HeroCard label="Revenue" value={`$${stats.incremental_revenue_usd.toLocaleString("en-US", { maximumFractionDigits: 0 })}`} sub="Incremental driven" accent />
+          </div>
+          <HeroCard label="Seats Filled" value={`${stats.total_redemptions}`} sub="Coupons validated" />
+          <HeroCard label="Avg Ticket" value={`$${stats.avg_ticket_usd.toFixed(2)}`} sub={`Vs $${Math.round(stats.min_spend_usd)} min spend`} />
         </div>
 
+        <RevenueTrendChart stats={stats} />
         <HourlyActivationChart stats={stats} />
       </div>
 
