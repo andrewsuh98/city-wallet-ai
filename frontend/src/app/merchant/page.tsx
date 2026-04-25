@@ -789,7 +789,7 @@ export default function MerchantPage() {
     setPublishing(true);
     setTimeout(() => {
       router.push(
-        `/merchant/dashboard?id=m_001&name=${encodeURIComponent(data.businessName)}&category=${data.category}`
+        `/merchant/scan?id=m_001&name=${encodeURIComponent(data.businessName)}&category=${data.category}`
       );
     }, 900);
   };

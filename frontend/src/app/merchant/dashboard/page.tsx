@@ -35,34 +35,48 @@ function HeroCard({ label, value, sub, accent }: { label: string; value: string;
   );
 }
 
-function RevenueTrendChart({ stats }: { stats: MerchantDashboardStats }) {
-  const chartData = stats.daily_series.map((d) => {
-    const [, m, day] = d.date.split("-");
-    return { ...d, label: `${parseInt(m)}/${parseInt(day)}` };
+function WeekdayAnalysisChart({ stats }: { stats: MerchantDashboardStats }) {
+  const weekdayTotals: Record<string, { total: number; count: number }> = {
+    Mon: { total: 0, count: 0 },
+    Tue: { total: 0, count: 0 },
+    Wed: { total: 0, count: 0 },
+    Thu: { total: 0, count: 0 },
+    Fri: { total: 0, count: 0 },
+    Sat: { total: 0, count: 0 },
+    Sun: { total: 0, count: 0 },
+  };
+
+  stats.daily_series.forEach((d) => {
+    const date = new Date(d.date);
+    const dayName = date.toLocaleDateString("en-US", { weekday: "short" });
+    if (weekdayTotals[dayName]) {
+      weekdayTotals[dayName].total += d.redemptions;
+      weekdayTotals[dayName].count += 1;
+    }
   });
+
+  const chartData = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => ({
+    day,
+    avg: weekdayTotals[day].count > 0 ? (weekdayTotals[day].total / weekdayTotals[day].count).toFixed(1) : 0,
+  }));
+
   const tooltipStyle = { background: "var(--bg-card)", border: "1px solid var(--border-2)", borderRadius: "var(--radius-2)", fontSize: 12, color: "var(--fg-1)", fontFamily: "var(--font-body)" };
 
   return (
     <div style={{ paddingTop: "32px", paddingBottom: "16px", borderBottom: "1px solid var(--border-2)", marginBottom: "16px" }}>
-      <h2 style={{ fontFamily: "var(--font-display)", fontSize: "24px", fontWeight: 500, color: "var(--fg-1)", marginBottom: "8px", letterSpacing: "var(--ls-tight)" }}>30-Day Revenue Trend</h2>
-      <p style={{ fontFamily: "var(--font-body)", fontSize: "14px", color: "var(--fg-2)", marginBottom: "32px", lineHeight: 1.4 }}>
-        Total incremental revenue driven by activated deals over the past month.
+      <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", fontWeight: 500, color: "var(--fg-1)", marginBottom: "8px", letterSpacing: "var(--ls-tight)" }}>Weekday Analysis</h2>
+      <p style={{ fontFamily: "var(--font-body)", fontSize: "var(--fs-body)", color: "var(--fg-2)", marginBottom: "32px", lineHeight: 1.4 }}>
+        Average coupon redemptions per day of the week. This helps you identify which days consistently need the most platform support.
       </p>
 
-      <ResponsiveContainer width="100%" height={200}>
-        <AreaChart data={chartData} margin={{ top: 0, right: 0, left: -24, bottom: 0 }}>
-          <defs>
-            <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="var(--cw-fresh)" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="var(--cw-fresh)" stopOpacity={0} />
-            </linearGradient>
-          </defs>
+      <ResponsiveContainer width="100%" height={240}>
+        <BarChart data={chartData} margin={{ top: 0, right: 0, left: -24, bottom: 0 }} barCategoryGap="25%">
           <CartesianGrid stroke="var(--border-2)" strokeDasharray="3 3" vertical={false} />
-          <XAxis dataKey="label" tick={{ fill: "var(--fg-3)", fontSize: 11, fontFamily: "var(--font-body)", fontWeight: 500 }} tickLine={false} axisLine={false} interval={6} />
-          <YAxis tick={{ fill: "var(--fg-3)", fontSize: 11, fontFamily: "var(--font-body)", fontWeight: 500 }} tickLine={false} axisLine={false} tickFormatter={(v) => `$${v}`} />
-          <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`$${Number(v ?? 0).toFixed(0)}`, "Revenue"]} labelStyle={{ color: "var(--fg-3)", marginBottom: "4px" }} cursor={{ stroke: "var(--border-2)" }} />
-          <Area type="monotone" dataKey="revenue_usd" stroke="var(--cw-fresh)" strokeWidth={2} fill="url(#revenueFill)" dot={false} activeDot={{ r: 4, fill: "var(--cw-fresh)", stroke: "var(--bg-page)", strokeWidth: 2 }} />
-        </AreaChart>
+          <XAxis dataKey="day" tick={{ fill: "var(--fg-3)", fontSize: 11, fontFamily: "var(--font-body)", fontWeight: 500 }} tickLine={false} axisLine={false} />
+          <YAxis tick={{ fill: "var(--fg-3)", fontSize: 11, fontFamily: "var(--font-body)", fontWeight: 500 }} tickLine={false} axisLine={false} allowDecimals={false} />
+          <Tooltip contentStyle={tooltipStyle} formatter={(v) => [Number(v ?? 0), "Avg Redemptions"]} cursor={{ fill: "var(--bg-card)" }} />
+          <Bar dataKey="avg" fill="var(--cw-fresh)" radius={[4, 4, 0, 0]} />
+        </BarChart>
       </ResponsiveContainer>
     </div>
   );
@@ -170,7 +184,7 @@ function DashboardContent() {
           <HeroCard label="Avg Ticket" value={`$${stats.avg_ticket_usd.toFixed(2)}`} sub={`Vs $${Math.round(stats.min_spend_usd)} min spend`} />
         </div>
 
-        <RevenueTrendChart stats={stats} />
+        <WeekdayAnalysisChart stats={stats} />
         <HourlyActivationChart stats={stats} />
       </div>
 

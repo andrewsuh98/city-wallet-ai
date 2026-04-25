@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const navItems = [
+  { href: "/merchant/scan",      label: "Scan",      icon: "ph-qr-code" },
   { href: "/merchant/dashboard", label: "Dashboard", icon: "ph-chart-line-up" },
   { href: "/merchant/settings",  label: "Settings",  icon: "ph-faders" },
 ];
