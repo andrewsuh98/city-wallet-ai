@@ -165,6 +165,44 @@ class OfferAnalytics(BaseModel):
     revenue_impact_estimate: float
 
 
+class DailyMetric(BaseModel):
+    date: str
+    redemptions: int
+    revenue_usd: float
+    avg_discount_pct: float
+
+
+class HourlyRedemption(BaseModel):
+    hour: int
+    count: int
+
+
+class MerchantDashboardStats(BaseModel):
+    merchant_id: str
+    period_days: int
+    incremental_revenue_usd: float
+    total_redemptions: int
+    avg_ticket_usd: float
+    avg_discount_pct: float
+    campaign_active: bool
+    is_paused: bool
+    strategy: str
+    max_discount_percent: int
+    min_spend_usd: float
+    total_generated: int
+    total_accepted: int
+    acceptance_rate: float
+    redemption_rate: float
+    daily_series: list[DailyMetric]
+    hourly_redemptions: list[HourlyRedemption]
+    dead_hour_ranges: list[tuple[int, int]]
+    top_context_triggers: list[str]
+
+
+class CampaignPatchRequest(BaseModel):
+    paused: bool
+
+
 # --- Request / Response ---
 
 class ContextRequest(BaseModel):

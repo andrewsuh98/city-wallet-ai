@@ -5,10 +5,12 @@ import type {
   GenerateOffersResponse,
   Merchant,
   MerchantRule,
+  MerchantDashboardStats,
   Offer,
   OfferActionRequest,
   OfferAnalytics,
   RedemptionResult,
+  RulesPatchRequest,
   TokenValidationResponse,
 } from "./types";
 
@@ -90,6 +92,32 @@ export async function getMerchantAnalytics(
   id: string
 ): Promise<OfferAnalytics> {
   return request(`/merchants/${encodeURIComponent(id)}/analytics`);
+}
+
+export async function getMerchantDashboard(
+  id: string
+): Promise<MerchantDashboardStats> {
+  return request(`/merchants/${encodeURIComponent(id)}/analytics`);
+}
+
+export async function patchMerchantCampaign(
+  id: string,
+  paused: boolean
+): Promise<{ is_paused: boolean }> {
+  return request(`/merchants/${encodeURIComponent(id)}/campaign`, {
+    method: "PATCH",
+    body: JSON.stringify({ paused }),
+  });
+}
+
+export async function patchMerchantRules(
+  id: string,
+  updates: RulesPatchRequest
+): Promise<{ success: boolean }> {
+  return request(`/merchants/${encodeURIComponent(id)}/rules`, {
+    method: "PUT",
+    body: JSON.stringify(updates),
+  });
 }
 
 // Redemption
