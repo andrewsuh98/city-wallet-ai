@@ -16,12 +16,14 @@ interface DailyHours {
 
 interface OnboardingData {
   businessName: string;
+  tagline: string;
   address: string;
   operatingHours: Record<string, DailyHours>;
   phone: string;
   category: MerchantCategory;
   images: string[];
   description: string;
+  tags: string[];
   
   timingMode: "automatic" | "manual" | null;
   blockHolidays: boolean;
@@ -29,6 +31,7 @@ interface OnboardingData {
   manualSchedule: { id: string; day: string; start: string; end: string }[];
   
   offerTypes: ("discount" | "bogo" | "free_item")[];
+  maxOffersPerDay: number;
   maxDiscountPercent: number;
   minSpend: number;
   bogoDetails: string;
@@ -40,6 +43,9 @@ interface OnboardingData {
 
 const DSV_MOCK: Partial<OnboardingData> = {
   businessName: "The Corner Bistro",
+  tagline: "Cozy neighborhood spot for casual dining",
+  description: "A local favorite serving up classic American comfort food, craft beers, and weekend brunch in a relaxed, vintage-inspired setting.",
+  tags: ["burgers", "brunch", "cocktails"],
   address: "47 W 20th St, New York, NY 10011",
   operatingHours: {
     Mon: { isOpen: true, start: "07:00", end: "22:00" },
@@ -57,12 +63,8 @@ const DSV_MOCK: Partial<OnboardingData> = {
 const CATEGORY_STYLES: Record<MerchantCategory, OfferStyle> = {
   cafe:      { background_gradient: ["#4A2C2A", "#D4A574"], emoji: "☕",  tone: "warm",          headline_style: "emotional" },
   restaurant:{ background_gradient: ["#1a3a2a", "#2d6a4f"], emoji: "🍽️", tone: "warm",          headline_style: "emotional" },
-  retail:    { background_gradient: ["#1a1a3e", "#4a4080"], emoji: "🛍️", tone: "sophisticated", headline_style: "factual"   },
   bakery:    { background_gradient: ["#3d2310", "#c4a265"], emoji: "🥐",  tone: "warm",          headline_style: "emotional" },
   bar:       { background_gradient: ["#1a1a2e", "#16213e"], emoji: "🍺",  tone: "playful",       headline_style: "emotional" },
-  bookstore: { background_gradient: ["#2D1B4E", "#1a1a3e"], emoji: "📚",  tone: "sophisticated", headline_style: "emotional" },
-  grocery:   { background_gradient: ["#1a3a2a", "#2d5016"], emoji: "🛒",  tone: "sophisticated", headline_style: "factual"   },
-  fitness:   { background_gradient: ["#1a1a3e", "#0d3b6e"], emoji: "💪",  tone: "urgent",        headline_style: "factual"   },
 };
 
 const CATEGORIES: { id: MerchantCategory; label: string; icon: string }[] = [
@@ -72,10 +74,40 @@ const CATEGORIES: { id: MerchantCategory; label: string; icon: string }[] = [
   { id: "bar", label: "Bar", icon: "ph-wine" },
 ];
 
+function BubbleTeaIcon({ size = 24 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 256 256" fill="none" stroke="currentColor" strokeWidth="16" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="152" y1="20" x2="136" y2="80" />
+      <line x1="56" y1="80" x2="200" y2="80" />
+      <path d="M72 80l12 148a8 8 0 0 0 8 7h72a8 8 0 0 0 8-7l12-148" />
+      <circle cx="112" cy="176" r="12" fill="currentColor" stroke="none" />
+      <circle cx="144" cy="168" r="12" fill="currentColor" stroke="none" />
+      <circle cx="120" cy="204" r="12" fill="currentColor" stroke="none" />
+      <circle cx="152" cy="200" r="12" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+const TASTE_OPTIONS = [
+  { id: "coffee", label: "Coffee", icon: "ph-coffee" },
+  { id: "bubble_tea", label: "Bubble tea", icon: "ph-cup" },
+  { id: "pizza", label: "Pizza", icon: "ph-pizza" },
+  { id: "sushi", label: "Sushi", icon: "ph-fish" },
+  { id: "burgers", label: "Burgers", icon: "ph-hamburger" },
+  { id: "brunch", label: "Brunch", icon: "ph-avocado" },
+  { id: "tacos", label: "Tacos", icon: "ph-pepper" },
+  { id: "ramen", label: "Ramen", icon: "ph-bowl-food" },
+  { id: "bakery", label: "Bakery", icon: "ph-cookie" },
+  { id: "desserts", label: "Desserts", icon: "ph-ice-cream" },
+  { id: "cocktails", label: "Cocktails", icon: "ph-wine" },
+  { id: "healthy", label: "Healthy", icon: "ph-leaf" },
+];
+
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const DEFAULT_DATA: OnboardingData = {
   businessName: "",
+  tagline: "",
   address: "",
   operatingHours: DAYS.reduce((acc, day) => {
     acc[day] = { isOpen: true, start: "09:00", end: "17:00" };
@@ -85,11 +117,13 @@ const DEFAULT_DATA: OnboardingData = {
   category: "restaurant",
   images: [],
   description: "",
+  tags: [],
   timingMode: null,
   blockHolidays: true,
   blockoutDates: [],
   manualSchedule: [],
   offerTypes: [],
+  maxOffersPerDay: 10,
   maxDiscountPercent: 20,
   minSpend: 15,
   bogoDetails: "Buy 1 get 1 free",
@@ -398,6 +432,15 @@ function BrandScreen({ data, update, onNext }: { data: OnboardingData, update: (
           style={{ ...inputStyle, textAlign: "left", marginBottom: "16px" }}
         />
 
+        <div style={labelStyle}>Tagline</div>
+        <input
+          type="text"
+          value={data.tagline}
+          onChange={(e) => update({ tagline: e.target.value })}
+          placeholder="e.g. Cozy neighborhood cafe with vintage decor"
+          style={{ ...inputStyle, textAlign: "left", marginBottom: "16px" }}
+        />
+
         <div style={labelStyle}>Location</div>
         <input
           type="text"
@@ -457,7 +500,7 @@ function BrandScreen({ data, update, onNext }: { data: OnboardingData, update: (
         />
       </div>
 
-      <div style={{ width: "100%", maxWidth: "320px", marginBottom: "40px" }}>
+      <div style={{ width: "100%", maxWidth: "320px", marginBottom: "32px" }}>
         <div style={labelStyle}>Business type</div>
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%" }}>
           {CATEGORIES.map((cat) => {
@@ -476,12 +519,70 @@ function BrandScreen({ data, update, onNext }: { data: OnboardingData, update: (
         </div>
       </div>
 
+      <div style={{ width: "100%", maxWidth: "320px", marginBottom: "40px" }}>
+        <div style={labelStyle}>Food categories</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", width: "100%", marginBottom: "16px" }}>
+          {TASTE_OPTIONS.map((option) => {
+            const isSelected = data.tags.includes(option.id);
+            const toggle = (id: string) => {
+              const newTags = data.tags.includes(id) ? data.tags.filter(t => t !== id) : [...data.tags, id];
+              update({ tags: newTags });
+            };
+            return (
+              <button
+                key={option.id}
+                onClick={() => toggle(option.id)}
+                style={tasteItem(isSelected, "var(--cw-fresh)", "var(--cw-fresh-bg)")}
+              >
+                {option.id === "bubble_tea" ? (
+                  <BubbleTeaIcon size={24} />
+                ) : (
+                  <i className={`ph ${option.icon}`} style={{ fontSize: "24px" }} />
+                )}
+                <span style={{ fontSize: "11px" }}>{option.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Custom Food Tags */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
+          {data.tags.filter(t => !TASTE_OPTIONS.find(o => o.id === t)).map(tag => (
+            <span key={tag} style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "var(--cw-fresh-bg)", color: "var(--cw-fresh)", borderRadius: "var(--radius-pill)", fontSize: "13px", fontWeight: 600 }}>
+              {tag}
+              <i className="ph ph-x" style={{ cursor: "pointer" }} onClick={() => {
+                update({ tags: data.tags.filter(t => t !== tag) });
+              }} />
+            </span>
+          ))}
+        </div>
+        <div style={{ position: "relative" }}>
+          <input
+            type="text"
+            placeholder="Add other food types..."
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                const val = e.currentTarget.value.trim();
+                if (val && !data.tags.includes(val)) {
+                  update({ tags: [...data.tags, val] });
+                  e.currentTarget.value = "";
+                }
+              }
+            }}
+            style={{ ...inputStyle, textAlign: "left", paddingRight: "40px" }}
+          />
+          <i className="ph ph-plus" style={{ position: "absolute", right: "14px", top: "50%", transform: "translateY(-50%)", color: "var(--fg-4)" }} />
+        </div>
+      </div>
+
       <button onClick={onNext} disabled={!canProceed} style={{ ...primaryBtn, opacity: canProceed ? 1 : 0.4, cursor: canProceed ? "pointer" : "default" }}>
         Continue <i className="ph ph-arrow-right" style={{ fontSize: "16px" }} />
       </button>
     </div>
   );
 }
+
+
 
 function TimingScreen({ data, update, onNext }: { data: OnboardingData, update: (p: Partial<OnboardingData>) => void, onNext: () => void }) {
   const canProceed = data.timingMode === "automatic" || (data.timingMode === "manual" && data.manualSchedule.length > 0);
@@ -699,6 +800,24 @@ function OfferScreen({ data, update, onNext }: { data: OnboardingData, update: (
             </div>
           )}
         </button>
+      </div>
+
+      <div style={{ width: "100%", maxWidth: "320px", marginBottom: "40px", padding: "20px", background: "var(--bg-card)", border: "1px solid var(--border-2)", borderRadius: "var(--radius-3)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+          <div style={labelStyle}>Max offers per day</div>
+          <span style={{ fontSize: "var(--fs-body)", fontWeight: 700, color: "var(--fg-1)" }}>{data.maxOffersPerDay}</span>
+        </div>
+        <input 
+          type="range" 
+          min={1} 
+          max={50} 
+          value={data.maxOffersPerDay} 
+          onChange={e => update({ maxOffersPerDay: Number(e.target.value) })} 
+          style={{ width: "100%", accentColor: "var(--cw-warm)", cursor: "pointer" }} 
+        />
+        <div style={{ fontSize: "12px", color: "var(--fg-3)", marginTop: "8px", textAlign: "left" }}>
+          Limit how many users can claim your offer daily.
+        </div>
       </div>
 
       <button onClick={onNext} disabled={!canProceed} style={{ ...primaryBtn, opacity: canProceed ? 1 : 0.4, cursor: canProceed ? "pointer" : "default" }}>

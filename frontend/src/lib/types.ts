@@ -48,17 +48,11 @@ export interface ContextState {
   urgency_score: number;
 }
 
-// Merchant types
-
 export type MerchantCategory =
   | "cafe"
   | "restaurant"
-  | "retail"
   | "bakery"
-  | "bar"
-  | "bookstore"
-  | "grocery"
-  | "fitness";
+  | "bar";
 
 export interface MerchantRule {
   id: string | null;
