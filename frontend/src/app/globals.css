@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+
 /* Design tokens. Source of truth: frontend/claude-design/colors_and_type.css
    Fonts loaded via next/font in layout.tsx; --font-* vars resolved there. */
 
@@ -262,4 +263,39 @@ html, body {
 ::selection {
   background: var(--cw-red-200);
   color: var(--cw-paper-900);
+}
+
+/* Scrollbar suppression */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Animations */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes bounce-in {
+  0%   { opacity: 0; transform: translateY(12px) scale(0.97); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.01); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+.animate-slide-up   { animation: slide-up 0.32s cubic-bezier(0.32, 0.72, 0, 1); }
+.animate-fade-in    { animation: fade-in 0.25s ease-out; }
+.animate-bounce-in  { animation: bounce-in 0.35s ease-out; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }

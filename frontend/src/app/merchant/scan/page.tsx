@@ -1,180 +1,256 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import Link from "next/link";
+import { Suspense, useState } from "react";
+import MerchantBottomNav from "@/components/MerchantBottomNav";
 
-import QRScanner from "@/components/QRScanner";
-import { redeemOffer, validateToken } from "@/lib/api";
-import type { Offer, RedemptionResult, TokenValidationResponse } from "@/lib/types";
+const screenStyle: React.CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  minHeight: "100vh",
+  padding: "60px 24px 120px",
+  background: "var(--bg-page)",
+  textAlign: "center",
+};
 
-type ScanState =
-  | { phase: "scanning"; cameraError: string | null }
-  | { phase: "previewing"; offer: Offer; token: string }
-  | { phase: "success"; result: RedemptionResult }
-  | { phase: "error"; message: string };
+const iconContainer: React.CSSProperties = {
+  width: "56px",
+  height: "56px",
+  borderRadius: "var(--radius-pill)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: "32px",
+  background: "var(--cw-warm-bg)",
+};
 
-export default function MerchantScanPage() {
-  const [state, setState] = useState<ScanState>({ phase: "scanning", cameraError: null });
-  const [pasteValue, setPasteValue] = useState("");
-  const [validating, setValidating] = useState(false);
+const hero: React.CSSProperties = {
+  fontFamily: "var(--font-display)",
+  fontSize: "36px",
+  lineHeight: "1.08",
+  letterSpacing: "var(--ls-tight)",
+  fontWeight: 500,
+  color: "var(--fg-1)",
+  marginBottom: "16px",
+  maxWidth: "300px",
+  fontVariationSettings: '"opsz" 96, "SOFT" 50',
+};
 
-  const handleToken = useCallback(async (token: string) => {
-    if (!token) return;
-    setValidating(true);
-    try {
-      const res: TokenValidationResponse = await validateToken(token);
-      if (!res.valid || !res.offer) {
-        setState({ phase: "error", message: "Invalid or expired token." });
-        return;
+const subtitle: React.CSSProperties = {
+  fontFamily: "var(--font-body)",
+  fontSize: "var(--fs-body)",
+  lineHeight: "var(--lh-normal)",
+  color: "var(--fg-2)",
+  maxWidth: "280px",
+  marginBottom: "40px",
+};
+
+const scannerContainer: React.CSSProperties = {
+  width: "100%",
+  maxWidth: "320px",
+  aspectRatio: "1/1",
+  position: "relative",
+  borderRadius: "var(--radius-4)",
+  overflow: "hidden",
+  background: "#0d0d0d",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: "32px",
+  boxShadow: "var(--shadow-3)",
+  border: "8px solid var(--bg-card)",
+};
+
+const viewFinder: React.CSSProperties = {
+  width: "70%",
+  height: "70%",
+  border: "1px solid rgba(255, 255, 255, 0.15)",
+  borderRadius: "var(--radius-3)",
+  position: "relative",
+};
+
+const corner: React.CSSProperties = {
+  position: "absolute",
+  width: "24px",
+  height: "24px",
+  borderColor: "var(--cw-fresh)",
+  borderStyle: "solid",
+};
+
+function ScanContent() {
+  const [showManual, setShowManual] = useState(false);
+  const [code, setCode] = useState("");
+  const [isValidating, setIsValidating] = useState(false);
+  const [result, setResult] = useState<"success" | "error" | null>(null);
+
+  const handleValidate = () => {
+    setIsValidating(true);
+    setResult(null);
+    // Mock validation delay
+    setTimeout(() => {
+      setIsValidating(false);
+      if (code.length === 6) {
+        setResult("success");
+        setTimeout(() => {
+          setShowManual(false);
+          setResult(null);
+          setCode("");
+        }, 2000);
+      } else {
+        setResult("error");
       }
-      setState({ phase: "previewing", offer: res.offer, token });
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Validation failed";
-      setState({ phase: "error", message: msg });
-    } finally {
-      setValidating(false);
-    }
-  }, []);
-
-  const handleConfirm = async () => {
-    if (state.phase !== "previewing") return;
-    try {
-      const result = await redeemOffer(state.offer.id, state.token);
-      if (!result.success) {
-        setState({ phase: "error", message: result.message });
-        return;
-      }
-      setState({ phase: "success", result });
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Redemption failed";
-      setState({ phase: "error", message: msg });
-    }
-  };
-
-  const reset = () => {
-    setPasteValue("");
-    setState({ phase: "scanning", cameraError: null });
+    }, 800);
   };
 
   return (
-    <div className="min-h-screen bg-page px-5 py-10">
-      <header className="mx-auto mb-6 flex max-w-md items-center justify-between">
-        <Link href="/merchant" className="inline-flex items-center gap-1 text-small text-fg-link no-underline">
-          <i className="ph ph-arrow-left text-xs" />
-          Back
-        </Link>
-        <h1
-          className="font-display text-h2 text-fg-1"
-          style={{ letterSpacing: "var(--ls-tight)", fontVariationSettings: '"opsz" 60, "SOFT" 30' }}
-        >
-          Scan
-        </h1>
-        <span className="w-16" />
-      </header>
-
-      <div className="mx-auto max-w-md space-y-5">
-        {state.phase === "scanning" && (
-          <>
-            <QRScanner
-              onScan={handleToken}
-              onError={(err) =>
-                setState({ phase: "scanning", cameraError: err })
-              }
-            />
-
-            <div className="rounded-4 border border-border-1 bg-card p-4 shadow-1">
-              <label className="mb-2 block text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
-                Or paste token
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={pasteValue}
-                  onChange={(e) => setPasteValue(e.target.value)}
-                  placeholder="Paste token here"
-                  className="flex-1 rounded-2 border border-border-2 bg-card-soft px-3 py-2 font-mono text-small text-fg-1 outline-none focus:border-action-primary"
-                />
-                <button
-                  onClick={() => handleToken(pasteValue.trim())}
-                  disabled={!pasteValue.trim() || validating}
-                  className="rounded-2 bg-action-primary px-4 py-2 text-small font-semibold text-fg-on-red disabled:opacity-40"
-                >
-                  Validate
-                </button>
-              </div>
-            </div>
-          </>
-        )}
-
-        {state.phase === "previewing" && (
-          <div className="space-y-4 rounded-4 border border-border-1 bg-card p-6 shadow-2">
-            <div>
-              <p className="text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
-                {state.offer.merchant_name}
-              </p>
-              <h2
-                className="mt-1 font-display text-h2 text-fg-1"
-                style={{ letterSpacing: "var(--ls-tight)", fontVariationSettings: '"opsz" 96, "SOFT" 50' }}
-              >
-                {state.offer.headline}
-              </h2>
-              <p className="mt-1 text-small text-fg-2">{state.offer.subtext}</p>
-            </div>
-            <span className="inline-block rounded-pill bg-cw-cool-bg px-3 py-1 text-small font-semibold text-cw-cool">
-              {state.offer.discount_value}
-            </span>
-            <div className="flex gap-3 pt-2">
-              <button
-                onClick={handleConfirm}
-                className="flex-1 rounded-2 bg-cw-fresh px-5 py-3 text-small font-semibold text-white hover:opacity-90"
-              >
-                Confirm Redemption
-              </button>
-              <button
-                onClick={reset}
-                className="rounded-2 border border-border-2 bg-card px-5 py-3 text-small font-semibold text-fg-2 hover:bg-card-soft"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-
-        {state.phase === "success" && (
-          <div className="rounded-4 border border-cw-fresh/30 bg-cw-fresh-bg p-8 text-center shadow-2">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-pill bg-cw-fresh text-fg-on-dark">
-              <i className="ph-bold ph-check text-3xl" />
-            </div>
-            <p className="text-h3 font-semibold text-fg-1">{state.result.message}</p>
-            {state.result.cashback_amount != null && (
-              <p
-                className="mt-2 font-display text-display tabular-nums text-cw-fresh"
-                style={{ letterSpacing: "var(--ls-tight)", fontVariationSettings: '"opsz" 96, "SOFT" 50' }}
-              >
-                +${state.result.cashback_amount.toFixed(2)}
-              </p>
-            )}
-            <button
-              onClick={reset}
-              className="mt-6 rounded-2 bg-cw-paper-900 px-5 py-2 text-small font-semibold text-fg-on-dark"
-            >
-              Scan another
-            </button>
-          </div>
-        )}
-
-        {state.phase === "error" && (
-          <div className="rounded-4 border border-status-danger/30 bg-cw-red-50 p-8 text-center shadow-1">
-            <p className="text-h3 font-semibold text-status-danger">{state.message}</p>
-            <button
-              onClick={reset}
-              className="mt-5 rounded-2 bg-cw-paper-900 px-5 py-2 text-small font-semibold text-fg-on-dark"
-            >
-              Try again
-            </button>
-          </div>
-        )}
+    <div className="animate-fade-in" style={screenStyle}>
+      <div style={iconContainer}>
+        <i className={`ph ${result === "success" ? "ph-check-circle" : "ph-qr-code"}`} style={{ fontSize: "28px", color: result === "success" ? "var(--cw-fresh)" : "var(--cw-warm)" }} />
       </div>
+
+      <h1 style={hero}>
+        {result === "success" ? "Valid Code!" : showManual ? "Manual Entry" : "Ready to scan."}
+      </h1>
+      <p style={subtitle}>
+        {result === "success" ? "The offer has been successfully redeemed." : showManual ? "Enter the 6-digit redemption code provided by the customer." : "Position the customer's QR code within the frame to validate their deal."}
+      </p>
+
+      {!showManual ? (
+        <>
+          <div style={scannerContainer}>
+            {/* Mock Camera Feed Background */}
+            <div style={{ 
+              position: "absolute", 
+              inset: 0, 
+              opacity: 0.1, 
+              background: "radial-gradient(circle at center, #333 0%, #000 100%)",
+            }} />
+            
+            <div style={viewFinder}>
+              <div style={{ ...corner, top: -2, left: -2, borderTopWidth: 4, borderLeftWidth: 4, borderRadius: "8px 0 0 0" }} />
+              <div style={{ ...corner, top: -2, right: -2, borderTopWidth: 4, borderRightWidth: 4, borderRadius: "0 8px 0 0" }} />
+              <div style={{ ...corner, bottom: -2, left: -2, borderBottomWidth: 4, borderLeftWidth: 4, borderRadius: "0 0 0 8px" }} />
+              <div style={{ ...corner, bottom: -2, right: -2, borderBottomWidth: 4, borderRightWidth: 4, borderRadius: "0 0 8px 0" }} />
+              <div className="scanning-line" style={{ position: "absolute", left: "4px", right: "4px", height: "2px", background: "var(--cw-fresh)", boxShadow: "0 0 12px var(--cw-fresh)", zIndex: 10, top: "0%" }} />
+            </div>
+
+            <style dangerouslySetInnerHTML={{ __html: `
+              @keyframes scanMove {
+                0% { top: 0%; opacity: 0.2; }
+                50% { top: 100%; opacity: 1; }
+                100% { top: 0%; opacity: 0.2; }
+              }
+              .scanning-line {
+                animation: scanMove 3s infinite ease-in-out;
+              }
+            `}} />
+          </div>
+
+          <button 
+            onClick={() => setShowManual(true)}
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "var(--fs-body)",
+              fontWeight: 600,
+              padding: "16px 32px",
+              borderRadius: "var(--radius-pill)",
+              background: "var(--bg-card)",
+              color: "var(--fg-1)",
+              border: "1px solid var(--border-2)",
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              boxShadow: "var(--shadow-2)",
+            }}
+          >
+            <i className="ph ph-keyboard" style={{ fontSize: "20px" }} />
+            Enter Code Manually
+          </button>
+        </>
+      ) : (
+        <div style={{ width: "100%", maxWidth: "320px", display: "flex", flexDirection: "column", gap: "20px" }}>
+          <input
+            type="text"
+            maxLength={6}
+            value={code}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            placeholder="XXXXXX"
+            style={{
+              width: "100%",
+              padding: "20px",
+              fontSize: "32px",
+              textAlign: "center",
+              letterSpacing: "8px",
+              fontFamily: "monospace",
+              borderRadius: "var(--radius-3)",
+              border: result === "error" ? "2px solid var(--action-primary)" : "1px solid var(--border-2)",
+              background: "var(--bg-card)",
+              color: "var(--fg-1)",
+              outline: "none",
+            }}
+          />
+
+          <div style={{ display: "flex", gap: "12px" }}>
+            <button 
+              onClick={() => { setShowManual(false); setResult(null); setCode(""); }}
+              style={{
+                flex: 1,
+                padding: "16px",
+                borderRadius: "var(--radius-pill)",
+                background: "transparent",
+                color: "var(--fg-3)",
+                border: "1px solid var(--border-2)",
+                fontSize: "14px",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={handleValidate}
+              disabled={isValidating || code.length < 6}
+              style={{
+                flex: 2,
+                padding: "16px",
+                borderRadius: "var(--radius-pill)",
+                background: "var(--cw-fresh)",
+                color: "white",
+                border: "none",
+                fontSize: "14px",
+                fontWeight: 600,
+                cursor: (isValidating || code.length < 6) ? "default" : "pointer",
+                opacity: (isValidating || code.length < 6) ? 0.5 : 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+              }}
+            >
+              {isValidating ? (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : "Validate Code"}
+            </button>
+          </div>
+
+          {result === "error" && (
+            <p style={{ fontSize: "13px", color: "var(--action-primary)", fontWeight: 600 }}>
+              Invalid code. Please check and try again.
+            </p>
+          )}
+        </div>
+      )}
+
+      <MerchantBottomNav />
     </div>
+  );
+}
+
+export default function MerchantScanPage() {
+  return (
+    <Suspense fallback={<div style={{ background: "var(--bg-page)", minHeight: "100vh" }} />}>
+      <ScanContent />
+    </Suspense>
   );
 }
