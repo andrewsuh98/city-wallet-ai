@@ -627,9 +627,12 @@ function TimingScreen({ data, update, onNext }: { data: OnboardingData, update: 
       <p style={subtitle}>Identify slow periods to run coupons. You can always change this later.</p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", maxWidth: "320px", marginBottom: "40px" }}>
-        {/* Automatic Button */}
-        <button
+        {/* Automatic — div+role so interactive children (inputs, labels) are valid */}
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => update({ timingMode: "automatic" })}
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && update({ timingMode: "automatic" })}
           style={strategyBtnStyle(data.timingMode === "automatic", "var(--cw-cool)", "var(--cw-cool-bg)")}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: data.timingMode === "automatic" ? "16px" : "0" }}>
@@ -663,11 +666,14 @@ function TimingScreen({ data, update, onNext }: { data: OnboardingData, update: 
                </div>
             </div>
           )}
-        </button>
+        </div>
 
-        {/* Manual Button */}
-        <button
+        {/* Manual Schedule — div+role so inner buttons/inputs are valid */}
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => update({ timingMode: "manual" })}
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && update({ timingMode: "manual" })}
           style={strategyBtnStyle(data.timingMode === "manual", "var(--cw-cool)", "var(--cw-cool-bg)")}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: data.timingMode === "manual" ? "16px" : "0" }}>
@@ -704,7 +710,7 @@ function TimingScreen({ data, update, onNext }: { data: OnboardingData, update: 
                </button>
             </div>
           )}
-        </button>
+        </div>
       </div>
 
       <button onClick={onNext} disabled={!canProceed} style={{ ...primaryBtn, opacity: canProceed ? 1 : 0.4, cursor: canProceed ? "pointer" : "default" }}>
@@ -736,9 +742,12 @@ function OfferScreen({ data, update, onNext }: { data: OnboardingData, update: (
       <p style={subtitle}>Choose the promotion types that best fit your margins. You can run multiple.</p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", maxWidth: "320px", marginBottom: "40px" }}>
-        {/* Storewide Discount */}
-        <button
+        {/* Storewide Discount — div+role so inner inputs are valid */}
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => toggleOfferType("discount")}
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && toggleOfferType("discount")}
           style={strategyBtnStyle(data.offerTypes.includes("discount"), "var(--cw-warm)", "var(--cw-warm-bg)")}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: data.offerTypes.includes("discount") ? "16px" : "0" }}>
@@ -757,11 +766,14 @@ function OfferScreen({ data, update, onNext }: { data: OnboardingData, update: (
                </div>
             </div>
           )}
-        </button>
+        </div>
 
-        {/* BOGO */}
-        <button
+        {/* BOGO — div+role so inner inputs are valid */}
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => toggleOfferType("bogo")}
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && toggleOfferType("bogo")}
           style={strategyBtnStyle(data.offerTypes.includes("bogo"), "var(--cw-warm)", "var(--cw-warm-bg)")}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: data.offerTypes.includes("bogo") ? "16px" : "0" }}>
@@ -776,11 +788,14 @@ function OfferScreen({ data, update, onNext }: { data: OnboardingData, update: (
                </div>
             </div>
           )}
-        </button>
+        </div>
 
-        {/* Free Item */}
-        <button
+        {/* Free Item — div+role so inner inputs are valid */}
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => toggleOfferType("free_item")}
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && toggleOfferType("free_item")}
           style={strategyBtnStyle(data.offerTypes.includes("free_item"), "var(--cw-warm)", "var(--cw-warm-bg)")}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: data.offerTypes.includes("free_item") ? "16px" : "0" }}>
@@ -799,7 +814,7 @@ function OfferScreen({ data, update, onNext }: { data: OnboardingData, update: (
                </div>
             </div>
           )}
-        </button>
+        </div>
       </div>
 
       <div style={{ width: "100%", maxWidth: "320px", marginBottom: "40px", padding: "20px", background: "var(--bg-card)", border: "1px solid var(--border-2)", borderRadius: "var(--radius-3)" }}>
