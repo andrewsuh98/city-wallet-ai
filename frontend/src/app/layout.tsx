@@ -45,7 +45,7 @@ export default function RootLayout({
           href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css"
         />
       </head>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col bg-[#faf7f2] text-[#15130f]">
         {children}
       </body>
     </html>

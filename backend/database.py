@@ -78,10 +78,5 @@ async def init_db():
     try:
         await db.executescript(SCHEMA)
         await db.commit()
-        try:
-            await db.execute("ALTER TABLE merchants ADD COLUMN is_paused INTEGER DEFAULT 0")
-            await db.commit()
-        except Exception:
-            pass  # column already exists
     finally:
         await db.close()

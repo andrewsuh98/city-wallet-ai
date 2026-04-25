@@ -1,27 +1,39 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import type { CSSProperties } from "react";
 import { useRouter } from "next/navigation";
-import BottomNav from "@/components/BottomNav";
 import OfferCard from "@/components/OfferCard";
 import type { MerchantCategory, Offer, OfferStyle } from "@/lib/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+interface DailyHours {
+  isOpen: boolean;
+  start: string;
+  end: string;
+}
+
 interface OnboardingData {
   businessName: string;
   address: string;
-  operatingHours: string;
+  operatingHours: Record<string, DailyHours>;
   phone: string;
   category: MerchantCategory;
   images: string[];
-  tagline: string;
-  strategy: "autopilot" | "manual" | null;
+  description: string;
+  
+  timingMode: "automatic" | "manual" | null;
+  blockHolidays: boolean;
+  blockoutDates: string[];
+  manualSchedule: { id: string; day: string; start: string; end: string }[];
+  
+  offerTypes: ("discount" | "bogo" | "free_item")[];
   maxDiscountPercent: number;
   minSpend: number;
-  scheduleDays: string[];
-  scheduleStart: string;
-  scheduleEnd: string;
+  bogoDetails: string;
+  freeItemDetails: string;
+  freeItemCondition: string;
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -29,7 +41,15 @@ interface OnboardingData {
 const DSV_MOCK: Partial<OnboardingData> = {
   businessName: "The Corner Bistro",
   address: "47 W 20th St, New York, NY 10011",
-  operatingHours: "Mon–Fri 7:00 AM – 10:00 PM, Sat–Sun 8:00 AM – 11:00 PM",
+  operatingHours: {
+    Mon: { isOpen: true, start: "07:00", end: "22:00" },
+    Tue: { isOpen: true, start: "07:00", end: "22:00" },
+    Wed: { isOpen: true, start: "07:00", end: "22:00" },
+    Thu: { isOpen: true, start: "07:00", end: "22:00" },
+    Fri: { isOpen: true, start: "07:00", end: "22:00" },
+    Sat: { isOpen: true, start: "08:00", end: "23:00" },
+    Sun: { isOpen: true, start: "08:00", end: "23:00" },
+  },
   phone: "+1 (212) 555-0147",
   category: "restaurant",
 };
@@ -45,8 +65,11 @@ const CATEGORY_STYLES: Record<MerchantCategory, OfferStyle> = {
   fitness:   { background_gradient: ["#1a1a3e", "#0d3b6e"], emoji: "💪",  tone: "urgent",        headline_style: "factual"   },
 };
 
-const CATEGORIES: MerchantCategory[] = [
-  "cafe", "restaurant", "retail", "bakery", "bar", "bookstore", "grocery", "fitness",
+const CATEGORIES: { id: MerchantCategory; label: string; icon: string }[] = [
+  { id: "cafe", label: "Cafe", icon: "ph-coffee" },
+  { id: "restaurant", label: "Restaurant", icon: "ph-pizza" },
+  { id: "bakery", label: "Bakery", icon: "ph-cookie" },
+  { id: "bar", label: "Bar", icon: "ph-wine" },
 ];
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -54,43 +77,252 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const DEFAULT_DATA: OnboardingData = {
   businessName: "",
   address: "",
-  operatingHours: "",
+  operatingHours: DAYS.reduce((acc, day) => {
+    acc[day] = { isOpen: true, start: "09:00", end: "17:00" };
+    return acc;
+  }, {} as Record<string, DailyHours>),
   phone: "",
   category: "restaurant",
   images: [],
-  tagline: "",
-  strategy: null,
+  description: "",
+  timingMode: null,
+  blockHolidays: true,
+  blockoutDates: [],
+  manualSchedule: [],
+  offerTypes: [],
   maxDiscountPercent: 20,
   minSpend: 15,
-  scheduleDays: [],
-  scheduleStart: "14:00",
-  scheduleEnd: "16:30",
+  bogoDetails: "Buy 1 get 1 free",
+  freeItemDetails: "Free cookie",
+  freeItemCondition: "with any coffee purchase",
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// ─── Shared Styles ────────────────────────────────────────────────────────────
 
-export default function MerchantPage() {
-  const router = useRouter();
-  const [step, setStep] = useState(1);
-  const [data, setData] = useState<OnboardingData>(DEFAULT_DATA);
-  const [showDsvModal, setShowDsvModal] = useState(false);
+const screen: CSSProperties = {
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  minHeight: "100vh",
+  padding: "40px 24px",
+  background: "var(--bg-page)",
+  textAlign: "center",
+};
+
+const iconContainer: CSSProperties = {
+  width: "56px",
+  height: "56px",
+  borderRadius: "var(--radius-pill)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  marginBottom: "32px",
+};
+
+const hero: CSSProperties = {
+  fontFamily: "var(--font-display)",
+  fontSize: "36px",
+  lineHeight: "1.08",
+  letterSpacing: "var(--ls-tight)",
+  fontWeight: 500,
+  color: "var(--fg-1)",
+  marginBottom: "16px",
+  maxWidth: "300px",
+  fontVariationSettings: '"opsz" 96, "SOFT" 50',
+  textWrap: "balance",
+};
+
+const subtitle: CSSProperties = {
+  fontFamily: "var(--font-body)",
+  fontSize: "var(--fs-body)",
+  lineHeight: "var(--lh-normal)",
+  color: "var(--fg-2)",
+  maxWidth: "280px",
+  marginBottom: "40px",
+};
+
+const primaryBtn: CSSProperties = {
+  fontFamily: "var(--font-body)",
+  fontSize: "var(--fs-body)",
+  fontWeight: 600,
+  padding: "14px 28px",
+  borderRadius: "var(--radius-2)",
+  background: "var(--action-primary)",
+  color: "var(--fg-on-red)",
+  border: "none",
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "8px",
+  width: "100%",
+  maxWidth: "320px",
+  justifyContent: "center",
+  transition: "all 120ms ease",
+};
+
+const inputStyle: CSSProperties = {
+  fontFamily: "var(--font-body)",
+  fontSize: "var(--fs-body)",
+  padding: "14px 16px",
+  borderRadius: "var(--radius-2)",
+  border: "1px solid var(--border-2)",
+  background: "var(--bg-card)",
+  color: "var(--fg-1)",
+  width: "100%",
+  maxWidth: "320px",
+  outline: "none",
+  textAlign: "center",
+  transition: "border-color 120ms ease",
+};
+
+const labelStyle: CSSProperties = {
+  fontFamily: "var(--font-body)",
+  fontSize: "var(--fs-micro)",
+  fontWeight: 600,
+  letterSpacing: "var(--ls-caps)",
+  textTransform: "uppercase",
+  color: "var(--fg-4)",
+  marginBottom: "10px",
+  textAlign: "left",
+  width: "100%",
+};
+
+const tasteItem = (isSelected: boolean, fgAccent: string, bgAccent: string): CSSProperties => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  gap: "6px",
+  padding: "14px 4px",
+  borderRadius: "var(--radius-3)",
+  border: isSelected ? `2px solid ${fgAccent}` : "1px solid var(--border-2)",
+  background: isSelected ? bgAccent : "var(--bg-card)",
+  cursor: "pointer",
+  fontFamily: "var(--font-body)",
+  fontSize: "var(--fs-small)",
+  fontWeight: 600,
+  color: isSelected ? fgAccent : "var(--fg-2)",
+  transition: "all 120ms ease",
+});
+
+const strategyBtnStyle = (isSelected: boolean, fgAccent: string, bgAccent: string): CSSProperties => ({
+  display: "flex",
+  flexDirection: "column",
+  padding: "16px",
+  borderRadius: "var(--radius-3)",
+  border: isSelected ? `2px solid ${fgAccent}` : "1px solid var(--border-2)",
+  background: isSelected ? bgAccent : "var(--bg-card)",
+  color: isSelected ? fgAccent : "var(--fg-1)",
+  cursor: "pointer",
+  transition: "all 120ms ease",
+  width: "100%",
+  textAlign: "left",
+});
+
+// ─── Screens ──────────────────────────────────────────────────────────────────
+
+function DsvConnectScreen({ onNext }: { onNext: (data: Partial<OnboardingData>) => void }) {
+  const [showModal, setShowModal] = useState(false);
   const [dsvLoading, setDsvLoading] = useState(false);
-  const [publishing, setPublishing] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const update = useCallback((patch: Partial<OnboardingData>) => {
-    setData((prev) => ({ ...prev, ...patch }));
-  }, []);
 
   const handleDsvLogin = () => {
     setDsvLoading(true);
     setTimeout(() => {
-      update(DSV_MOCK);
-      setDsvLoading(false);
-      setShowDsvModal(false);
-      setStep(2);
+      onNext(DSV_MOCK);
     }, 1500);
   };
+
+  return (
+    <>
+      <div className="animate-fade-in" style={screen}>
+        <div style={{ ...iconContainer, background: "var(--cw-warm-bg)" }}>
+          <i className="ph ph-plugs-connected" style={{ fontSize: "28px", color: "var(--cw-warm)" }} />
+        </div>
+
+        <h1 style={hero}>Grow on autopilot.</h1>
+        <p style={subtitle}>
+          Connect your DSV account. We import your profile, hours, and detect slow periods automatically.
+        </p>
+
+        <button
+          onClick={() => setShowModal(true)}
+          style={primaryBtn}
+        >
+          Connect DSV Account
+          <i className="ph ph-arrow-right" style={{ fontSize: "16px" }} />
+        </button>
+
+        <p style={{ marginTop: "20px", fontSize: "11px", color: "var(--fg-4)", letterSpacing: "var(--ls-caps)", textTransform: "uppercase", fontWeight: 600 }}>
+          Secure OAuth 2.0
+        </p>
+      </div>
+
+      {showModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm"
+          onClick={() => !dsvLoading && setShowModal(false)}
+        >
+          <div
+            className="bg-white rounded-t-3xl px-6 pt-6 pb-12 w-full max-w-lg animate-slide-up border-t border-[rgba(21,19,15,0.08)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 bg-[rgba(21,19,15,0.12)] rounded-full mx-auto mb-8" />
+
+            <p className="text-xs font-medium text-[#a89d87] uppercase tracking-widest text-center mb-2">
+              DSV Partner Login
+            </p>
+            <h3 className="text-xl font-bold text-[#15130f] text-center mb-8">
+              Connect your DSV account
+            </h3>
+
+            <div className="space-y-3 mb-6">
+              <input
+                type="email"
+                defaultValue="merchant@example.com"
+                className="w-full bg-[#faf7f2] border border-[rgba(21,19,15,0.10)] rounded-xl px-4 py-3 text-sm text-[#15130f] placeholder:text-[#a89d87] focus:outline-none focus:border-[#e30018]/50 transition-colors"
+                placeholder="Email"
+              />
+              <input
+                type="password"
+                defaultValue="password"
+                className="w-full bg-[#faf7f2] border border-[rgba(21,19,15,0.10)] rounded-xl px-4 py-3 text-sm text-[#15130f] placeholder:text-[#a89d87] focus:outline-none focus:border-[#e30018]/50 transition-colors"
+                placeholder="Password"
+              />
+            </div>
+
+            <button
+              onClick={handleDsvLogin}
+              disabled={dsvLoading}
+              className="w-full rounded-full bg-[#e30018] py-4 text-sm font-semibold text-white hover:bg-[#c20014] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {dsvLoading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Importing your data...
+                </>
+              ) : (
+                "Sign in to DSV"
+              )}
+            </button>
+
+            {!dsvLoading && (
+              <button
+                onClick={() => setShowModal(false)}
+                className="w-full mt-4 text-sm text-[#a89d87] hover:text-[#7a715f] transition-colors"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function BrandScreen({ data, update, onNext }: { data: OnboardingData, update: (p: Partial<OnboardingData>) => void, onNext: () => void }) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const canProceed = data.description.trim().length > 0 && data.businessName.trim().length > 0; // images are optional
 
   const handleImageAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -99,17 +331,459 @@ export default function MerchantPage() {
     update({ images: [...data.images, ...urls].slice(0, 3) });
     e.target.value = "";
   };
-
   const removeImage = (idx: number) => {
     update({ images: data.images.filter((_, i) => i !== idx) });
   };
 
-  const toggleDay = (day: string) => {
-    const next = data.scheduleDays.includes(day)
-      ? data.scheduleDays.filter((d) => d !== day)
-      : [...data.scheduleDays, day];
-    update({ scheduleDays: next });
+  return (
+    <div className="animate-fade-in" style={{ ...screen, justifyContent: "flex-start", paddingTop: "80px" }}>
+      <div style={{ ...iconContainer, background: "var(--cw-fresh-bg)" }}>
+        <i className="ph ph-image" style={{ fontSize: "28px", color: "var(--cw-fresh)" }} />
+      </div>
+
+      <h1 style={hero}>Make it yours.</h1>
+      <p style={subtitle}>Add your description and best photos. These appear when your offer goes live.</p>
+
+      {/* Google Maps Import (Coming Soon) */}
+      <div style={{ width: "100%", maxWidth: "320px", marginBottom: "32px" }}>
+        <button 
+          disabled 
+          style={{ 
+            display: "flex", 
+            alignItems: "center", 
+            justifyContent: "space-between",
+            width: "100%", 
+            padding: "16px", 
+            borderRadius: "var(--radius-3)", 
+            border: "1px dashed var(--border-2)", 
+            background: "transparent", 
+            opacity: 0.6,
+            cursor: "not-allowed" 
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <i className="ph ph-map-pin" style={{ fontSize: "24px", color: "var(--fg-3)" }} />
+            <span style={{ fontSize: "var(--fs-body)", fontWeight: 600, color: "var(--fg-2)" }}>Import from Google Maps</span>
+          </div>
+          <span style={{ fontSize: "10px", fontWeight: 700, letterSpacing: "var(--ls-caps)", textTransform: "uppercase", background: "var(--border-2)", color: "var(--fg-3)", padding: "4px 8px", borderRadius: "var(--radius-pill)" }}>Coming Soon</span>
+        </button>
+      </div>
+
+      {/* Images (Optional) at the top */}
+      <div style={{ width: "100%", maxWidth: "320px", marginBottom: "28px" }}>
+        <div style={labelStyle}>Hero images (Optional, up to 3)</div>
+        <div style={{ display: "flex", gap: "12px", justifyContent: "center" }}>
+          {data.images.map((url, i) => (
+            <div key={i} style={{ width: "80px", height: "80px", borderRadius: "var(--radius-3)", overflow: "hidden", position: "relative" }}>
+               <img src={url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+               <button onClick={() => removeImage(i)} style={{ position: "absolute", top: "4px", right: "4px", width: "20px", height: "20px", borderRadius: "99px", background: "rgba(21,19,15,0.6)", color: "white", border: "none", fontSize: "10px", cursor: "pointer" }}>×</button>
+            </div>
+          ))}
+          {data.images.length < 3 && (
+            <button onClick={() => fileInputRef.current?.click()} style={{ width: "80px", height: "80px", borderRadius: "var(--radius-3)", border: "2px dashed var(--border-2)", background: "transparent", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--fg-4)" }}>
+              <i className="ph ph-plus" style={{ fontSize: "24px" }} />
+            </button>
+          )}
+        </div>
+        <input ref={fileInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImageAdd} />
+      </div>
+
+      <div style={{ width: "100%", maxWidth: "320px", marginBottom: "28px" }}>
+        <div style={labelStyle}>Business Name</div>
+        <input
+          type="text"
+          value={data.businessName}
+          onChange={(e) => update({ businessName: e.target.value })}
+          placeholder="e.g. The Corner Bistro"
+          style={{ ...inputStyle, textAlign: "left", marginBottom: "16px" }}
+        />
+
+        <div style={labelStyle}>Location</div>
+        <input
+          type="text"
+          value={data.address}
+          onChange={(e) => update({ address: e.target.value })}
+          placeholder="e.g. 47 W 20th St, New York"
+          style={{ ...inputStyle, textAlign: "left", marginBottom: "16px" }}
+        />
+
+        <div style={labelStyle}>Opening Hours</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginBottom: "8px", width: "100%" }}>
+          {DAYS.map(day => (
+            <div key={day} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", background: "var(--bg-card)", padding: "8px 12px", borderRadius: "var(--radius-2)", border: "1px solid var(--border-2)" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", width: "70px" }}>
+                <input 
+                  type="checkbox" 
+                  checked={data.operatingHours[day].isOpen}
+                  onChange={(e) => update({ operatingHours: { ...data.operatingHours, [day]: { ...data.operatingHours[day], isOpen: e.target.checked } } })}
+                  style={{ accentColor: "var(--cw-fresh)", width: "16px", height: "16px" }}
+                />
+                <span style={{ fontSize: "13px", fontWeight: 600, color: data.operatingHours[day].isOpen ? "var(--fg-1)" : "var(--fg-4)" }}>{day}</span>
+              </label>
+              
+              {data.operatingHours[day].isOpen ? (
+                <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
+                  <input 
+                    type="time" 
+                    value={data.operatingHours[day].start}
+                    onChange={(e) => update({ operatingHours: { ...data.operatingHours, [day]: { ...data.operatingHours[day], start: e.target.value } } })}
+                    style={{ ...inputStyle, padding: "4px", fontSize: "13px", width: "auto" }}
+                  />
+                  <span style={{ color: "var(--fg-4)", fontSize: "12px" }}>-</span>
+                  <input 
+                    type="time" 
+                    value={data.operatingHours[day].end}
+                    onChange={(e) => update({ operatingHours: { ...data.operatingHours, [day]: { ...data.operatingHours[day], end: e.target.value } } })}
+                    style={{ ...inputStyle, padding: "4px", fontSize: "13px", width: "auto" }}
+                  />
+                </div>
+              ) : (
+                <span style={{ fontSize: "12px", color: "var(--fg-4)", fontStyle: "italic", paddingRight: "36px" }}>Closed</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ width: "100%", maxWidth: "320px", marginBottom: "28px" }}>
+        <div style={labelStyle}>Description</div>
+        <textarea
+          value={data.description}
+          onChange={(e) => update({ description: e.target.value })}
+          maxLength={150}
+          rows={3}
+          placeholder="e.g. Artisan coffee and vegan pastries..."
+          style={{ ...inputStyle, textAlign: "left", resize: "none" }}
+        />
+      </div>
+
+      <div style={{ width: "100%", maxWidth: "320px", marginBottom: "40px" }}>
+        <div style={labelStyle}>Business type</div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%" }}>
+          {CATEGORIES.map((cat) => {
+            const isSelected = data.category === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => update({ category: cat.id })}
+                style={tasteItem(isSelected, "var(--cw-fresh)", "var(--cw-fresh-bg)")}
+              >
+                <i className={`ph ${cat.icon}`} style={{ fontSize: "24px" }} />
+                {cat.label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <button onClick={onNext} disabled={!canProceed} style={{ ...primaryBtn, opacity: canProceed ? 1 : 0.4, cursor: canProceed ? "pointer" : "default" }}>
+        Continue <i className="ph ph-arrow-right" style={{ fontSize: "16px" }} />
+      </button>
+    </div>
+  );
+}
+
+function TimingScreen({ data, update, onNext }: { data: OnboardingData, update: (p: Partial<OnboardingData>) => void, onNext: () => void }) {
+  const canProceed = data.timingMode === "automatic" || (data.timingMode === "manual" && data.manualSchedule.length > 0);
+
+  const addTimeWindow = () => {
+    update({
+      manualSchedule: [
+        ...data.manualSchedule,
+        { id: Math.random().toString(36).slice(2), day: "Mon", start: "14:00", end: "16:00" }
+      ]
+    });
   };
+
+  const removeTimeWindow = (id: string) => {
+    update({ manualSchedule: data.manualSchedule.filter(s => s.id !== id) });
+  };
+
+  const updateTimeWindow = (id: string, field: "day" | "start" | "end", value: string) => {
+    update({
+      manualSchedule: data.manualSchedule.map(s => s.id === id ? { ...s, [field]: value } : s)
+    });
+  };
+
+  const addBlockout = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value && !data.blockoutDates.includes(e.target.value)) {
+      update({ blockoutDates: [...data.blockoutDates, e.target.value] });
+    }
+    e.target.value = "";
+  };
+
+  const removeBlockout = (date: string) => {
+    update({ blockoutDates: data.blockoutDates.filter(d => d !== date) });
+  };
+
+  return (
+    <div className="animate-fade-in" style={{ ...screen, justifyContent: "flex-start", paddingTop: "80px" }}>
+      <div style={{ ...iconContainer, background: "var(--cw-cool-bg)" }}>
+        <i className="ph ph-clock" style={{ fontSize: "28px", color: "var(--cw-cool)" }} />
+      </div>
+
+      <h1 style={hero}>When to run offers?</h1>
+      <p style={subtitle}>Identify slow periods to run coupons. You can always change this later.</p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", maxWidth: "320px", marginBottom: "40px" }}>
+        {/* Automatic Button */}
+        <button
+          onClick={() => update({ timingMode: "automatic" })}
+          style={strategyBtnStyle(data.timingMode === "automatic", "var(--cw-cool)", "var(--cw-cool-bg)")}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: data.timingMode === "automatic" ? "16px" : "0" }}>
+             <i className="ph ph-sparkle" style={{ fontSize: "24px" }} />
+             <span style={{ fontSize: "var(--fs-body)", fontWeight: 600 }}>Automatic (Recommended)</span>
+          </div>
+          {data.timingMode === "automatic" && (
+            <div className="animate-slide-up" style={{ textAlign: "left", borderTop: "1px solid var(--border-2)", paddingTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }} onClick={e => e.stopPropagation()}>
+               <p style={{ fontSize: "13px", color: "var(--fg-2)", lineHeight: 1.5 }}>
+                 We use external factors and your sales data to dynamically identify slow periods.
+               </p>
+               
+               <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer" }}>
+                 <input type="checkbox" checked={data.blockHolidays} onChange={(e) => update({ blockHolidays: e.target.checked })} style={{ marginTop: "4px", accentColor: "var(--cw-cool)" }} />
+                 <span style={{ fontSize: "13px", color: "var(--fg-2)", lineHeight: 1.4 }}>
+                   <strong>Block major holidays</strong> (Valentine's, Mother's Day, Christmas). You'll be notified 7 days prior.
+                 </span>
+               </label>
+
+               <div>
+                 <div style={labelStyle}>Add Blockout Dates</div>
+                 <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "8px" }}>
+                   {data.blockoutDates.map(date => (
+                     <span key={date} style={{ display: "inline-flex", alignItems: "center", gap: "4px", padding: "4px 8px", background: "var(--cw-cool-bg)", color: "var(--cw-cool)", borderRadius: "var(--radius-1)", fontSize: "12px", fontWeight: 600 }}>
+                       {date}
+                       <i className="ph ph-x" style={{ cursor: "pointer" }} onClick={() => removeBlockout(date)} />
+                     </span>
+                   ))}
+                 </div>
+                 <input type="date" onChange={addBlockout} style={{ ...inputStyle, textAlign: "left", padding: "8px" }} />
+               </div>
+            </div>
+          )}
+        </button>
+
+        {/* Manual Button */}
+        <button
+          onClick={() => update({ timingMode: "manual" })}
+          style={strategyBtnStyle(data.timingMode === "manual", "var(--cw-cool)", "var(--cw-cool-bg)")}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: data.timingMode === "manual" ? "16px" : "0" }}>
+             <i className="ph ph-calendar" style={{ fontSize: "24px" }} />
+             <span style={{ fontSize: "var(--fs-body)", fontWeight: 600 }}>Manual Schedule</span>
+          </div>
+          {data.timingMode === "manual" && (
+            <div className="animate-slide-up" style={{ textAlign: "left", borderTop: "1px solid var(--border-2)", paddingTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }} onClick={e => e.stopPropagation()}>
+               <p style={{ fontSize: "13px", color: "var(--fg-2)", lineHeight: 1.5 }}>
+                 You choose exactly when offers are active.
+               </p>
+
+               <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", cursor: "pointer", marginTop: "8px" }}>
+                 <input type="checkbox" checked={data.blockHolidays} onChange={(e) => update({ blockHolidays: e.target.checked })} style={{ marginTop: "4px", accentColor: "var(--cw-cool)" }} />
+                 <span style={{ fontSize: "13px", color: "var(--fg-2)", lineHeight: 1.4 }}>
+                   <strong>Block major holidays</strong> (Valentine's, Mother's Day, Christmas). You'll be notified 7 days prior.
+                 </span>
+               </label>
+               
+               {data.manualSchedule.map((slot, index) => (
+                 <div key={slot.id} style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--bg-card)", padding: "8px", borderRadius: "var(--radius-2)", border: "1px solid var(--border-2)" }}>
+                   <select value={slot.day} onChange={e => updateTimeWindow(slot.id, "day", e.target.value)} style={{ background: "transparent", border: "none", fontSize: "13px", fontWeight: 600, color: "var(--fg-1)", outline: "none" }}>
+                     {DAYS.map(d => <option key={d} value={d}>{d}</option>)}
+                   </select>
+                   <input type="time" value={slot.start} onChange={e => updateTimeWindow(slot.id, "start", e.target.value)} style={{ background: "transparent", border: "none", fontSize: "13px", color: "var(--fg-1)", outline: "none" }} />
+                   <span style={{ color: "var(--fg-4)" }}>-</span>
+                   <input type="time" value={slot.end} onChange={e => updateTimeWindow(slot.id, "end", e.target.value)} style={{ background: "transparent", border: "none", fontSize: "13px", color: "var(--fg-1)", outline: "none" }} />
+                   <i className="ph ph-trash" style={{ marginLeft: "auto", color: "var(--fg-4)", cursor: "pointer" }} onClick={() => removeTimeWindow(slot.id)} />
+                 </div>
+               ))}
+               
+               <button onClick={addTimeWindow} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", width: "100%", padding: "10px", borderRadius: "var(--radius-2)", border: "1px dashed var(--border-2)", background: "transparent", color: "var(--cw-cool)", fontSize: "13px", fontWeight: 600, cursor: "pointer" }}>
+                 <i className="ph ph-plus" /> Add Time Window
+               </button>
+            </div>
+          )}
+        </button>
+      </div>
+
+      <button onClick={onNext} disabled={!canProceed} style={{ ...primaryBtn, opacity: canProceed ? 1 : 0.4, cursor: canProceed ? "pointer" : "default" }}>
+        Continue <i className="ph ph-arrow-right" style={{ fontSize: "16px" }} />
+      </button>
+    </div>
+  );
+}
+
+function OfferScreen({ data, update, onNext }: { data: OnboardingData, update: (p: Partial<OnboardingData>) => void, onNext: () => void }) {
+  const canProceed = data.offerTypes.length > 0;
+
+  const toggleOfferType = (type: "discount" | "bogo" | "free_item") => {
+    const isSelected = data.offerTypes.includes(type);
+    if (isSelected) {
+      update({ offerTypes: data.offerTypes.filter(t => t !== type) });
+    } else {
+      update({ offerTypes: [...data.offerTypes, type] });
+    }
+  };
+
+  return (
+    <div className="animate-fade-in" style={{ ...screen, justifyContent: "flex-start", paddingTop: "80px" }}>
+      <div style={{ ...iconContainer, background: "var(--cw-warm-bg)" }}>
+        <i className="ph ph-tag" style={{ fontSize: "28px", color: "var(--cw-warm)" }} />
+      </div>
+
+      <h1 style={hero}>What's the offer?</h1>
+      <p style={subtitle}>Choose the promotion types that best fit your margins. You can run multiple.</p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "12px", width: "100%", maxWidth: "320px", marginBottom: "40px" }}>
+        {/* Storewide Discount */}
+        <button
+          onClick={() => toggleOfferType("discount")}
+          style={strategyBtnStyle(data.offerTypes.includes("discount"), "var(--cw-warm)", "var(--cw-warm-bg)")}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: data.offerTypes.includes("discount") ? "16px" : "0" }}>
+             <i className="ph ph-percent" style={{ fontSize: "24px" }} />
+             <span style={{ fontSize: "var(--fs-body)", fontWeight: 600 }}>Storewide Discount</span>
+          </div>
+          {data.offerTypes.includes("discount") && (
+            <div className="animate-slide-up" style={{ textAlign: "left", borderTop: "1px solid var(--border-2)", paddingTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }} onClick={e => e.stopPropagation()}>
+               <div>
+                  <div style={labelStyle}>Discount: {data.maxDiscountPercent}% off</div>
+                  <input type="range" min={5} max={50} value={data.maxDiscountPercent} onChange={e => update({ maxDiscountPercent: Number(e.target.value) })} style={{ width: "100%", accentColor: "var(--cw-warm)", cursor: "pointer" }} />
+               </div>
+               <div>
+                  <div style={labelStyle}>Min Spend ($)</div>
+                  <input type="number" min={0} value={data.minSpend} onChange={e => update({ minSpend: Number(e.target.value) })} style={{ ...inputStyle, textAlign: "left", padding: "10px" }} />
+               </div>
+            </div>
+          )}
+        </button>
+
+        {/* BOGO */}
+        <button
+          onClick={() => toggleOfferType("bogo")}
+          style={strategyBtnStyle(data.offerTypes.includes("bogo"), "var(--cw-warm)", "var(--cw-warm-bg)")}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: data.offerTypes.includes("bogo") ? "16px" : "0" }}>
+             <i className="ph ph-copy" style={{ fontSize: "24px" }} />
+             <span style={{ fontSize: "var(--fs-body)", fontWeight: 600 }}>Buy One, Get One</span>
+          </div>
+          {data.offerTypes.includes("bogo") && (
+            <div className="animate-slide-up" style={{ textAlign: "left", borderTop: "1px solid var(--border-2)", paddingTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }} onClick={e => e.stopPropagation()}>
+               <div>
+                  <div style={labelStyle}>Offer details</div>
+                  <input type="text" value={data.bogoDetails} onChange={e => update({ bogoDetails: e.target.value })} placeholder="e.g. Buy 1 coffee, get 1 free" style={{ ...inputStyle, textAlign: "left", padding: "10px" }} />
+               </div>
+            </div>
+          )}
+        </button>
+
+        {/* Free Item */}
+        <button
+          onClick={() => toggleOfferType("free_item")}
+          style={strategyBtnStyle(data.offerTypes.includes("free_item"), "var(--cw-warm)", "var(--cw-warm-bg)")}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: data.offerTypes.includes("free_item") ? "16px" : "0" }}>
+             <i className="ph ph-gift" style={{ fontSize: "24px" }} />
+             <span style={{ fontSize: "var(--fs-body)", fontWeight: 600 }}>Free Item with Purchase</span>
+          </div>
+          {data.offerTypes.includes("free_item") && (
+            <div className="animate-slide-up" style={{ textAlign: "left", borderTop: "1px solid var(--border-2)", paddingTop: "16px", display: "flex", flexDirection: "column", gap: "16px" }} onClick={e => e.stopPropagation()}>
+               <div>
+                  <div style={labelStyle}>Free item</div>
+                  <input type="text" value={data.freeItemDetails} onChange={e => update({ freeItemDetails: e.target.value })} placeholder="e.g. Free cookie" style={{ ...inputStyle, textAlign: "left", padding: "10px" }} />
+               </div>
+               <div>
+                  <div style={labelStyle}>Condition</div>
+                  <input type="text" value={data.freeItemCondition} onChange={e => update({ freeItemCondition: e.target.value })} placeholder="e.g. with any coffee purchase" style={{ ...inputStyle, textAlign: "left", padding: "10px" }} />
+               </div>
+            </div>
+          )}
+        </button>
+      </div>
+
+      <button onClick={onNext} disabled={!canProceed} style={{ ...primaryBtn, opacity: canProceed ? 1 : 0.4, cursor: canProceed ? "pointer" : "default" }}>
+        Continue <i className="ph ph-arrow-right" style={{ fontSize: "16px" }} />
+      </button>
+    </div>
+  );
+}
+
+function ReviewScreen({ data, onPublish, publishing }: { data: OnboardingData, onPublish: () => void, publishing: boolean }) {
+  
+  const previewOffers = data.offerTypes.map((type) => {
+    let headline = "";
+    let subtext = "";
+    let discountValue = "";
+
+    if (type === "discount") {
+      headline = `Quiet afternoon? Drop in for ${data.maxDiscountPercent}% off.`;
+      subtext = `${data.maxDiscountPercent}% off at ${data.businessName} — limited time`;
+      discountValue = `${data.maxDiscountPercent}%`;
+    } else if (type === "bogo") {
+      headline = `Quiet afternoon? Drop in for ${data.bogoDetails}.`;
+      subtext = `${data.bogoDetails} at ${data.businessName} — limited time`;
+      discountValue = "BOGO";
+    } else {
+      headline = `Quiet afternoon? Drop in for a ${data.freeItemDetails} ${data.freeItemCondition}.`;
+      subtext = `${data.freeItemDetails} at ${data.businessName} — limited time`;
+      discountValue = "FREE";
+    }
+
+    return {
+      id: `preview-${type}`,
+      merchant_id: "preview",
+      merchant_name: data.businessName,
+      merchant_category: data.category,
+      headline,
+      subtext,
+      description: data.description || "Artisan coffee and pastries.",
+      discount_value: discountValue,
+      discount_type: "percentage_discount",
+      context_tags: ["quiet_period"],
+      why_now: "Slow period detected — your deal is now live.",
+      created_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 30 * 60000).toISOString(),
+      style: CATEGORY_STYLES[data.category],
+      status: "active",
+      distance_meters: 120,
+      redemption_token: null,
+    } as Offer;
+  });
+
+  return (
+    <div className="animate-fade-in" style={{ ...screen, justifyContent: "flex-start", paddingTop: "80px" }}>
+      <div style={{ ...iconContainer, background: "var(--cw-dusk-bg)" }}>
+        <i className="ph ph-check-circle" style={{ fontSize: "28px", color: "var(--cw-dusk)" }} />
+      </div>
+
+      <h1 style={hero}>Ready to launch.</h1>
+      <p style={subtitle}>Your campaign is configured. Here are the templates users might see.</p>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: "16px", width: "100%", maxWidth: "340px", marginBottom: "40px", pointerEvents: "none", textAlign: "left" }}>
+        {previewOffers.map(offer => (
+          <OfferCard key={offer.id} offer={offer} />
+        ))}
+      </div>
+
+      <button onClick={onPublish} disabled={publishing} style={{ ...primaryBtn, opacity: publishing ? 0.6 : 1, cursor: publishing ? "default" : "pointer" }}>
+        {publishing ? "Publishing..." : "Publish Campaign"}
+        {!publishing && <i className="ph ph-arrow-right" style={{ fontSize: "16px" }} />}
+      </button>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+export default function MerchantPage() {
+  const router = useRouter();
+  const [step, setStep] = useState(1);
+  const [data, setData] = useState<OnboardingData>(DEFAULT_DATA);
+  const [publishing, setPublishing] = useState(false);
+
+  const update = useCallback((patch: Partial<OnboardingData>) => {
+    setData((prev) => ({ ...prev, ...patch }));
+  }, []);
 
   const handlePublish = () => {
     setPublishing(true);
@@ -120,586 +794,38 @@ export default function MerchantPage() {
     }, 900);
   };
 
-  const canProceed = (): boolean => {
-    if (step === 2) return data.images.length > 0 && data.tagline.trim().length > 0;
-    if (step === 3) {
-      if (!data.strategy) return false;
-      if (data.strategy === "manual") return data.scheduleDays.length > 0;
-      return true;
-    }
-    return true;
-  };
-
-  // Fabricated offer for the review step preview
-  const previewOffer: Offer = {
-    id: "preview",
-    merchant_id: "preview",
-    merchant_name: data.businessName,
-    merchant_category: data.category,
-    headline: `Quiet afternoon? Drop in for ${data.maxDiscountPercent}% off.`,
-    subtext: `${data.maxDiscountPercent}% off at ${data.businessName} — limited time`,
-    description: data.tagline,
-    discount_value: `${data.maxDiscountPercent}%`,
-    discount_type: "percentage_discount",
-    context_tags: ["quiet_period"],
-    why_now: "Slow period detected — your deal is now live.",
-    created_at: new Date().toISOString(),
-    expires_at: new Date(Date.now() + 30 * 60000).toISOString(),
-    style: CATEGORY_STYLES[data.category],
-    status: "active",
-    distance_meters: 120,
-    redemption_token: null,
-  };
-
-  // ── Header ──────────────────────────────────────────────────────────────────
-
-  const header = (
-    <header
-      className={`flex items-center justify-between px-4 py-4 ${
-        step > 1 ? "border-b border-white/10" : ""
-      }`}
-    >
-      {step > 1 ? (
-        <button
-          onClick={() => setStep((s) => s - 1)}
-          className="text-sm text-white/50 hover:text-white/80 transition-colors w-14"
-        >
-          ← Back
-        </button>
-      ) : (
-        <span className="text-sm font-semibold text-white/80 tracking-wide">
-          City Wallet
-        </span>
-      )}
-      {step > 1 && (
-        <span className="text-xs font-medium text-white/40">Step {step} of 4</span>
-      )}
-      <div className="w-14" />
-    </header>
-  );
-
-  // ── Progress bar ─────────────────────────────────────────────────────────────
-
-  const progressBar = step > 1 && (
-    <div className="flex gap-1.5 px-4 py-3">
-      {[1, 2, 3, 4].map((s) => (
-        <div
-          key={s}
-          className={`h-1 flex-1 rounded-full transition-all duration-400 ${
-            s < step ? "bg-success" : s === step ? "bg-accent" : "bg-white/10"
-          }`}
-        />
-      ))}
-    </div>
-  );
-
-  // ── Step 1: DSV Connect ──────────────────────────────────────────────────────
-
-  const step1 = (
-    <div className="flex-1 flex flex-col px-4 py-8 animate-fade-in">
-      <div className="mb-10">
-        <h1 className="text-3xl font-bold text-white leading-tight mb-4">
-          Grow your business<br />on autopilot.
-        </h1>
-        <p className="text-base text-white/50 leading-relaxed">
-          Connect your DSV account and we import your business data automatically.
-          No manual entry, no forms.
-        </p>
-      </div>
-
-      <div className="space-y-4 mb-10">
-        {[
-          "Business name & address pulled from your DSV profile",
-          "Operating hours synced automatically",
-          "Transaction data used to detect your slow hours",
-        ].map((text) => (
-          <div key={text} className="flex items-start gap-3">
-            <span className="text-accent mt-0.5 shrink-0 text-sm">→</span>
-            <span className="text-sm text-white/60 leading-relaxed">{text}</span>
-          </div>
-        ))}
-      </div>
-
-      <button
-        onClick={() => setShowDsvModal(true)}
-        className="w-full rounded-full bg-accent py-4 text-sm font-semibold text-white hover:scale-[1.02] active:scale-[0.98] transition-transform"
-      >
-        Connect DSV Account
-      </button>
-      <p className="text-xs text-white/25 text-center mt-4">
-        Secure OAuth 2.0 connection. We never store your credentials.
-      </p>
-    </div>
-  );
-
-  // ── Step 2: Brand Essentials ─────────────────────────────────────────────────
-
-  const step2 = (
-    <div className="flex-1 px-4 py-6 space-y-6 animate-fade-in">
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-1">Make your business shine.</h2>
-        <p className="text-sm text-white/50">These details appear on your City Wallet offer page.</p>
-      </div>
-
-      {/* DSV data card */}
-      <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-white/40 uppercase tracking-wide">
-            Imported from DSV
-          </span>
-          <span className="rounded-full bg-accent/10 border border-accent/30 px-2.5 py-0.5 text-xs font-medium text-accent">
-            DSV
-          </span>
-        </div>
-        {[
-          { label: "Business", value: data.businessName },
-          { label: "Address",  value: data.address },
-          { label: "Hours",    value: data.operatingHours },
-          { label: "Phone",    value: data.phone },
-        ].map((row) => (
-          <div key={row.label} className="flex items-start gap-3">
-            <span className="text-xs text-white/30 w-14 shrink-0 pt-0.5">{row.label}</span>
-            <span className="text-sm text-white/80">{row.value}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Category selector */}
-      <div>
-        <label className="block text-xs font-medium text-white/60 uppercase tracking-wide mb-3">
-          Business type
-        </label>
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => update({ category: cat })}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                data.category === cat
-                  ? "bg-accent text-white"
-                  : "bg-white/10 text-white/60 hover:bg-white/20"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Image upload */}
-      <div>
-        <label className="block text-xs font-medium text-white/60 uppercase tracking-wide mb-3">
-          Hero images (1–3)
-        </label>
-        <div className="flex gap-3 overflow-x-auto pb-1 no-scrollbar">
-          {data.images.map((url, i) => (
-            <div
-              key={i}
-              className="relative shrink-0 w-28 h-28 rounded-2xl overflow-hidden border border-white/10"
-            >
-              <img src={url} alt="" className="w-full h-full object-cover" />
-              <button
-                onClick={() => removeImage(i)}
-                className="absolute top-1.5 right-1.5 w-5 h-5 rounded-full bg-black/70 flex items-center justify-center text-white/80 text-xs hover:bg-black/90 transition-colors"
-              >
-                ×
-              </button>
-            </div>
-          ))}
-
-          {data.images.length < 3 && (
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="shrink-0 w-28 h-28 rounded-2xl border-2 border-dashed border-white/20 flex flex-col items-center justify-center gap-1.5 hover:border-white/40 hover:bg-white/5 transition-colors"
-            >
-              <span className="text-2xl text-white/30">+</span>
-              <span className="text-xs text-white/30">Add photo</span>
-            </button>
-          )}
-
-          {Array.from({ length: Math.max(0, 2 - data.images.length) }).map((_, i) => (
-            <div
-              key={`ghost-${i}`}
-              className="shrink-0 w-28 h-28 rounded-2xl border border-dashed border-white/10"
-            />
-          ))}
-        </div>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="image/*"
-          multiple
-          className="hidden"
-          onChange={handleImageAdd}
-        />
-        <p className="text-xs text-white/30 mt-2">Food, interior, or your logo. JPG or PNG.</p>
-      </div>
-
-      {/* Tagline */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <label className="text-xs font-medium text-white/60 uppercase tracking-wide">
-            Tagline
-          </label>
-          <span className="text-xs text-white/30">{data.tagline.length}/150</span>
-        </div>
-        <textarea
-          value={data.tagline}
-          onChange={(e) => update({ tagline: e.target.value })}
-          maxLength={150}
-          rows={3}
-          placeholder="Artisan coffee and vegan pastries made with love"
-          className="w-full bg-[#0f0f0f] border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/30 focus:outline-none focus:border-accent/60 resize-none transition-colors"
-        />
-        <p className="text-xs text-white/30 mt-1">1–2 sentences. This appears on your offer card.</p>
-      </div>
-    </div>
-  );
-
-  // ── Step 3: Strategy Engine ──────────────────────────────────────────────────
-
-  const step3 = (
-    <div className="flex-1 px-4 py-6 space-y-6 animate-fade-in">
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-1">Fill your empty seats.</h2>
-        <p className="text-sm text-white/50">
-          City Wallet only activates your deals during slow periods. Never during your rush.
-        </p>
-      </div>
-
-      {/* Auto-Pilot card */}
-      <div
-        className={`rounded-2xl border-2 p-5 cursor-pointer transition-all duration-200 ${
-          data.strategy === "autopilot"
-            ? "border-accent bg-accent/5"
-            : "border-white/10 bg-[#1a1a1a] hover:border-white/25"
-        }`}
-        onClick={() => update({ strategy: "autopilot" })}
-      >
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-2xl">✨</span>
-          <span className="text-base font-semibold text-white">Auto-Pilot</span>
-          {data.strategy === "autopilot" && (
-            <span className="ml-auto text-xs font-medium text-accent">Selected</span>
-          )}
-        </div>
-        <p className="text-sm text-white/50">
-          Let our algorithm detect your slow hours in real-time and activate deals automatically.
-        </p>
-
-        <div
-          className={`overflow-hidden transition-all duration-300 ${
-            data.strategy === "autopilot" ? "max-h-64 opacity-100 mt-5" : "max-h-0 opacity-0"
-          }`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="space-y-5 pt-4 border-t border-white/10">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-medium text-white/60 uppercase tracking-wide">
-                  Max discount
-                </label>
-                <span className="text-sm font-semibold text-white">
-                  Up to {data.maxDiscountPercent}% off
-                </span>
-              </div>
-              <input
-                type="range"
-                min={5}
-                max={30}
-                value={data.maxDiscountPercent}
-                onChange={(e) => update({ maxDiscountPercent: Number(e.target.value) })}
-                className="w-full cursor-pointer"
-                style={{ accentColor: "#4f8cff" }}
-              />
-              <div className="flex justify-between text-xs text-white/30 mt-1">
-                <span>5%</span>
-                <span>30%</span>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-white/60 uppercase tracking-wide mb-2">
-                Minimum spend
-              </label>
-              <div className="flex items-center bg-[#0f0f0f] border border-white/10 rounded-xl overflow-hidden focus-within:border-accent/60 transition-colors">
-                <span className="px-3 text-sm text-white/40 border-r border-white/10 py-3">$</span>
-                <input
-                  type="number"
-                  min={0}
-                  value={data.minSpend}
-                  onChange={(e) => update({ minSpend: Number(e.target.value) })}
-                  className="flex-1 bg-transparent px-3 py-3 text-sm text-white focus:outline-none"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Manual Schedule card */}
-      <div
-        className={`rounded-2xl border-2 p-5 cursor-pointer transition-all duration-200 ${
-          data.strategy === "manual"
-            ? "border-accent bg-accent/5"
-            : "border-white/10 bg-[#1a1a1a] hover:border-white/25"
-        }`}
-        onClick={() => update({ strategy: "manual" })}
-      >
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-2xl">🗓️</span>
-          <span className="text-base font-semibold text-white">Manual Schedule</span>
-          {data.strategy === "manual" && (
-            <span className="ml-auto text-xs font-medium text-accent">Selected</span>
-          )}
-        </div>
-        <p className="text-sm text-white/50">
-          I know my slow hours. I'll schedule my own discount windows.
-        </p>
-
-        <div
-          className={`overflow-hidden transition-all duration-300 ${
-            data.strategy === "manual" ? "max-h-96 opacity-100 mt-5" : "max-h-0 opacity-0"
-          }`}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="space-y-5 pt-4 border-t border-white/10">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="text-xs font-medium text-white/60 uppercase tracking-wide">
-                  Discount
-                </label>
-                <span className="text-sm font-semibold text-white">
-                  {data.maxDiscountPercent}% off
-                </span>
-              </div>
-              <input
-                type="range"
-                min={5}
-                max={30}
-                value={data.maxDiscountPercent}
-                onChange={(e) => update({ maxDiscountPercent: Number(e.target.value) })}
-                className="w-full cursor-pointer"
-                style={{ accentColor: "#4f8cff" }}
-              />
-              <div className="flex justify-between text-xs text-white/30 mt-1">
-                <span>5%</span>
-                <span>30%</span>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-white/60 uppercase tracking-wide mb-3">
-                Active days
-              </label>
-              <div className="flex gap-2">
-                {DAYS.map((day) => {
-                  const active = data.scheduleDays.includes(day);
-                  return (
-                    <button
-                      key={day}
-                      onClick={() => toggleDay(day)}
-                      className={`w-9 h-9 rounded-full text-xs font-semibold transition-colors ${
-                        active
-                          ? "bg-accent text-white"
-                          : "bg-white/10 text-white/50 hover:bg-white/20"
-                      }`}
-                    >
-                      {day.slice(0, 1)}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-medium text-white/60 uppercase tracking-wide mb-2">
-                Time window
-              </label>
-              <div className="flex items-center gap-3">
-                <input
-                  type="time"
-                  value={data.scheduleStart}
-                  onChange={(e) => update({ scheduleStart: e.target.value })}
-                  style={{ colorScheme: "dark" }}
-                  className="flex-1 bg-[#0f0f0f] border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-accent/60 transition-colors"
-                />
-                <span className="text-white/30 text-sm shrink-0">to</span>
-                <input
-                  type="time"
-                  value={data.scheduleEnd}
-                  onChange={(e) => update({ scheduleEnd: e.target.value })}
-                  style={{ colorScheme: "dark" }}
-                  className="flex-1 bg-[#0f0f0f] border border-white/10 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-accent/60 transition-colors"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-
-  // ── Step 4: Review & Activate ────────────────────────────────────────────────
-
-  const summaryRows =
-    data.strategy === "autopilot"
-      ? [
-          { label: "Strategy",     value: "Auto-Pilot" },
-          { label: "Max discount", value: `${data.maxDiscountPercent}% off` },
-          { label: "Min spend",    value: `$${data.minSpend}` },
-          { label: "Operating",    value: data.operatingHours },
-        ]
-      : [
-          { label: "Strategy",     value: "Manual Schedule" },
-          { label: "Discount",     value: `${data.maxDiscountPercent}% off` },
-          { label: "Active days",  value: data.scheduleDays.join(", ") || "—" },
-          { label: "Hours",        value: `${data.scheduleStart} – ${data.scheduleEnd}` },
-        ];
-
-  const step4 = (
-    <div className="flex-1 px-4 py-6 space-y-6 animate-fade-in">
-      <div>
-        <h2 className="text-2xl font-bold text-white mb-1">Your campaign preview.</h2>
-        <p className="text-sm text-white/50">
-          This is what City Wallet users will see when your deal goes live.
-        </p>
-      </div>
-
-      <div className="pointer-events-none">
-        <OfferCard offer={previewOffer} />
-      </div>
-
-      <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-white/40 uppercase tracking-wide">
-            Campaign settings
-          </span>
-          <button
-            onClick={() => setStep(3)}
-            className="text-xs text-accent hover:text-white transition-colors pointer-events-auto"
-          >
-            Edit
-          </button>
-        </div>
-        {summaryRows.map((row) => (
-          <div key={row.label} className="flex items-start gap-3">
-            <span className="text-xs text-white/30 w-20 shrink-0 pt-0.5">{row.label}</span>
-            <span className="text-sm text-white/70">{row.value}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-
-  // ── DSV Modal ─────────────────────────────────────────────────────────────────
-
-  const dsvModal = showDsvModal && (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/60 backdrop-blur-sm"
-      onClick={() => !dsvLoading && setShowDsvModal(false)}
-    >
-      <div
-        className="bg-[#1a1a1a] rounded-t-3xl px-6 pt-6 pb-12 w-full max-w-lg animate-slide-up border-t border-white/10"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-8" />
-
-        <p className="text-xs font-medium text-white/40 uppercase tracking-widest text-center mb-2">
-          DSV Partner Login
-        </p>
-        <h3 className="text-xl font-bold text-white text-center mb-8">
-          Connect your DSV account
-        </h3>
-
-        <div className="space-y-3 mb-6">
-          <input
-            type="email"
-            defaultValue="merchant@example.com"
-            className="w-full bg-[#0f0f0f] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accent/60 transition-colors"
-            placeholder="Email"
-          />
-          <input
-            type="password"
-            defaultValue="password"
-            className="w-full bg-[#0f0f0f] border border-white/10 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accent/60 transition-colors"
-            placeholder="Password"
-          />
-        </div>
-
-        <button
-          onClick={handleDsvLogin}
-          disabled={dsvLoading}
-          className="w-full rounded-full bg-white py-4 text-sm font-semibold text-black hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-        >
-          {dsvLoading ? (
-            <>
-              <span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-              Importing your data...
-            </>
-          ) : (
-            "Sign in to DSV"
-          )}
-        </button>
-
-        {!dsvLoading && (
-          <button
-            onClick={() => setShowDsvModal(false)}
-            className="w-full mt-4 text-sm text-white/30 hover:text-white/60 transition-colors"
-          >
-            Cancel
-          </button>
-        )}
-      </div>
-    </div>
-  );
-
-  // ── Sticky CTA ────────────────────────────────────────────────────────────────
-
-  const stickyCta = step > 1 && (
-    <div className="sticky bottom-16 z-10 px-4 pb-4 pt-6 bg-gradient-to-t from-[#0f0f0f] via-[#0f0f0f]/90 to-transparent">
-      <button
-        onClick={step === 4 ? handlePublish : () => setStep((s) => s + 1)}
-        disabled={!canProceed() || publishing}
-        className={`w-full rounded-full py-4 text-sm font-semibold transition-all flex items-center justify-center gap-2 ${
-          !canProceed() || publishing
-            ? "bg-white/10 text-white/30 cursor-not-allowed"
-            : "bg-white text-black hover:scale-[1.02] active:scale-[0.98]"
-        }`}
-      >
-        {step === 4 ? (
-          publishing ? (
-            <>
-              <span className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
-              Publishing...
-            </>
-          ) : (
-            "Publish Campaign →"
-          )
-        ) : (
-          "Continue"
-        )}
-      </button>
-    </div>
-  );
-
-  // ── Render ────────────────────────────────────────────────────────────────────
-
   return (
-    <div className="flex flex-col min-h-screen pb-16 bg-[#0f0f0f]">
-      {header}
-      {progressBar}
+    <div style={{ background: "var(--bg-page)", minHeight: "100vh" }}>
+      {step > 1 && step < 5 && (
+        <button
+          onClick={() => setStep(s => s - 1)}
+          style={{
+            position: "absolute",
+            top: "24px",
+            left: "24px",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            fontFamily: "var(--font-body)",
+            fontSize: "var(--fs-body)",
+            fontWeight: 600,
+            color: "var(--fg-2)",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px",
+            zIndex: 10
+          }}
+        >
+          <i className="ph ph-arrow-left" style={{ fontSize: "16px" }} />
+          Back
+        </button>
+      )}
 
-      <div className="flex-1 overflow-y-auto">
-        {step === 1 && step1}
-        {step === 2 && step2}
-        {step === 3 && step3}
-        {step === 4 && step4}
-      </div>
-
-      {stickyCta}
-      {dsvModal}
-      <BottomNav />
+      {step === 1 && <DsvConnectScreen onNext={(dsv) => { update(dsv); setStep(2); }} />}
+      {step === 2 && <BrandScreen data={data} update={update} onNext={() => setStep(3)} />}
+      {step === 3 && <TimingScreen data={data} update={update} onNext={() => setStep(4)} />}
+      {step === 4 && <OfferScreen data={data} update={update} onNext={() => setStep(5)} />}
+      {step === 5 && <ReviewScreen data={data} onPublish={handlePublish} publishing={publishing} />}
     </div>
   );
 }
