@@ -4,7 +4,6 @@ import logging
 import anthropic
 
 from config import ANTHROPIC_API_KEY
-from database import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -20,12 +19,12 @@ Output only a JSON object with two fields:
 No markdown, no explanation. JSON only."""
 
 
-async def get_user_preferences(session_id: str, context_tags: list[str]) -> dict:
+async def get_user_preferences(db, session_id: str, context_tags: list[str]) -> dict:
     """
     Queries recent offer history for the session, calls Claude Haiku to infer
     intent tags and preferred categories. Returns empty preferences on any failure.
     """
-    history = await _fetch_offer_history(session_id)
+    history = await _fetch_offer_history(db, session_id)
     if not history:
         return {"intent_tags": [], "past_categories": []}
 
@@ -52,31 +51,27 @@ async def get_user_preferences(session_id: str, context_tags: list[str]) -> dict
         return {"intent_tags": [], "past_categories": []}
 
 
-async def _fetch_offer_history(session_id: str) -> list[dict]:
-    db = await get_db()
-    try:
-        cursor = await db.execute(
-            """
-            SELECT merchant_category, context_tags, status
-            FROM offers
-            WHERE user_session_id = ?
-              AND status IN ('accepted', 'declined', 'redeemed')
-            ORDER BY created_at DESC
-            LIMIT 20
-            """,
-            (session_id,),
-        )
-        rows = await cursor.fetchall()
-        return [
-            {
-                "category": row["merchant_category"],
-                "context_tags": json.loads(row["context_tags"] or "[]"),
-                "status": row["status"],
-            }
-            for row in rows
-        ]
-    finally:
-        await db.close()
+async def _fetch_offer_history(db, session_id: str) -> list[dict]:
+    cursor = await db.execute(
+        """
+        SELECT merchant_category, context_tags, status
+        FROM offers
+        WHERE user_session_id = ?
+          AND status IN ('accepted', 'declined', 'redeemed')
+        ORDER BY created_at DESC
+        LIMIT 20
+        """,
+        (session_id,),
+    )
+    rows = await cursor.fetchall()
+    return [
+        {
+            "category": row["merchant_category"],
+            "context_tags": json.loads(row["context_tags"] or "[]"),
+            "status": row["status"],
+        }
+        for row in rows
+    ]
 
 
 def _build_prompt(history: list[dict], context_tags: list[str]) -> str:

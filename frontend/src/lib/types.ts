@@ -97,9 +97,8 @@ export type OfferStatus =
 
 export interface OfferStyle {
   background_gradient: string[];
-  emoji: string;
   tone: "warm" | "urgent" | "playful" | "sophisticated";
-  headline_style: "emotional" | "factual";
+  headline_style: "emotional";
 }
 
 export interface Offer {
@@ -155,6 +154,7 @@ export interface ContextRequest {
 }
 
 export interface GenerateOffersRequest {
+  session_id: string;
   context: ContextState;
   max_offers?: number;
   user_preferences?: {

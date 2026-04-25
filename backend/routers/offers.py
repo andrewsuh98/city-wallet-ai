@@ -1,7 +1,9 @@
+import asyncio
 import json
 import logging
-from typing import Optional
+import uuid
 
+import anthropic
 from fastapi import APIRouter, HTTPException, Query
 
 from database import get_db
@@ -54,7 +56,7 @@ def _row_to_offer(row) -> Offer:
 async def generate_offers_endpoint(request: GenerateOffersRequest):
     try:
         return await generate_offers(request)
-    except Exception:
+    except (anthropic.APIError, asyncio.TimeoutError, json.JSONDecodeError):
         logger.exception("Offer generation failed")
         raise HTTPException(status_code=503, detail="Offer generation unavailable")
 
@@ -62,14 +64,14 @@ async def generate_offers_endpoint(request: GenerateOffersRequest):
 @router.get("", response_model=OfferListResponse)
 async def list_offers(
     session_id: str = Query(...),
-    status: Optional[str] = Query(None),
+    status: OfferStatus | None = Query(None),
 ):
     db = await get_db()
     try:
-        if status:
+        if status is not None:
             cursor = await db.execute(
                 "SELECT * FROM offers WHERE user_session_id = ? AND status = ? ORDER BY created_at DESC",
-                (session_id, status),
+                (session_id, status.value),
             )
         else:
             cursor = await db.execute(
@@ -107,10 +109,17 @@ async def update_offer_status(offer_id: str, body: OfferActionRequest):
                 detail=f"Offer has already been {row['status']}",
             )
 
-        await db.execute(
-            "UPDATE offers SET status = ? WHERE id = ?",
-            (new_status, offer_id),
-        )
+        if body.action == "accept":
+            new_token = str(uuid.uuid4())
+            await db.execute(
+                "UPDATE offers SET status = ?, redemption_token = ? WHERE id = ?",
+                (new_status, new_token, offer_id),
+            )
+        else:
+            await db.execute(
+                "UPDATE offers SET status = ? WHERE id = ?",
+                (new_status, offer_id),
+            )
         await db.commit()
 
         cursor = await db.execute("SELECT * FROM offers WHERE id = ?", (offer_id,))

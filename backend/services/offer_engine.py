@@ -1,12 +1,14 @@
 import json
 import logging
 import math
+import re
 import uuid
 from datetime import datetime, timedelta, timezone
 from time import perf_counter
 from typing import Optional
 
 import anthropic
+from anthropic.types import ToolUseBlock
 
 from config import ANTHROPIC_API_KEY, city_config
 from database import get_db
@@ -122,6 +124,12 @@ _OFFER_SCHEMA = {
     "additionalProperties": False,
 }
 
+_OFFER_TOOL = {
+    "name": "emit_offers",
+    "description": "Emit the batch of personalized offers for the eligible merchants.",
+    "input_schema": _OFFER_SCHEMA,
+}
+
 
 def _haversine_meters(lat1: float, lng1: float, lat2: float, lng2: float) -> float:
     R = 6_371_000
@@ -143,14 +151,15 @@ def _urgency_label(score: float) -> str:
 
 
 def _clamp_discount(value_str: str, rule: MerchantRule) -> str:
-    try:
-        numeric = float("".join(c for c in value_str if c.isdigit() or c == "."))
-        clamped = max(rule.min_discount_percent, min(rule.max_discount_percent, numeric))
-        if "%" in value_str:
-            return f"{int(clamped)}%"
-        return f"${clamped:.0f} off"
-    except (ValueError, TypeError):
+    if rule.offer_type != "percentage_discount":
+        return value_str
+
+    match = re.search(r"\d+(?:\.\d+)?", value_str or "")
+    if not match:
         return f"{rule.min_discount_percent}%"
+    numeric = float(match.group(0))
+    clamped = int(max(rule.min_discount_percent, min(rule.max_discount_percent, numeric)))
+    return f"{clamped}%"
 
 
 def _context_summary(context: ContextState) -> str:
@@ -313,10 +322,14 @@ async def call_claude(user_prompt: str) -> dict:
             }
         ],
         messages=[{"role": "user", "content": user_prompt}],
-        output_config={"format": {"type": "json_schema", "schema": _OFFER_SCHEMA}},
+        tools=[_OFFER_TOOL],  # type: ignore[arg-type]
+        tool_choice={"type": "tool", "name": "emit_offers"},
         timeout=5.0,
     )
-    return json.loads(response.content[0].text)
+    for block in response.content:
+        if isinstance(block, ToolUseBlock):
+            return block.input  # type: ignore[return-value]
+    raise ValueError("Claude response missing emit_offers tool call")
 
 
 async def process_response(
@@ -425,7 +438,7 @@ async def generate_offers(request: GenerateOffersRequest) -> GenerateOffersRespo
 
     try:
         user_preferences = await get_user_preferences(
-            request.session_id, request.context.context_tags
+            db, request.session_id, request.context.context_tags
         )
 
         merchant_rules = await match_merchants(request.context, db)

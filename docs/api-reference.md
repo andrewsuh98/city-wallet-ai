@@ -108,6 +108,7 @@ Generate personalized offers based on the current context. This is the core endp
 
 ```json
 {
+  "session_id": "a7f3b2c1-4d5e-6f7a-8b9c-0d1e2f3a4b5c",
   "context": { "<ContextState object from POST /api/context>" : "..." },
   "max_offers": 3,
   "user_preferences": {
@@ -140,7 +141,6 @@ Generate personalized offers based on the current context. This is the core endp
       "expires_at": "2026-04-25T15:02:05Z",
       "style": {
         "background_gradient": ["#4A2C2A", "#D4A574"],
-        "emoji": "coffee",
         "tone": "warm",
         "headline_style": "emotional"
       },
@@ -156,7 +156,7 @@ Generate personalized offers based on the current context. This is the core endp
 
 **Latency:** Typically 1.5-3 seconds (dominated by Claude API call). The frontend should show a loading skeleton during this time.
 
-**Fallback:** If Claude fails or times out (5s), the backend returns pre-generated fallback offers from a small pool.
+**Failure:** If Claude fails or times out (5s), the backend responds with `503 Offer generation unavailable`. There is no fallback pool.
 
 ---
 
