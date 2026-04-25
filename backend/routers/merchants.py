@@ -49,6 +49,11 @@ async def list_merchants():
                     longitude=row["longitude"],
                     address=row["address"] or "",
                     image_url=row["image_url"],
+                    brand_voice=row["brand_voice"],
+                    signature_items=json.loads(row["signature_items"] or "[]"),
+                    target_demographics=json.loads(row["target_demographics"] or "[]"),
+                    primary_goal=row["primary_goal"],
+                    daily_budget_usd=row["daily_budget_usd"],
                     rules=rules,
                 )
             )

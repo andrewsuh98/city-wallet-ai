@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from database import init_db
-from routers import merchants
+from routers import context, merchants
 
 
 @asynccontextmanager
@@ -23,6 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(context.router)
 app.include_router(merchants.router)
 
 

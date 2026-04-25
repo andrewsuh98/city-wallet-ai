@@ -31,6 +31,11 @@
       "longitude": -73.9870,
       "address": "1 Rockefeller Plaza, New York, NY 10020",
       "image_url": null,
+      "brand_voice": "warm",
+      "signature_items": ["cappuccino", "single-origin pour-over", "almond croissant"],
+      "target_demographics": ["young_professional", "tourist", "office_worker"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 50.00,
       "rules": [
         {
           "max_discount_percent": 20,
@@ -60,6 +65,11 @@
       "longitude": -74.0021,
       "address": "7 Carmine St, New York, NY 10014",
       "image_url": null,
+      "brand_voice": "neighborly",
+      "signature_items": ["pepperoni slice", "margherita slice", "fresh mozzarella slice"],
+      "target_demographics": ["local", "student", "tourist"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 40.00,
       "rules": [
         {
           "max_discount_percent": 15,
@@ -89,6 +99,11 @@
       "longitude": -73.9909,
       "address": "828 Broadway, New York, NY 10003",
       "image_url": null,
+      "brand_voice": "sophisticated",
+      "signature_items": ["rare first editions", "Strand tote bag", "staff picks"],
+      "target_demographics": ["local", "tourist", "student"],
+      "primary_goal": "loyalty_reward",
+      "daily_budget_usd": 30.00,
       "rules": [
         {
           "max_discount_percent": 20,
@@ -118,6 +133,11 @@
       "longitude": -73.9804,
       "address": "167 W 74th St, New York, NY 10023",
       "image_url": null,
+      "brand_voice": "playful",
+      "signature_items": ["chocolate chip walnut cookie", "dark chocolate peanut butter cookie"],
+      "target_demographics": ["tourist", "family", "young_professional"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 35.00,
       "rules": [
         {
           "max_discount_percent": 15,
@@ -147,6 +167,11 @@
       "longitude": -73.9881,
       "address": "Madison Square Park, New York, NY 10010",
       "image_url": null,
+      "brand_voice": "playful",
+      "signature_items": ["ShackBurger", "crinkle-cut fries", "chocolate shake"],
+      "target_demographics": ["tourist", "office_worker", "family"],
+      "primary_goal": "event_capture",
+      "daily_budget_usd": 60.00,
       "rules": [
         {
           "max_discount_percent": 15,
@@ -176,6 +201,11 @@
       "longitude": -73.9959,
       "address": "52 Prince St, New York, NY 10012",
       "image_url": null,
+      "brand_voice": "sophisticated",
+      "signature_items": ["staff picks", "literary fiction", "espresso"],
+      "target_demographics": ["local", "young_professional", "tourist"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 25.00,
       "rules": [
         {
           "max_discount_percent": 20,
@@ -205,6 +235,11 @@
       "longitude": -73.9882,
       "address": "373 Broome St, New York, NY 10013",
       "image_url": null,
+      "brand_voice": "playful",
+      "signature_items": ["iced matcha latte", "pink drink", "matcha soft serve"],
+      "target_demographics": ["young_professional", "student", "tourist"],
+      "primary_goal": "loyalty_reward",
+      "daily_budget_usd": 40.00,
       "rules": [
         {
           "max_discount_percent": 15,
@@ -234,6 +269,11 @@
       "longitude": -73.9772,
       "address": "956 2nd Ave, New York, NY 10022",
       "image_url": null,
+      "brand_voice": "sophisticated",
+      "signature_items": ["truffle mac & cheese", "burger", "ricotta gnocchi"],
+      "target_demographics": ["young_professional", "couple", "tourist"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 45.00,
       "rules": [
         {
           "max_discount_percent": 20,
@@ -263,6 +303,11 @@
       "longitude": -73.9830,
       "address": "10 Columbus Cir, New York, NY 10019",
       "image_url": null,
+      "brand_voice": "friendly",
+      "signature_items": ["hot bar", "365 brand basics", "prepared salads"],
+      "target_demographics": ["local", "office_worker", "family"],
+      "primary_goal": "loyalty_reward",
+      "daily_budget_usd": 80.00,
       "rules": [
         {
           "max_discount_percent": 10,
@@ -292,6 +337,11 @@
       "longitude": -73.9712,
       "address": "897 Broadway, New York, NY 10003",
       "image_url": null,
+      "brand_voice": "sophisticated",
+      "signature_items": ["spin class", "personal training session", "recovery suite"],
+      "target_demographics": ["young_professional", "couple"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 30.00,
       "rules": [
         {
           "max_discount_percent": 20,
@@ -321,6 +371,11 @@
       "longitude": -73.9891,
       "address": "900 Broadway, New York, NY 10003",
       "image_url": null,
+      "brand_voice": "neighborly",
+      "signature_items": ["Flagship cheddar", "world's best mac & cheese", "cheese flight"],
+      "target_demographics": ["tourist", "office_worker", "couple"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 25.00,
       "rules": [
         {
           "max_discount_percent": 15,
@@ -350,6 +405,11 @@
       "longitude": -74.0023,
       "address": "30 W 8th St, New York, NY 10011",
       "image_url": null,
+      "brand_voice": "warm",
+      "signature_items": ["Hair Bender espresso", "cold brew", "Stumptown drip"],
+      "target_demographics": ["local", "young_professional", "student"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 45.00,
       "rules": [
         {
           "max_discount_percent": 20,
