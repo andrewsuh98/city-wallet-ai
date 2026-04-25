@@ -76,7 +76,7 @@
 
   /* Font families — next/font vars (--font-fraunces etc.) override primaries at runtime */
   --font-display: var(--font-fraunces, "Fraunces"), "Iowan Old Style", Georgia, serif;
-  --font-body:    var(--font-inter-tight, "Inter Tight"), -apple-system, "SF Pro Text", system-ui, sans-serif;
+  --font-body:    var(--font-plus-jakarta, "Plus Jakarta Sans"), -apple-system, "SF Pro Text", system-ui, sans-serif;
   --font-mono:    var(--font-jetbrains-mono, "JetBrains Mono"), ui-monospace, "SF Mono", Menlo, monospace;
 
   /* Type scale */
@@ -262,4 +262,34 @@ html, body {
 ::selection {
   background: var(--cw-red-200);
   color: var(--cw-paper-900);
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-2.5deg); }
+  40% { transform: rotate(2.5deg); }
+  60% { transform: rotate(-1.5deg); }
+  80% { transform: rotate(1.5deg); }
+}
+
+.ticket-tear {
+  position: relative;
+}
+.ticket-tear::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  right: -1px;
+  top: -10px;
+  height: 20px;
+  background:
+    radial-gradient(circle at 0 50%, var(--bg-page) 10px, transparent 10.5px),
+    radial-gradient(circle at 100% 50%, var(--bg-page) 10px, transparent 10.5px);
+  pointer-events: none;
+  z-index: 1;
 }

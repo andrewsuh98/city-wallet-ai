@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import ContextBar from "@/components/ContextBar";
 import OfferCard from "@/components/OfferCard";
 import BottomNav from "@/components/BottomNav";
+import CategoryChips from "@/components/CategoryChips";
 import ConsentModal, { getConsent, setConsent, getTaste, getProfile } from "@/components/ConsentModal";
 import type { Offer, MerchantCategory } from "@/lib/types";
 
@@ -29,9 +29,8 @@ const mockOffers: Offer[] = [
     merchant_name: "Blue Bottle Coffee",
     merchant_category: "cafe",
     headline: "Cold outside? Your cappuccino is waiting.",
-    subtext: "2 min walk \u00b7 Rockefeller Center",
-    description:
-      "Warm up at Blue Bottle Coffee. Quiet right now, no queue, your usual spot by the window is free.",
+    subtext: "2 min walk · Rockefeller Center",
+    description: "Warm up at Blue Bottle Coffee. Quiet right now, no queue, your usual spot by the window is free.",
     discount_value: "15%",
     discount_type: "percentage_discount",
     context_tags: ["rainy", "cold", "quiet_cafes"],
@@ -39,8 +38,8 @@ const mockOffers: Offer[] = [
     created_at: new Date().toISOString(),
     expires_at: new Date(Date.now() + 25 * 60000).toISOString(),
     style: {
-      background_gradient: [],
-      emoji: "",
+      background_gradient: ["#4A2C2A", "#D4A574"],
+      emoji: "☕",
       tone: "warm",
       headline_style: "emotional",
     },
@@ -54,18 +53,17 @@ const mockOffers: Offer[] = [
     merchant_name: "Joe's Pizza",
     merchant_category: "restaurant",
     headline: "Rain keeping people away. The oven is not.",
-    subtext: "4 min walk \u00b7 Greenwich Village",
-    description:
-      "Iconic New York slices since 1975. Wet streets mean shorter wait. Fresh out of the oven.",
+    subtext: "4 min walk · Greenwich Village",
+    description: "Iconic New York slices since 1975. Wet streets mean shorter wait. Fresh out of the oven.",
     discount_value: "10%",
     discount_type: "percentage_discount",
     context_tags: ["rainy", "lunch_hour"],
     why_now: "Rain is keeping foot traffic low. Pizza is fresh.",
     created_at: new Date().toISOString(),
-    expires_at: new Date(Date.now() + 18 * 60000).toISOString(),
+    expires_at: new Date(Date.now() + 8 * 60000).toISOString(),
     style: {
-      background_gradient: [],
-      emoji: "",
+      background_gradient: ["#1E3A8A", "#3B82F6"],
+      emoji: "🍕",
       tone: "playful",
       headline_style: "emotional",
     },
@@ -79,9 +77,8 @@ const mockOffers: Offer[] = [
     merchant_name: "The Strand Bookstore",
     merchant_category: "bookstore",
     headline: "18 miles of books. Perfect afternoon for it.",
-    subtext: "6 min walk \u00b7 Union Square",
-    description:
-      "Weekend rain has cleared the usual crowds. The stacks are yours.",
+    subtext: "6 min walk · Union Square",
+    description: "Weekend rain has cleared the usual crowds. The stacks are yours.",
     discount_value: "20%",
     discount_type: "percentage_discount",
     context_tags: ["rainy", "weekend", "quiet_period"],
@@ -89,13 +86,109 @@ const mockOffers: Offer[] = [
     created_at: new Date().toISOString(),
     expires_at: new Date(Date.now() + 45 * 60000).toISOString(),
     style: {
-      background_gradient: [],
-      emoji: "",
+      background_gradient: ["#1a1a2e", "#16213e"],
+      emoji: "📚",
       tone: "sophisticated",
       headline_style: "emotional",
     },
     status: "active",
     distance_meters: 520,
+    redemption_token: null,
+  },
+  {
+    id: "off_mock_4",
+    merchant_id: "m_004",
+    merchant_name: "Levain Bakery",
+    merchant_category: "bakery",
+    headline: "Warm cookies. Cold rain. You do the math.",
+    subtext: "3 min walk · Upper West Side",
+    description: "Their famous chocolate chip walnut cookie, straight from the oven. Rainy days are cookie days.",
+    discount_value: "12%",
+    discount_type: "percentage_discount",
+    context_tags: ["rainy", "cold", "quiet_period"],
+    why_now: "Rainy afternoon, bakery is quiet, cookies are fresh.",
+    created_at: new Date().toISOString(),
+    expires_at: new Date(Date.now() + 20 * 60000).toISOString(),
+    style: {
+      background_gradient: ["#92400E", "#D97706"],
+      emoji: "🍪",
+      tone: "warm",
+      headline_style: "emotional",
+    },
+    status: "active",
+    distance_meters: 240,
+    redemption_token: null,
+  },
+  {
+    id: "off_mock_5",
+    merchant_id: "m_005",
+    merchant_name: "Shake Shack",
+    merchant_category: "restaurant",
+    headline: "Burger break? The line is short for once.",
+    subtext: "5 min walk · Madison Square Park",
+    description: "Rain has cleared the usual lunchtime crowd. ShackBurger and fries, no wait.",
+    discount_value: "8%",
+    discount_type: "percentage_discount",
+    context_tags: ["rainy", "lunch_hour", "quiet_period"],
+    why_now: "Rainy lunch hour — line is unusually short.",
+    created_at: new Date().toISOString(),
+    expires_at: new Date(Date.now() + 12 * 60000).toISOString(),
+    style: {
+      background_gradient: ["#065F46", "#10B981"],
+      emoji: "🍔",
+      tone: "playful",
+      headline_style: "emotional",
+    },
+    status: "active",
+    distance_meters: 410,
+    redemption_token: null,
+  },
+  {
+    id: "off_mock_6",
+    merchant_id: "m_006",
+    merchant_name: "Cha Cha Matcha",
+    merchant_category: "cafe",
+    headline: "Rainy day matcha. Green calm in the grey.",
+    subtext: "3 min walk · NoLIta",
+    description: "Cozy up with a ceremonial-grade matcha latte. The rain outside makes it taste better.",
+    discount_value: "15%",
+    discount_type: "percentage_discount",
+    context_tags: ["rainy", "quiet_cafes", "afternoon"],
+    why_now: "Quiet afternoon, perfect for a slow matcha moment.",
+    created_at: new Date().toISOString(),
+    expires_at: new Date(Date.now() + 30 * 60000).toISOString(),
+    style: {
+      background_gradient: ["#14532D", "#4ADE80"],
+      emoji: "🍵",
+      tone: "warm",
+      headline_style: "emotional",
+    },
+    status: "active",
+    distance_meters: 260,
+    redemption_token: null,
+  },
+  {
+    id: "off_mock_7",
+    merchant_id: "m_007",
+    merchant_name: "Equinox",
+    merchant_category: "fitness",
+    headline: "Skip the rain. Hit the gym instead.",
+    subtext: "7 min walk · Hudson Yards",
+    description: "Turn a rainy afternoon into gains. Day pass includes pool, sauna, and all classes.",
+    discount_value: "25%",
+    discount_type: "percentage_discount",
+    context_tags: ["rainy", "afternoon", "weekend"],
+    why_now: "Weekend rain — perfect excuse to try a workout instead.",
+    created_at: new Date().toISOString(),
+    expires_at: new Date(Date.now() + 55 * 60000).toISOString(),
+    style: {
+      background_gradient: ["#18181B", "#3F3F46"],
+      emoji: "🏋️",
+      tone: "sophisticated",
+      headline_style: "factual",
+    },
+    status: "active",
+    distance_meters: 580,
     redemption_token: null,
   },
 ];
@@ -142,6 +235,7 @@ function LocationBanner({ onEnable }: { onEnable: () => void }) {
 
 export default function Home() {
   const [consentStatus, handleConsent] = useConsentStatus();
+  const [categoryFilter, setCategoryFilter] = useState("all");
 
   const handleEnableFromBanner = () => {
     setConsent(true);
@@ -158,12 +252,26 @@ export default function Home() {
 
   const taste = getTaste();
   const profile = getProfile();
-  const visibleOffers = (() => {
+
+  const tasteFiltered = (() => {
     if (!taste || taste.categories.length === 0) return mockOffers;
     const cats = new Set(taste.categories.map((c) => TASTE_TO_MERCHANT[c]).filter(Boolean));
     const filtered = mockOffers.filter((o) => cats.has(o.merchant_category));
     return filtered.length > 0 ? filtered : mockOffers;
   })();
+
+  const visibleOffers = categoryFilter === "all"
+    ? tasteFiltered
+    : tasteFiltered.filter((o) => o.merchant_category === TASTE_TO_MERCHANT[categoryFilter]);
+
+  const displayOffers = visibleOffers.length > 0 ? visibleOffers : tasteFiltered;
+
+  const offerMerchantCats = new Set(tasteFiltered.map((o) => o.merchant_category));
+  const availableTastes = new Set(
+    Object.entries(TASTE_TO_MERCHANT)
+      .filter(([, mc]) => offerMerchantCats.has(mc))
+      .map(([tasteId]) => tasteId)
+  );
 
   const heading = consentStatus === "declined"
     ? "Times Square"
@@ -177,21 +285,26 @@ export default function Home() {
         <LocationBanner onEnable={handleEnableFromBanner} />
       )}
 
-      <ContextBar />
-
-      <div className="flex h-[35vh] min-h-[200px] items-center justify-center border-b border-border-1 bg-sunken">
+      <div className="flex h-[20vh] min-h-[120px] items-center justify-center border-b border-border-1 bg-sunken">
         <div className="text-center text-small font-semibold uppercase tracking-[0.08em] text-fg-4">
-          {consentStatus === "declined" ? "Map \u00b7 Times Square (default)" : "Map \u00b7 Mapbox goes here"}
+          {consentStatus === "declined" ? "Map · Times Square (default)" : "Map · Mapbox goes here"}
         </div>
       </div>
 
-      <div className="flex-1 px-5 pt-5">
-        <div className="mb-4 text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
-          {heading} {"\u00b7"} {visibleOffers.length} {taste ? "matching" : ""} offers
+      <CategoryChips
+        selected={categoryFilter}
+        onSelect={setCategoryFilter}
+        userTastes={taste?.categories}
+        availableTastes={availableTastes}
+      />
+
+      <div className="flex-1 px-5">
+        <div className="mb-2 text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
+          {heading} {"·"} {displayOffers.length} {taste ? "matching" : ""} offers
         </div>
 
         <div className="flex flex-col gap-3">
-          {visibleOffers.map((offer) => (
+          {displayOffers.map((offer) => (
             <OfferCard
               key={offer.id}
               offer={offer}

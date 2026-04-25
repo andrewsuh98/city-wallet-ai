@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
 import "@phosphor-icons/web/regular";
 import "@phosphor-icons/web/bold";
 import "./globals.css";
@@ -9,8 +9,8 @@ const fraunces = Fraunces({
   subsets: ["latin"],
 });
 
-const interTight = Inter_Tight({
-  variable: "--font-inter-tight",
+const plusJakarta = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });
@@ -35,7 +35,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${interTight.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${fraunces.variable} ${plusJakarta.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {children}
