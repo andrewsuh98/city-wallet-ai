@@ -1,33 +1,158 @@
 @import "tailwindcss";
 
+/* Design tokens — source of truth: frontend/claude design/colors_and_type.css
+   Fonts loaded via next/font in layout.tsx; --font-* vars resolved there. */
+
 :root {
-  --background: #0f0f0f;
-  --foreground: #ffffff;
-  --surface: #1a1a1a;
-  --text-secondary: #a0a0a0;
-  --accent: #4f8cff;
-  --success: #34d399;
-  --warning: #fbbf24;
-  --danger: #ef4444;
+  /* Brand: Sparkassen-Rot HKS 13 */
+  --cw-red-50:  #fff1f2;
+  --cw-red-100: #ffd9dd;
+  --cw-red-200: #ffb3bb;
+  --cw-red-300: #ff8590;
+  --cw-red-400: #f54d5c;
+  --cw-red-500: #e30018;
+  --cw-red-600: #c20014;
+  --cw-red-700: #9c0010;
+  --cw-red-800: #6e000b;
+  --cw-red-900: #3d0006;
+
+  /* Paper neutrals */
+  --cw-paper-0:   #ffffff;
+  --cw-paper-50:  #faf7f2;
+  --cw-paper-100: #f3eee5;
+  --cw-paper-200: #e8e0d2;
+  --cw-paper-300: #d6cab5;
+  --cw-paper-400: #a89d87;
+  --cw-paper-500: #7a715f;
+  --cw-paper-600: #5a5346;
+  --cw-paper-700: #3d3830;
+  --cw-paper-800: #26221c;
+  --cw-paper-900: #15130f;
+
+  /* Situational accents */
+  --cw-warm:     #f59e0b;
+  --cw-warm-bg:  #fff4d6;
+  --cw-cool:     #1e6fb8;
+  --cw-cool-bg:  #e0eef9;
+  --cw-fresh:    #2f7d4f;
+  --cw-fresh-bg: #dcefe2;
+  --cw-dusk:     #7a4ca8;
+  --cw-dusk-bg:  #ebe1f5;
+
+  /* Semantic surfaces */
+  --bg-page:      var(--cw-paper-50);
+  --bg-card:      var(--cw-paper-0);
+  --bg-card-soft: var(--cw-paper-100);
+  --bg-sunken:    var(--cw-paper-100);
+  --bg-inverse:   var(--cw-paper-900);
+
+  /* Semantic text */
+  --fg-1:       var(--cw-paper-900);
+  --fg-2:       var(--cw-paper-700);
+  --fg-3:       var(--cw-paper-500);
+  --fg-4:       var(--cw-paper-400);
+  --fg-on-red:  #ffffff;
+  --fg-on-dark: #faf7f2;
+  --fg-link:    var(--cw-red-600);
+
+  /* Borders */
+  --border-1:   rgba(21, 19, 15, 0.08);
+  --border-2:   rgba(21, 19, 15, 0.14);
+  --border-3:   rgba(21, 19, 15, 0.22);
+  --border-red: var(--cw-red-500);
+
+  /* Actions */
+  --action-primary:         var(--cw-red-500);
+  --action-primary-hover:   var(--cw-red-600);
+  --action-primary-press:   var(--cw-red-700);
+  --action-secondary:       var(--cw-paper-900);
+  --action-secondary-hover: var(--cw-paper-800);
+
+  /* Status */
+  --status-success: #2f7d4f;
+  --status-warning: #b8860b;
+  --status-danger:  #c20014;
+  --status-info:    #1e6fb8;
+
+  /* Font families — next/font vars (--font-fraunces etc.) override primaries at runtime */
+  --font-display: var(--font-fraunces, "Fraunces"), "Iowan Old Style", Georgia, serif;
+  --font-body:    var(--font-inter-tight, "Inter Tight"), -apple-system, "SF Pro Text", system-ui, sans-serif;
+  --font-mono:    var(--font-jetbrains-mono, "JetBrains Mono"), ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Type scale */
+  --fs-hero:    44px;
+  --fs-display: 32px;
+  --fs-h1:      24px;
+  --fs-h2:      20px;
+  --fs-h3:      17px;
+  --fs-body:    15px;
+  --fs-small:   13px;
+  --fs-micro:   11px;
+
+  --lh-tight:  1.05;
+  --lh-snug:   1.2;
+  --lh-normal: 1.45;
+  --lh-loose:  1.6;
+
+  --ls-tight:  -0.02em;
+  --ls-snug:   -0.01em;
+  --ls-normal:  0;
+  --ls-wide:    0.04em;
+  --ls-caps:    0.08em;
+
+  /* Spacing (4-pt grid) */
+  --space-0:  0;
+  --space-1:  2px;
+  --space-2:  4px;
+  --space-3:  8px;
+  --space-4:  12px;
+  --space-5:  16px;
+  --space-6:  20px;
+  --space-7:  24px;
+  --space-8:  32px;
+  --space-9:  40px;
+  --space-10: 56px;
+  --space-11: 72px;
+  --space-12: 96px;
+
+  /* Radii */
+  --radius-1:    4px;
+  --radius-2:    8px;
+  --radius-3:    12px;
+  --radius-4:    18px;
+  --radius-5:    24px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-1:     0 1px 2px rgba(21, 19, 15, 0.06);
+  --shadow-2:     0 2px 6px rgba(21, 19, 15, 0.06), 0 1px 2px rgba(21, 19, 15, 0.04);
+  --shadow-3:     0 8px 20px rgba(21, 19, 15, 0.08), 0 2px 6px rgba(21, 19, 15, 0.04);
+  --shadow-4:     0 18px 40px rgba(21, 19, 15, 0.12), 0 4px 10px rgba(21, 19, 15, 0.06);
+  --shadow-press: inset 0 1px 2px rgba(21, 19, 15, 0.12);
+
+  /* Motion */
+  --ease-out:    cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-in-out: cubic-bezier(0.5, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.4, 0.5, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 320ms;
+  --dur-4: 520ms;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-surface: var(--surface);
-  --color-text-secondary: var(--text-secondary);
-  --color-accent: var(--accent);
-  --color-success: var(--success);
-  --color-warning: var(--warning);
-  --color-danger: var(--danger);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html, body {
+  background: var(--bg-page);
+  color: var(--fg-1);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+::selection {
+  background: var(--cw-red-200);
+  color: var(--cw-paper-900);
 }
 
 /* Scrollbar suppression */

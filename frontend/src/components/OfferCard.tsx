@@ -1,3 +1,4 @@
+import type { CSSProperties, MouseEvent } from "react";
 import type { Offer } from "@/lib/types";
 
 interface OfferCardProps {
@@ -6,97 +7,291 @@ interface OfferCardProps {
   onDismiss?: (id: string) => void;
 }
 
-function getTimeRemaining(expiresAt: string): string {
-  const diff = new Date(expiresAt).getTime() - Date.now();
-  if (diff <= 0) return "Expired";
-  const minutes = Math.ceil(diff / 60000);
-  return `${minutes}m`;
-}
+type ChipVariant = "cool" | "warm" | "fresh" | "dusk" | "neutral";
 
-const toneClasses: Record<string, string> = {
-  warm: "animate-fade-in",
-  urgent: "animate-slide-up",
-  playful: "animate-bounce-in",
-  sophisticated: "animate-fade-in",
+const TAG_VARIANT: Record<string, ChipVariant> = {
+  rainy: "cool",
+  rain: "cool",
+  cold: "cool",
+  snow: "cool",
+  storm: "cool",
+  sunny: "warm",
+  warm: "warm",
+  hot: "warm",
+  fresh: "fresh",
+  available: "fresh",
+  quiet: "fresh",
+  quiet_cafes: "fresh",
+  quiet_period: "fresh",
+  evening: "dusk",
+  dusk: "dusk",
+  events: "dusk",
+  concert: "dusk",
+  weekend: "dusk",
 };
 
+const TAG_ICON: Record<string, string> = {
+  rainy: "ph-cloud-rain",
+  rain: "ph-cloud-rain",
+  cold: "ph-thermometer-cold",
+  snow: "ph-snowflake",
+  storm: "ph-cloud-lightning",
+  sunny: "ph-sun",
+  warm: "ph-sun",
+  hot: "ph-sun",
+  fresh: "ph-coffee",
+  quiet: "ph-chart-bar",
+  quiet_cafes: "ph-coffee",
+  quiet_period: "ph-chart-bar",
+  lunch_hour: "ph-fork-knife",
+  weekend: "ph-calendar",
+  evening: "ph-moon",
+  dusk: "ph-moon",
+  events: "ph-music-notes",
+  concert: "ph-music-notes",
+};
+
+const CHIP_STYLE: Record<ChipVariant, { background: string; color: string }> = {
+  cool:    { background: "var(--cw-cool-bg)",   color: "var(--cw-cool)" },
+  warm:    { background: "var(--cw-warm-bg)",   color: "var(--cw-warm)" },
+  fresh:   { background: "var(--cw-fresh-bg)",  color: "var(--cw-fresh)" },
+  dusk:    { background: "var(--cw-dusk-bg)",   color: "var(--cw-dusk)" },
+  neutral: { background: "var(--cw-paper-100)", color: "var(--fg-2)" },
+};
+
+const chipBase: CSSProperties = {
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "5px",
+  padding: "4px 9px",
+  borderRadius: "var(--radius-pill)",
+  fontFamily: "var(--font-body)",
+  fontSize: "10px",
+  fontWeight: 600,
+  letterSpacing: "0.04em",
+  textTransform: "uppercase",
+  whiteSpace: "nowrap",
+};
+
+function pickPrimaryTag(tags: string[]): string | null {
+  for (const tag of tags) {
+    if (TAG_VARIANT[tag] || TAG_ICON[tag]) return tag;
+  }
+  return tags[0] ?? null;
+}
+
+function formatExpiry(expiresAt: string): string {
+  const target = new Date(expiresAt);
+  const diff = target.getTime() - Date.now();
+  if (diff <= 0) return "closed";
+  const h = target.getHours().toString().padStart(2, "0");
+  const m = target.getMinutes().toString().padStart(2, "0");
+  return `until ${h}:${m}`;
+}
+
+function formatDistance(meters: number): string {
+  if (meters < 1000) return `${Math.round(meters)}m`;
+  return `${(meters / 1000).toFixed(1)}km`;
+}
+
+function formatDiscount(value: string): string {
+  if (!value) return "Accept";
+  if (value.startsWith("−") || value.startsWith("-")) return value;
+  if (value.endsWith("%")) return `−${value}`;
+  return value;
+}
+
 export default function OfferCard({ offer, onAccept, onDismiss }: OfferCardProps) {
-  const gradient = `linear-gradient(135deg, ${offer.style.background_gradient[0]}, ${offer.style.background_gradient[1]})`;
-  const timeLeft = getTimeRemaining(offer.expires_at);
-  const isExpired = timeLeft === "Expired";
+  const expiresMs = new Date(offer.expires_at).getTime() - Date.now();
+  const isExpired = expiresMs <= 0;
+  const isActive = !isExpired && offer.status === "active";
+
+  const primaryTag = pickPrimaryTag(offer.context_tags);
+  const variant: ChipVariant = (primaryTag ? TAG_VARIANT[primaryTag] : undefined) ?? "neutral";
+  const chipColor = CHIP_STYLE[variant];
+  const tagIcon = (primaryTag ? TAG_ICON[primaryTag] : undefined) ?? "ph-tag";
+  const tagLabel = (primaryTag ?? "").replace(/_/g, " ");
+
+  const merchantInitial = offer.merchant_name.charAt(0).toUpperCase();
+  const expiry = formatExpiry(offer.expires_at);
+  const discountLabel = formatDiscount(offer.discount_value);
 
   return (
-    <div
-      className={`relative rounded-2xl p-5 shadow-lg ${toneClasses[offer.style.tone] || ""} ${isExpired ? "opacity-50" : ""}`}
-      style={{ background: gradient }}
+    <article
+      style={{
+        background: "var(--bg-card)",
+        borderRadius: "var(--radius-4)",
+        padding: "18px",
+        border: "1px solid var(--border-1)",
+        boxShadow: isActive ? "var(--shadow-2)" : "var(--shadow-1)",
+        opacity: isExpired ? 0.5 : 1,
+        transition: `box-shadow var(--dur-2) var(--ease-out)`,
+      }}
     >
-      {/* Top row: emoji + badges */}
-      <div className="flex items-start justify-between mb-3">
-        <span className="text-5xl leading-none">{offer.style.emoji}</span>
-        <div className="flex gap-2">
-          {offer.distance_meters != null && (
-            <span className="rounded-full bg-black/30 px-2.5 py-1 text-xs font-medium text-white/90">
-              {offer.distance_meters < 1000
-                ? `${Math.round(offer.distance_meters)}m`
-                : `${(offer.distance_meters / 1000).toFixed(1)}km`}
-            </span>
-          )}
-        </div>
+      {/* Context chips */}
+      <div style={{ display: "flex", gap: "6px", marginBottom: "12px", flexWrap: "wrap" }}>
+        {primaryTag && (
+          <span style={{ ...chipBase, ...chipColor }}>
+            <i className={`ph ${tagIcon}`} style={{ fontSize: "12px" }} />
+            {tagLabel}
+          </span>
+        )}
+        {offer.distance_meters != null && (
+          <span style={{ ...chipBase, ...CHIP_STYLE.neutral }}>
+            <i className="ph ph-map-pin" style={{ fontSize: "12px" }} />
+            {formatDistance(offer.distance_meters)}
+          </span>
+        )}
       </div>
 
-      {/* Headline */}
+      {/* Hero — Fraunces */}
       <h3
-        className={`mb-1 leading-tight text-white ${
-          offer.style.headline_style === "emotional"
-            ? "text-2xl font-bold"
-            : "text-xl font-semibold"
-        }`}
+        style={{
+          fontFamily: "var(--font-display)",
+          fontSize: "26px",
+          lineHeight: "1.05",
+          letterSpacing: "var(--ls-tight)",
+          fontWeight: 500,
+          color: "var(--fg-1)",
+          margin: "0 0 8px",
+          fontVariationSettings: '"opsz" 96, "SOFT" 50',
+          textWrap: "balance",
+        }}
       >
         {offer.headline}
       </h3>
 
-      {/* Subtext */}
-      <p className="text-base font-medium text-white/90 mb-4">{offer.subtext}</p>
+      {/* Meta */}
+      <div
+        style={{
+          fontFamily: "var(--font-body)",
+          fontSize: "var(--fs-small)",
+          color: "var(--fg-3)",
+          marginBottom: "16px",
+        }}
+      >
+        {offer.subtext}
+        {!isExpired && <> · {expiry}</>}
+      </div>
 
-      {/* Bottom row: CTA + expiry */}
-      <div className="flex items-center justify-between">
-        {!isExpired && offer.status === "active" ? (
+      {/* Bottom row: merchant + CTA */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: 0 }}>
+          <div
+            style={{
+              width: "28px",
+              height: "28px",
+              borderRadius: "6px",
+              background: "var(--cw-paper-200)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontFamily: "var(--font-display)",
+              fontWeight: 600,
+              color: "var(--fg-2)",
+              fontSize: "14px",
+              flexShrink: 0,
+            }}
+          >
+            {merchantInitial}
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "var(--fs-small)",
+                fontWeight: 600,
+                color: "var(--fg-1)",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {offer.merchant_name}
+            </div>
+            <div
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "var(--fs-micro)",
+                color: "var(--fg-3)",
+              }}
+            >
+              {offer.merchant_category}
+            </div>
+          </div>
+        </div>
+
+        {isActive ? (
           <button
             onClick={() => onAccept?.(offer.id)}
-            className="rounded-full bg-white px-5 py-2 text-sm font-semibold text-black transition-transform hover:scale-105 active:scale-95"
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "var(--fs-small)",
+              fontWeight: 600,
+              padding: "8px 14px",
+              borderRadius: "var(--radius-2)",
+              background: "var(--action-primary)",
+              color: "var(--fg-on-red)",
+              border: "none",
+              cursor: "pointer",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              flexShrink: 0,
+              transition: `background var(--dur-1) var(--ease-out)`,
+            }}
+            onMouseDown={(e: MouseEvent<HTMLButtonElement>) => (e.currentTarget.style.background = "var(--action-primary-press)")}
+            onMouseUp={(e: MouseEvent<HTMLButtonElement>) => (e.currentTarget.style.background = "var(--action-primary)")}
+            onMouseLeave={(e: MouseEvent<HTMLButtonElement>) => (e.currentTarget.style.background = "var(--action-primary)")}
           >
-            Accept
+            {discountLabel}
+            <i className="ph ph-arrow-right" style={{ fontSize: "14px" }} />
           </button>
         ) : offer.status === "accepted" ? (
-          <span className="rounded-full bg-emerald-500/20 border border-emerald-400/50 px-4 py-2 text-sm font-semibold text-emerald-300">
+          <span
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "var(--fs-small)",
+              fontWeight: 600,
+              color: "var(--status-success)",
+              padding: "6px 12px",
+              borderRadius: "var(--radius-pill)",
+              background: "var(--cw-fresh-bg)",
+            }}
+          >
             Accepted
           </span>
         ) : (
-          <span className="text-sm text-white/50">Expired</span>
-        )}
-
-        <div className="flex items-center gap-3">
           <span
-            className={`text-xs font-medium ${
-              isExpired
-                ? "text-white/40"
-                : timeLeft <= "5m"
-                  ? "text-red-300"
-                  : "text-white/70"
-            }`}
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "var(--fs-small)",
+              color: "var(--fg-3)",
+            }}
           >
-            {isExpired ? "Expired" : `expires in ${timeLeft}`}
+            Window closed
           </span>
-          {!isExpired && offer.status === "active" && (
-            <button
-              onClick={() => onDismiss?.(offer.id)}
-              className="text-xs text-white/40 hover:text-white/70 transition-colors"
-            >
-              dismiss
-            </button>
-          )}
-        </div>
+        )}
       </div>
-    </div>
+
+      {isActive && (
+        <div style={{ marginTop: "10px", textAlign: "right" }}>
+          <button
+            onClick={() => onDismiss?.(offer.id)}
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "var(--fs-small)",
+              color: "var(--fg-3)",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: 0,
+            }}
+          >
+            Maybe later
+          </button>
+        </div>
+      )}
+    </article>
   );
 }
