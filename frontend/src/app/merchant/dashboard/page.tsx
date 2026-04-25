@@ -66,7 +66,7 @@ function WeekdayAnalysisChart({ stats }: { stats: MerchantDashboardStats }) {
     <div style={{ paddingTop: "32px", paddingBottom: "16px", borderBottom: "1px solid var(--border-2)", marginBottom: "16px" }}>
       <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", fontWeight: 500, color: "var(--fg-1)", marginBottom: "8px", letterSpacing: "var(--ls-tight)" }}>Weekday Analysis</h2>
       <p style={{ fontFamily: "var(--font-body)", fontSize: "var(--fs-body)", color: "var(--fg-2)", marginBottom: "32px", lineHeight: 1.4 }}>
-        Average coupon redemptions per day of the week. This helps you identify which days consistently need the most platform support.
+        Average coupon redemptions per day of the week.
       </p>
 
       <ResponsiveContainer width="100%" height={240}>
@@ -103,7 +103,7 @@ function HourlyActivationChart({ stats }: { stats: MerchantDashboardStats }) {
     <div style={{ paddingTop: "32px", paddingBottom: "16px" }}>
       <h2 style={{ fontFamily: "var(--font-display)", fontSize: "32px", fontWeight: 500, color: "var(--fg-1)", marginBottom: "8px", letterSpacing: "var(--ls-tight)" }}>Hourly Activations</h2>
       <p style={{ fontFamily: "var(--font-body)", fontSize: "var(--fs-body)", color: "var(--fg-2)", marginBottom: "32px", lineHeight: 1.4 }}>
-        Average redemptions by hour across the week. Notice how offers fire precisely during your target slow periods to boost foot traffic.
+        Average redemptions by hour across the week.
       </p>
       
       <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "32px", fontFamily: "var(--font-body)", fontSize: "12px", color: "var(--fg-2)", fontWeight: 600 }}>
@@ -146,58 +146,64 @@ function DashboardContent() {
   }, [merchantId]);
 
   if (loading) return (
-    <div style={{ background: "var(--bg-page)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <header style={{ padding: "32px 24px", borderBottom: "1px solid var(--border-2)" }}>
-        <span style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "var(--ls-caps)", textTransform: "uppercase", color: "var(--fg-3)" }}>City Wallet Partner</span>
-      </header>
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
-        <span className="w-6 h-6 border-2 border-var(--fg-3) border-t-var(--fg-1) rounded-full animate-spin" />
+    <div style={{ background: "var(--bg-page)", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div style={{ width: "100%", maxWidth: "400px", display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <header style={{ padding: "32px 24px", borderBottom: "1px solid var(--border-2)" }}>
+          <span style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "var(--ls-caps)", textTransform: "uppercase", color: "var(--fg-3)" }}>City Wallet Partner</span>
+        </header>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <span className="w-6 h-6 border-2 border-var(--fg-3) border-t-var(--fg-1) rounded-full animate-spin" />
+        </div>
       </div>
       <MerchantBottomNav />
     </div>
   );
 
   if (!stats) return (
-    <div style={{ background: "var(--bg-page)", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
-      <header style={{ padding: "32px 24px", borderBottom: "1px solid var(--border-2)" }}>
-        <span style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "var(--ls-caps)", textTransform: "uppercase", color: "var(--fg-3)" }}>City Wallet Partner</span>
-      </header>
-      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--fg-3)", fontSize: "14px" }}>
-        Could not load dashboard
+    <div style={{ background: "var(--bg-page)", minHeight: "100vh", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div style={{ width: "100%", maxWidth: "400px", display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+        <header style={{ padding: "32px 24px", borderBottom: "1px solid var(--border-2)" }}>
+          <span style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "var(--ls-caps)", textTransform: "uppercase", color: "var(--fg-3)" }}>City Wallet Partner</span>
+        </header>
+        <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", color: "var(--fg-3)", fontSize: "14px" }}>
+          Could not load dashboard
+        </div>
       </div>
       <MerchantBottomNav />
     </div>
   );
 
   return (
-    <div style={{ background: "var(--bg-page)", minHeight: "100vh", paddingBottom: "100px" }}>
-      <header style={{ padding: "32px 24px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "var(--ls-caps)", textTransform: "uppercase", color: "var(--fg-4)" }}>Partner Dashboard</span>
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-          {stats.is_paused ? (
-            <><span style={{ width: "8px", height: "8px", borderRadius: "99px", background: "var(--cw-warm)" }} /><span style={{ fontSize: "12px", fontWeight: 600, color: "var(--cw-warm)" }}>Paused</span></>
-          ) : (
-            <><span style={{ width: "8px", height: "8px", borderRadius: "99px", background: "var(--cw-fresh)" }} /><span style={{ fontSize: "12px", fontWeight: 600, color: "var(--cw-fresh)" }}>Live</span></>
-          )}
-        </div>
-      </header>
-
-      <div className="animate-fade-in" style={{ padding: "0 24px" }}>
-        <div style={{ marginBottom: "40px" }}>
-          <h1 style={{ fontFamily: "var(--font-display)", fontSize: "40px", fontWeight: 500, lineHeight: 1.05, letterSpacing: "-0.02em", color: "var(--fg-1)", marginBottom: "8px" }}>{name}</h1>
-          <p style={{ fontSize: "14px", color: "var(--fg-2)", textTransform: "capitalize" }}>{category} · Weekly Pulse</p>
-        </div>
-
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "32px" }}>
-          <div style={{ gridColumn: "1 / -1" }}>
-            <HeroCard label="Revenue" value={`$${stats.incremental_revenue_usd.toLocaleString("en-US", { maximumFractionDigits: 0 })}`} sub="Incremental driven" accent />
+    <div style={{ background: "var(--bg-page)", minHeight: "100vh", paddingBottom: "100px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <div style={{ width: "100%", maxWidth: "400px" }}>
+        <header style={{ padding: "32px 24px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontSize: "11px", fontWeight: 700, letterSpacing: "var(--ls-caps)", textTransform: "uppercase", color: "var(--fg-4)" }}>Partner Dashboard</span>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            {stats.is_paused ? (
+              <><span style={{ width: "8px", height: "8px", borderRadius: "99px", background: "var(--cw-warm)" }} /><span style={{ fontSize: "12px", fontWeight: 600, color: "var(--cw-warm)" }}>Paused</span></>
+            ) : (
+              <><span style={{ width: "8px", height: "8px", borderRadius: "99px", background: "var(--cw-fresh)" }} /><span style={{ fontSize: "12px", fontWeight: 600, color: "var(--cw-fresh)" }}>Live</span></>
+            )}
           </div>
-          <HeroCard label="Seats Filled" value={`${stats.total_redemptions}`} sub="Coupons validated" />
-          <HeroCard label="Avg Ticket" value={`$${stats.avg_ticket_usd.toFixed(2)}`} sub={`Vs $${Math.round(stats.min_spend_usd)} min spend`} />
-        </div>
+        </header>
 
-        <WeekdayAnalysisChart stats={stats} />
-        <HourlyActivationChart stats={stats} />
+        <div className="animate-fade-in" style={{ padding: "0 24px" }}>
+          <div style={{ marginBottom: "40px" }}>
+            <h1 style={{ fontFamily: "var(--font-display)", fontSize: "40px", fontWeight: 500, lineHeight: 1.05, letterSpacing: "-0.02em", color: "var(--fg-1)", marginBottom: "8px" }}>{name}</h1>
+            <p style={{ fontSize: "14px", color: "var(--fg-2)", textTransform: "capitalize" }}>{category} · Weekly Pulse</p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginBottom: "32px" }}>
+            <div style={{ gridColumn: "1 / -1" }}>
+              <HeroCard label="Revenue" value={`$${stats.incremental_revenue_usd.toLocaleString("en-US", { maximumFractionDigits: 0 })}`} sub="Incremental driven" accent />
+            </div>
+            <HeroCard label="Seats Filled" value={`${stats.total_redemptions}`} sub="Coupons validated" />
+            <HeroCard label="Avg Ticket" value={`$${stats.avg_ticket_usd.toFixed(2)}`} sub={`Vs $${Math.round(stats.min_spend_usd)} min spend`} />
+          </div>
+
+          <WeekdayAnalysisChart stats={stats} />
+          <HourlyActivationChart stats={stats} />
+        </div>
       </div>
 
       <MerchantBottomNav />
