@@ -293,33 +293,33 @@ function DsvConnectScreen({ onNext }: { onNext: (data: Partial<OnboardingData>) 
 
       {showModal && (
         <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm"
+          style={{ position: "fixed", inset: 0, zIndex: 50, display: "flex", alignItems: "flex-end", justifyContent: "center", background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
           onClick={() => !dsvLoading && setShowModal(false)}
         >
           <div
-            className="bg-white rounded-t-3xl px-6 pt-6 pb-12 w-full max-w-lg animate-slide-up border-t border-[rgba(21,19,15,0.08)]"
+            className="animate-slide-up"
+            style={{ background: "var(--bg-card)", borderRadius: "24px 24px 0 0", padding: "24px 24px 48px", width: "100%", maxWidth: "512px", borderTop: "1px solid var(--border-1)" }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-10 h-1 bg-[rgba(21,19,15,0.12)] rounded-full mx-auto mb-8" />
+            <div style={{ width: "40px", height: "4px", background: "var(--border-2)", borderRadius: "999px", margin: "0 auto 32px" }} />
 
-            <p className="text-xs font-medium text-[#a89d87] uppercase tracking-widest text-center mb-2">
+            <p style={{ fontSize: "var(--fs-micro)", fontWeight: 600, color: "var(--fg-4)", letterSpacing: "var(--ls-caps)", textTransform: "uppercase", textAlign: "center", marginBottom: "8px", fontFamily: "var(--font-body)" }}>
               DSV Partner Login
             </p>
-            <h3 className="text-xl font-bold text-[#15130f] text-center mb-8">
+            <h3 style={{ fontSize: "20px", fontWeight: 700, color: "var(--fg-1)", textAlign: "center", marginBottom: "32px", fontFamily: "var(--font-body)" }}>
               Connect your DSV account
             </h3>
 
-            <div className="space-y-3 mb-6">
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
+              {/* No defaultValue — avoid leaking demo credentials into production builds */}
               <input
                 type="email"
-                defaultValue="merchant@example.com"
-                className="w-full bg-[#faf7f2] border border-[rgba(21,19,15,0.10)] rounded-xl px-4 py-3 text-sm text-[#15130f] placeholder:text-[#a89d87] focus:outline-none focus:border-[#e30018]/50 transition-colors"
+                style={{ ...inputStyle, maxWidth: "100%", textAlign: "left" }}
                 placeholder="Email"
               />
               <input
                 type="password"
-                defaultValue="password"
-                className="w-full bg-[#faf7f2] border border-[rgba(21,19,15,0.10)] rounded-xl px-4 py-3 text-sm text-[#15130f] placeholder:text-[#a89d87] focus:outline-none focus:border-[#e30018]/50 transition-colors"
+                style={{ ...inputStyle, maxWidth: "100%", textAlign: "left" }}
                 placeholder="Password"
               />
             </div>
@@ -327,11 +327,11 @@ function DsvConnectScreen({ onNext }: { onNext: (data: Partial<OnboardingData>) 
             <button
               onClick={handleDsvLogin}
               disabled={dsvLoading}
-              className="w-full rounded-full bg-[#e30018] py-4 text-sm font-semibold text-white hover:bg-[#c20014] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{ ...primaryBtn, maxWidth: "100%", borderRadius: "var(--radius-pill)", opacity: dsvLoading ? 0.6 : 1, cursor: dsvLoading ? "not-allowed" : "pointer" }}
             >
               {dsvLoading ? (
                 <>
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span style={{ width: "16px", height: "16px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "white", borderRadius: "999px", display: "inline-block", animation: "spin 0.75s linear infinite" }} />
                   Importing your data...
                 </>
               ) : (
@@ -342,7 +342,7 @@ function DsvConnectScreen({ onNext }: { onNext: (data: Partial<OnboardingData>) 
             {!dsvLoading && (
               <button
                 onClick={() => setShowModal(false)}
-                className="w-full mt-4 text-sm text-[#a89d87] hover:text-[#7a715f] transition-colors"
+                style={{ width: "100%", marginTop: "16px", fontSize: "var(--fs-small)", color: "var(--fg-4)", background: "none", border: "none", cursor: "pointer", fontFamily: "var(--font-body)", transition: "color 120ms ease" }}
               >
                 Cancel
               </button>

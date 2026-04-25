@@ -94,6 +94,11 @@ export async function getMerchantAnalytics(
   return request(`/merchants/${encodeURIComponent(id)}/analytics`);
 }
 
+// Static mock series — deterministic so charts don't flicker on re-render.
+// TODO: replace getMerchantDashboard with real endpoint GET /merchants/{id}/dashboard
+const MOCK_DAILY_REDEMPTIONS = [5, 8, 3, 12, 9, 4, 7, 11, 6, 10, 8, 5, 3, 9, 14, 7, 6, 8, 10, 9, 5, 7, 12, 8, 4, 6, 9, 11, 7, 8];
+const MOCK_HOURLY_COUNTS     = [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 3, 4, 3, 2, 2, 3, 4, 3, 2, 1, 1, 0, 0];
+
 export async function getMerchantDashboard(
   id: string
 ): Promise<MerchantDashboardStats> {
@@ -116,26 +121,24 @@ export async function getMerchantDashboard(
       total_accepted: 350,
       acceptance_rate: 350 / 1200,
       redemption_rate: 145 / 1200,
-      daily_series: Array.from({ length: 30 }).map((_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() - (29 - i));
+      daily_series: MOCK_DAILY_REDEMPTIONS.map((redemptions, i) => {
+        const d = new Date("2026-03-27");
+        d.setDate(d.getDate() + i);
         return {
           date: d.toISOString().split("T")[0],
-          redemptions: Math.floor(Math.random() * 10) + 1,
-          revenue_usd: Math.floor(Math.random() * 100) + 50,
-          avg_discount_pct: 10 + Math.random() * 10,
+          redemptions,
+          revenue_usd: Math.round(redemptions * 24.5),
+          avg_discount_pct: 15.2,
         };
       }),
-      hourly_redemptions: Array.from({ length: 24 }).map((_, i) => ({
-        hour: i,
-        count: (i > 8 && i < 22) ? Math.floor(Math.random() * 5) : 0,
-      })),
+      hourly_redemptions: MOCK_HOURLY_COUNTS.map((count, hour) => ({ hour, count })),
       dead_hour_ranges: [[14, 17]],
       top_context_triggers: ["rainy_day", "quiet_period", "cold_weather"],
     });
   }, 500));
 }
 
+// TODO: replace patchMerchantCampaign with real endpoint PATCH /merchants/{id}/campaign
 export async function patchMerchantCampaign(
   id: string,
   paused: boolean
@@ -143,6 +146,7 @@ export async function patchMerchantCampaign(
   return new Promise(resolve => setTimeout(() => resolve({ is_paused: paused }), 500));
 }
 
+// TODO: replace patchMerchantRules with real endpoint PATCH /merchants/{id}/rules
 export async function patchMerchantRules(
   id: string,
   updates: RulesPatchRequest

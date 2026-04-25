@@ -1,4 +1,7 @@
 @import "tailwindcss";
+/* Phosphor Icons — loaded from local npm package, no CDN dependency */
+@import "@phosphor-icons/web/src/regular/style.css";
+@import "@phosphor-icons/web/src/bold/style.css";
 
 /* Design tokens — source of truth: frontend/claude design/colors_and_type.css
    Fonts loaded via next/font in layout.tsx; --font-* vars resolved there. */
@@ -184,3 +187,8 @@ html, body {
 .animate-slide-up   { animation: slide-up 0.32s cubic-bezier(0.32, 0.72, 0, 1); }
 .animate-fade-in    { animation: fade-in 0.25s ease-out; }
 .animate-bounce-in  { animation: bounce-in 0.35s ease-out; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}

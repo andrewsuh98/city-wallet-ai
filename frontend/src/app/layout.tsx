@@ -35,16 +35,7 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${interTight.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css"
-        />
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css"
-        />
-      </head>
+      {/* Phosphor Icons loaded locally via globals.css — no CDN dependency */}
       <body className="min-h-full flex flex-col bg-[#faf7f2] text-[#15130f]">
         {children}
       </body>
