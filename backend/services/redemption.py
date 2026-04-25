@@ -119,9 +119,8 @@ def _row_to_offer(row: aiosqlite.Row) -> Offer:
         expires_at=_parse_expires_at(row["expires_at"]) or _utcnow(),
         style=OfferStyle(**style_dict) if style_dict else OfferStyle(
             background_gradient=["#1A1A1A", "#1A1A1A"],
-            emoji="*",
             tone="warm",
-            headline_style="factual",
+            headline_style="emotional",
         ),
         status=OfferStatus(row["status"] or "active"),
         distance_meters=row["distance_meters"],

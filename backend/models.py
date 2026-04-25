@@ -111,7 +111,6 @@ class OfferStatus(str, Enum):
 
 class OfferStyle(BaseModel):
     background_gradient: list[str]
-    emoji: str
     tone: str
     headline_style: str
 
@@ -174,6 +173,7 @@ class ContextRequest(BaseModel):
 
 
 class GenerateOffersRequest(BaseModel):
+    session_id: str
     context: ContextState
     max_offers: int = 3
     user_preferences: Optional[dict] = None
@@ -191,6 +191,10 @@ class OfferActionRequest(BaseModel):
 
 class MerchantListResponse(BaseModel):
     merchants: list[Merchant]
+
+
+class OfferListResponse(BaseModel):
+    offers: list[Offer]
 
 
 class TokenValidationResponse(BaseModel):

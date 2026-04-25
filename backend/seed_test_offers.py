@@ -51,7 +51,6 @@ async def seed_test_offers(session_id: str, count: int = 3):
             gradient = SAMPLE_GRADIENTS[i % len(SAMPLE_GRADIENTS)]
             style = {
                 "background_gradient": gradient,
-                "emoji": "*",
                 "tone": "warm",
                 "headline_style": "emotional",
             }

@@ -40,7 +40,6 @@ const mockOffers: Offer[] = [
     expires_at: new Date(Date.now() + 25 * 60000).toISOString(),
     style: {
       background_gradient: [],
-      emoji: "",
       tone: "warm",
       headline_style: "emotional",
     },
@@ -65,7 +64,6 @@ const mockOffers: Offer[] = [
     expires_at: new Date(Date.now() + 18 * 60000).toISOString(),
     style: {
       background_gradient: [],
-      emoji: "",
       tone: "playful",
       headline_style: "emotional",
     },
@@ -90,7 +88,6 @@ const mockOffers: Offer[] = [
     expires_at: new Date(Date.now() + 45 * 60000).toISOString(),
     style: {
       background_gradient: [],
-      emoji: "",
       tone: "sophisticated",
       headline_style: "emotional",
     },
