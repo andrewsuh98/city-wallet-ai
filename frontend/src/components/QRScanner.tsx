@@ -64,11 +64,11 @@ export default function QRScanner({ onScan, onError }: QRScannerProps) {
     <div className="w-full">
       <div
         id={REGION_ID}
-        className="mx-auto w-full max-w-md overflow-hidden rounded-2xl bg-black"
+        className="mx-auto w-full max-w-md overflow-hidden rounded-4 border border-border-1 bg-cw-paper-900 shadow-2"
         style={{ minHeight: 280 }}
       />
       {permissionState === "error" && (
-        <p className="mt-3 text-center text-xs text-white/60">
+        <p className="mt-3 text-center text-micro text-fg-3">
           Camera unavailable. Use the paste field below.
         </p>
       )}

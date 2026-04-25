@@ -37,17 +37,17 @@ export default function QRDisplay({ offerId, size = 280 }: QRDisplayProps) {
   if (error) {
     return (
       <div
-        className="flex flex-col items-center justify-center rounded-2xl bg-[#1A1A1A] p-6 text-center"
+        className="flex flex-col items-center justify-center rounded-4 border border-status-danger/30 bg-cw-red-50 p-6 text-center"
         style={{ width: size, height: size }}
       >
-        <p className="mb-3 text-sm text-red-300">{error}</p>
+        <p className="mb-3 text-small text-status-danger">{error}</p>
         <button
           onClick={() => {
             setError(null);
             setData(null);
             getOfferQR(offerId).then(setData).catch((e) => setError(e.message));
           }}
-          className="rounded-full bg-white px-4 py-1.5 text-xs font-semibold text-black"
+          className="rounded-2 bg-action-primary px-4 py-1.5 text-micro font-semibold text-fg-on-red"
         >
           Retry
         </button>
@@ -58,7 +58,7 @@ export default function QRDisplay({ offerId, size = 280 }: QRDisplayProps) {
   if (!data) {
     return (
       <div
-        className="animate-pulse rounded-2xl bg-[#1A1A1A]"
+        className="animate-pulse rounded-4 bg-card-soft"
         style={{ width: size, height: size }}
       />
     );
@@ -67,7 +67,7 @@ export default function QRDisplay({ offerId, size = 280 }: QRDisplayProps) {
   return (
     <div className="flex flex-col items-center gap-3">
       <div
-        className="rounded-2xl bg-white p-3"
+        className="rounded-4 border border-border-1 bg-white p-3 shadow-2"
         style={{ width: size, height: size }}
       >
         <img
@@ -76,7 +76,7 @@ export default function QRDisplay({ offerId, size = 280 }: QRDisplayProps) {
           className="h-full w-full object-contain"
         />
       </div>
-      <code className="select-all break-all rounded-lg bg-[#1A1A1A] px-3 py-2 font-mono text-xs text-white/70">
+      <code className="select-all break-all rounded-2 border border-border-1 bg-card-soft px-3 py-2 font-mono text-micro text-fg-2">
         {data.token}
       </code>
     </div>

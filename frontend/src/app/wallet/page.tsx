@@ -41,34 +41,41 @@ export default function WalletPage() {
   );
 
   return (
-    <div className="min-h-screen pb-24">
-      <header className="px-5 pt-8 pb-4">
-        <h1 className="text-2xl font-bold text-white">Wallet</h1>
-        <p className="text-sm text-white/60">Your accepted offers and cashback</p>
+    <div className="min-h-screen bg-page pb-24">
+      <header className="px-5 pt-10 pb-5">
+        <div className="text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
+          Wallet
+        </div>
+        <h1
+          className="mt-1 font-display text-h1 leading-snug text-fg-1"
+          style={{ letterSpacing: "var(--ls-tight)", fontVariationSettings: '"opsz" 60, "SOFT" 30' }}
+        >
+          Your offers and cashback
+        </h1>
       </header>
 
       <div className="space-y-6 px-5">
         <CashbackBalance balanceUsd={balance} redemptionCount={redemptionCount} />
 
         {error && (
-          <div className="rounded-2xl bg-red-500/10 p-4 text-sm text-red-300">
+          <div className="rounded-3 border border-status-danger/30 bg-cw-red-50 p-4 text-small text-status-danger">
             {error}
           </div>
         )}
 
         {offers === null && !error && (
           <div className="space-y-3">
-            <div className="h-32 animate-pulse rounded-2xl bg-[#1A1A1A]" />
-            <div className="h-32 animate-pulse rounded-2xl bg-[#1A1A1A]" />
+            <div className="h-32 animate-pulse rounded-4 bg-card-soft" />
+            <div className="h-32 animate-pulse rounded-4 bg-card-soft" />
           </div>
         )}
 
         {offers !== null && offers.length === 0 && (
-          <div className="rounded-2xl bg-[#1A1A1A] p-6 text-center">
-            <p className="mb-3 text-white/70">No offers yet.</p>
+          <div className="rounded-4 border border-border-1 bg-card p-6 text-center shadow-1">
+            <p className="mb-4 text-body text-fg-2">No offers yet.</p>
             <Link
               href="/"
-              className="inline-block rounded-full bg-white px-5 py-2 text-sm font-semibold text-black"
+              className="inline-block rounded-2 bg-action-primary px-5 py-2 text-small font-semibold text-fg-on-red no-underline"
             >
               Discover offers
             </Link>
@@ -77,7 +84,7 @@ export default function WalletPage() {
 
         {accepted.length > 0 && (
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-white/50">
+            <h2 className="mb-3 text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
               Ready to use
             </h2>
             <div className="space-y-3">
@@ -94,7 +101,7 @@ export default function WalletPage() {
 
         {redeemed.length > 0 && (
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-white/50">
+            <h2 className="mb-3 text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
               Redeemed
             </h2>
             <div className="space-y-2">
@@ -103,13 +110,13 @@ export default function WalletPage() {
                 return (
                   <div
                     key={o.id}
-                    className="flex items-center justify-between rounded-2xl bg-[#1A1A1A] p-4"
+                    className="flex items-center justify-between rounded-3 border border-border-1 bg-card p-4 shadow-1"
                   >
-                    <div>
-                      <p className="font-semibold text-white">{o.merchant_name}</p>
-                      <p className="text-xs text-white/50">{o.headline}</p>
+                    <div className="min-w-0">
+                      <p className="truncate text-body font-semibold text-fg-1">{o.merchant_name}</p>
+                      <p className="truncate text-small text-fg-3">{o.headline}</p>
                     </div>
-                    <p className="font-bold tabular-nums text-emerald-400">
+                    <p className="font-display text-h3 tabular-nums text-cw-fresh">
                       +${cashback.toFixed(2)}
                     </p>
                   </div>
@@ -121,17 +128,17 @@ export default function WalletPage() {
 
         {expired.length > 0 && (
           <section>
-            <h2 className="mb-3 text-sm font-semibold uppercase tracking-wider text-white/40">
+            <h2 className="mb-3 text-micro font-semibold uppercase tracking-[0.08em] text-fg-4">
               Expired
             </h2>
             <div className="space-y-2 opacity-60">
               {expired.map((o) => (
                 <div
                   key={o.id}
-                  className="rounded-2xl bg-[#1A1A1A] p-4 text-sm text-white/60"
+                  className="rounded-3 border border-border-1 bg-card-soft p-4 text-small text-fg-3"
                 >
-                  <span className="font-semibold">{o.merchant_name}</span>
-                  <span className="ml-2 text-white/40">{o.headline}</span>
+                  <span className="font-semibold text-fg-2">{o.merchant_name}</span>
+                  <span className="ml-2 text-fg-4">{o.headline}</span>
                 </div>
               ))}
             </div>

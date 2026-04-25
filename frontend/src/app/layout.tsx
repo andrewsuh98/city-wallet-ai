@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Inter_Tight, JetBrains_Mono } from "next/font/google";
+import "@phosphor-icons/web/regular";
+import "@phosphor-icons/web/bold";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -35,16 +37,6 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${interTight.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <head>
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css"
-        />
-        <link
-          rel="stylesheet"
-          href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css"
-        />
-      </head>
       <body className="min-h-full flex flex-col">
         {children}
       </body>
