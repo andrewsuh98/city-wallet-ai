@@ -119,6 +119,7 @@ function SettingsContent() {
   const [strategy, setStrategy] = useState<"autopilot" | "manual">("autopilot");
   const [maxDiscount, setMaxDiscount] = useState(20);
   const [minSpend, setMinSpend] = useState(15);
+  const [maxOffersPerDay, setMaxOffersPerDay] = useState(10);
   
   // Offer Mechanics States (matches Onboarding)
   const [offerTypes, setOfferTypes] = useState<("discount" | "bogo" | "free_item")[]>(["discount"]);
@@ -176,6 +177,7 @@ function SettingsContent() {
         setStrategy(data.strategy as "autopilot" | "manual");
         setMaxDiscount(data.max_discount_percent);
         setMinSpend(Math.round(data.min_spend_usd));
+        setMaxOffersPerDay(data.max_offers_per_day);
       })
       .catch((e) => console.error(e))
       .finally(() => setLoading(false));
@@ -196,6 +198,7 @@ function SettingsContent() {
       await patchMerchantRules(merchantId, {
         max_discount_percent: maxDiscount,
         min_spend_usd: minSpend,
+        max_offers_per_day: maxOffersPerDay,
       });
       setSavedFlash(true);
       setTimeout(() => setSavedFlash(false), 2000);
@@ -414,6 +417,25 @@ function SettingsContent() {
             </div>
           )}
         </button>
+      </div>
+
+      {/* LIMITS SECTION */}
+      <div style={{ width: "100%", maxWidth: "320px", marginBottom: "40px", padding: "20px", background: "var(--bg-card)", border: "1px solid var(--border-2)", borderRadius: "var(--radius-3)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+          <div style={labelStyle}>Max redeemed offers per day</div>
+          <span style={{ fontSize: "var(--fs-body)", fontWeight: 700, color: "var(--fg-1)" }}>{maxOffersPerDay}</span>
+        </div>
+        <input 
+          type="range" 
+          min={1} 
+          max={50} 
+          value={maxOffersPerDay} 
+          onChange={e => setMaxOffersPerDay(Number(e.target.value))} 
+          style={{ width: "100%", accentColor: "var(--cw-warm)", cursor: "pointer" }} 
+        />
+        <div style={{ fontSize: "12px", color: "var(--fg-3)", marginTop: "8px", textAlign: "left" }}>
+          Limit how many users can claim your offer daily.
+        </div>
       </div>
 
       <button 

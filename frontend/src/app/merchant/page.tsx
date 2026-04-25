@@ -804,7 +804,7 @@ function OfferScreen({ data, update, onNext }: { data: OnboardingData, update: (
 
       <div style={{ width: "100%", maxWidth: "320px", marginBottom: "40px", padding: "20px", background: "var(--bg-card)", border: "1px solid var(--border-2)", borderRadius: "var(--radius-3)" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
-          <div style={labelStyle}>Max offers per day</div>
+          <div style={labelStyle}>Max redeemed offers per day</div>
           <span style={{ fontSize: "var(--fs-body)", fontWeight: 700, color: "var(--fg-1)" }}>{data.maxOffersPerDay}</span>
         </div>
         <input 
