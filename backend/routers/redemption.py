@@ -65,7 +65,14 @@ async def redeem(req: RedemptionRequest):
                 success=False, offer=offer, message=reason, cashback_amount=None
             )
 
-        cashback, _redemption_id = await svc.commit_redemption(db, offer)
+        committed, cashback, _redemption_id = await svc.commit_redemption(db, offer)
+        if not committed:
+            return RedemptionResult(
+                success=False,
+                offer=offer,
+                message="Offer already redeemed",
+                cashback_amount=None,
+            )
 
         cursor = await db.execute("SELECT * FROM offers WHERE id = ?", (offer.id,))
         latest_row = await cursor.fetchone()

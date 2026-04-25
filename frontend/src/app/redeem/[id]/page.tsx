@@ -36,6 +36,14 @@ export default function RedeemPage() {
     const sid = getSessionId();
     if (!sid || !offerId) return;
     let alive = true;
+    let interval: ReturnType<typeof setInterval> | null = null;
+
+    const stop = () => {
+      if (interval !== null) {
+        clearInterval(interval);
+        interval = null;
+      }
+    };
 
     const fetchOffer = async () => {
       try {
@@ -43,7 +51,8 @@ export default function RedeemPage() {
         const found = res.offers.find((o) => o.id === offerId) ?? null;
         if (!alive) return;
         setOffer(found);
-        if (found?.status === "redeemed" && cashback === null) {
+        if (found?.status === "redeemed") {
+          stop();
           const wallet = await getWalletBalance(sid);
           if (!alive) return;
           const matched = wallet.redemptions.find((r) => r.offer_id === offerId);
@@ -55,16 +64,13 @@ export default function RedeemPage() {
     };
 
     fetchOffer();
-    const interval = setInterval(() => {
-      if (!alive) return;
-      fetchOffer();
-    }, POLL_INTERVAL_MS);
+    interval = setInterval(fetchOffer, POLL_INTERVAL_MS);
 
     return () => {
       alive = false;
-      clearInterval(interval);
+      stop();
     };
-  }, [offerId, cashback]);
+  }, [offerId]);
 
   useEffect(() => {
     const t = setInterval(() => setTick((n) => n + 1), 1000);

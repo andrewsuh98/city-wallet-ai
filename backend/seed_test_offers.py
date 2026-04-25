@@ -14,7 +14,7 @@ import json
 import random
 import sys
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from database import get_db, init_db
 from services.redemption import generate_token
@@ -56,7 +56,9 @@ async def seed_test_offers(session_id: str, count: int = 3):
                 "headline_style": "emotional",
             }
             tags = random.sample(SAMPLE_TAGS, 3)
-            expires_at = (datetime.now() + timedelta(minutes=30)).isoformat()
+            expires_at = (
+                datetime.now(timezone.utc) + timedelta(minutes=30)
+            ).isoformat()
 
             await db.execute(
                 """INSERT INTO offers (

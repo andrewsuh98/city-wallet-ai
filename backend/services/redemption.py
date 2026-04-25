@@ -6,7 +6,7 @@ import json
 import logging
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Optional
 
 import aiosqlite
@@ -67,15 +67,26 @@ def compute_cashback(
     return 0.0
 
 
+def _utcnow() -> datetime:
+    """Aware UTC now. All timestamps in this module live in UTC."""
+    return datetime.now(timezone.utc)
+
+
 def _parse_expires_at(value) -> Optional[datetime]:
+    """Parse a stored timestamp as an aware UTC datetime.
+
+    SQLite stores CURRENT_TIMESTAMP as a naive UTC string. Anything that comes
+    back without tzinfo is assumed to be UTC.
+    """
     if value is None:
         return None
     if isinstance(value, datetime):
-        return value
+        return value if value.tzinfo else value.replace(tzinfo=timezone.utc)
     try:
-        return datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        parsed = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
     except ValueError:
         return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
 def _row_to_offer(row: aiosqlite.Row) -> Offer:
@@ -104,8 +115,8 @@ def _row_to_offer(row: aiosqlite.Row) -> Offer:
         discount_type=row["discount_type"] or "",
         context_tags=tags,
         why_now=row["why_now"] or "",
-        created_at=_parse_expires_at(row["created_at"]) or datetime.now(),
-        expires_at=_parse_expires_at(row["expires_at"]) or datetime.now(),
+        created_at=_parse_expires_at(row["created_at"]) or _utcnow(),
+        expires_at=_parse_expires_at(row["expires_at"]) or _utcnow(),
         style=OfferStyle(**style_dict) if style_dict else OfferStyle(
             background_gradient=["#1A1A1A", "#1A1A1A"],
             emoji="*",
@@ -151,7 +162,7 @@ async def validate_redemption(
     if offer.status != OfferStatus.ACCEPTED:
         return False, offer, f"Offer is not redeemable (status: {offer.status.value})"
 
-    if offer.expires_at and offer.expires_at <= datetime.now():
+    if offer.expires_at and offer.expires_at <= _utcnow():
         await db.execute(
             "UPDATE offers SET status = 'expired' WHERE id = ?", (offer.id,)
         )
@@ -163,20 +174,31 @@ async def validate_redemption(
 
 async def commit_redemption(
     db: aiosqlite.Connection, offer: Offer
-) -> tuple[float, str]:
-    """Insert redemption row and mark offer redeemed. Returns (cashback, redemption_id)."""
+) -> tuple[bool, float, Optional[str]]:
+    """Atomically claim the offer and record the redemption.
+
+    Returns (committed, cashback, redemption_id). committed=False means another
+    request beat us to it; the caller should treat this as 'already redeemed'
+    rather than as success. We claim by updating WHERE status='accepted', so
+    concurrent calls cannot both succeed.
+    """
     cashback = compute_cashback(offer.discount_value, offer.discount_type)
     redemption_id = f"rdm_{uuid.uuid4().hex[:8]}"
+
+    cursor = await db.execute(
+        "UPDATE offers SET status = 'redeemed' WHERE id = ? AND status = 'accepted'",
+        (offer.id,),
+    )
+    if cursor.rowcount != 1:
+        await db.rollback()
+        return False, 0.0, None
 
     await db.execute(
         "INSERT INTO redemptions (id, offer_id, token, cashback_amount) VALUES (?, ?, ?, ?)",
         (redemption_id, offer.id, offer.redemption_token, cashback),
     )
-    await db.execute(
-        "UPDATE offers SET status = 'redeemed' WHERE id = ?", (offer.id,)
-    )
     await db.commit()
-    return cashback, redemption_id
+    return True, cashback, redemption_id
 
 
 async def get_wallet_balance(db: aiosqlite.Connection, session_id: str) -> float:
