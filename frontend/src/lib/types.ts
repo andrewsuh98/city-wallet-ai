@@ -164,6 +164,7 @@ export interface MerchantDashboardStats {
   strategy: string;
   max_discount_percent: number;
   min_spend_usd: number;
+  max_offers_per_day: number;
   total_generated: number;
   total_accepted: number;
   acceptance_rate: number;
@@ -181,6 +182,7 @@ export interface CampaignPatchRequest {
 export interface RulesPatchRequest {
   max_discount_percent?: number;
   min_spend_usd?: number;
+  max_offers_per_day?: number;
   goal?: string;
 }
 

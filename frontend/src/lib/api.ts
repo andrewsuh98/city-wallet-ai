@@ -111,6 +111,7 @@ export async function getMerchantDashboard(
       strategy: "autopilot",
       max_discount_percent: 25,
       min_spend_usd: 15,
+      max_offers_per_day: 15,
       total_generated: 1200,
       total_accepted: 350,
       acceptance_rate: 350 / 1200,
