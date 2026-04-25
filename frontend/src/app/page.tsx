@@ -5,29 +5,19 @@ import OfferCard from "@/components/OfferCard";
 import BottomNav from "@/components/BottomNav";
 import CategoryChips from "@/components/CategoryChips";
 import ConsentModal, { getConsent, setConsent, getTaste, getProfile } from "@/components/ConsentModal";
-import type { Offer, MerchantCategory } from "@/lib/types";
+import type { Offer } from "@/lib/types";
 
-const TASTE_TO_MERCHANT: Record<string, MerchantCategory> = {
-  coffee: "cafe",
-  bubble_tea: "cafe",
-  pizza: "restaurant",
-  sushi: "restaurant",
-  burgers: "restaurant",
-  brunch: "restaurant",
-  tacos: "restaurant",
-  ramen: "restaurant",
-  bakery: "bakery",
-  desserts: "bakery",
-  cocktails: "restaurant",
-  healthy: "restaurant",
-};
+interface MockOffer extends Offer {
+  taste_tag: string;
+}
 
-const mockOffers: Offer[] = [
+const mockOffers: MockOffer[] = [
   {
     id: "off_mock_1",
     merchant_id: "m_001",
     merchant_name: "Blue Bottle Coffee",
     merchant_category: "cafe",
+    taste_tag: "coffee",
     headline: "Cold outside? Your cappuccino is waiting.",
     subtext: "2 min walk · Rockefeller Center",
     description: "Warm up at Blue Bottle Coffee. Quiet right now, no queue, your usual spot by the window is free.",
@@ -52,6 +42,7 @@ const mockOffers: Offer[] = [
     merchant_id: "m_002",
     merchant_name: "Joe's Pizza",
     merchant_category: "restaurant",
+    taste_tag: "pizza",
     headline: "Rain keeping people away. The oven is not.",
     subtext: "4 min walk · Greenwich Village",
     description: "Iconic New York slices since 1975. Wet streets mean shorter wait. Fresh out of the oven.",
@@ -76,6 +67,7 @@ const mockOffers: Offer[] = [
     merchant_id: "m_003",
     merchant_name: "The Strand Bookstore",
     merchant_category: "bookstore",
+    taste_tag: "",
     headline: "18 miles of books. Perfect afternoon for it.",
     subtext: "6 min walk · Union Square",
     description: "Weekend rain has cleared the usual crowds. The stacks are yours.",
@@ -100,6 +92,7 @@ const mockOffers: Offer[] = [
     merchant_id: "m_004",
     merchant_name: "Levain Bakery",
     merchant_category: "bakery",
+    taste_tag: "bakery",
     headline: "Warm cookies. Cold rain. You do the math.",
     subtext: "3 min walk · Upper West Side",
     description: "Their famous chocolate chip walnut cookie, straight from the oven. Rainy days are cookie days.",
@@ -124,6 +117,7 @@ const mockOffers: Offer[] = [
     merchant_id: "m_005",
     merchant_name: "Shake Shack",
     merchant_category: "restaurant",
+    taste_tag: "burgers",
     headline: "Burger break? The line is short for once.",
     subtext: "5 min walk · Madison Square Park",
     description: "Rain has cleared the usual lunchtime crowd. ShackBurger and fries, no wait.",
@@ -148,6 +142,7 @@ const mockOffers: Offer[] = [
     merchant_id: "m_006",
     merchant_name: "Cha Cha Matcha",
     merchant_category: "cafe",
+    taste_tag: "bubble_tea",
     headline: "Rainy day matcha. Green calm in the grey.",
     subtext: "3 min walk · NoLIta",
     description: "Cozy up with a ceremonial-grade matcha latte. The rain outside makes it taste better.",
@@ -172,6 +167,7 @@ const mockOffers: Offer[] = [
     merchant_id: "m_007",
     merchant_name: "Equinox",
     merchant_category: "fitness",
+    taste_tag: "",
     headline: "Skip the rain. Hit the gym instead.",
     subtext: "7 min walk · Hudson Yards",
     description: "Turn a rainy afternoon into gains. Day pass includes pool, sauna, and all classes.",
@@ -255,22 +251,19 @@ export default function Home() {
 
   const tasteFiltered = (() => {
     if (!taste || taste.categories.length === 0) return mockOffers;
-    const cats = new Set(taste.categories.map((c) => TASTE_TO_MERCHANT[c]).filter(Boolean));
-    const filtered = mockOffers.filter((o) => cats.has(o.merchant_category));
+    const userTastes = new Set(taste.categories);
+    const filtered = mockOffers.filter((o) => o.taste_tag && userTastes.has(o.taste_tag));
     return filtered.length > 0 ? filtered : mockOffers;
   })();
 
   const visibleOffers = categoryFilter === "all"
     ? tasteFiltered
-    : tasteFiltered.filter((o) => o.merchant_category === TASTE_TO_MERCHANT[categoryFilter]);
+    : tasteFiltered.filter((o) => o.taste_tag === categoryFilter);
 
   const displayOffers = visibleOffers.length > 0 ? visibleOffers : tasteFiltered;
 
-  const offerMerchantCats = new Set(tasteFiltered.map((o) => o.merchant_category));
   const availableTastes = new Set(
-    Object.entries(TASTE_TO_MERCHANT)
-      .filter(([, mc]) => offerMerchantCats.has(mc))
-      .map(([tasteId]) => tasteId)
+    tasteFiltered.map((o) => o.taste_tag).filter(Boolean)
   );
 
   const heading = consentStatus === "declined"
@@ -285,9 +278,10 @@ export default function Home() {
         <LocationBanner onEnable={handleEnableFromBanner} />
       )}
 
-      <div className="flex h-[20vh] min-h-[120px] items-center justify-center border-b border-border-1 bg-sunken">
-        <div className="text-center text-small font-semibold uppercase tracking-[0.08em] text-fg-4">
-          {consentStatus === "declined" ? "Map · Times Square (default)" : "Map · Mapbox goes here"}
+      <div className="border-b border-border-1 bg-sunken px-5 py-3">
+        <div className="flex items-center gap-2 text-small text-fg-3">
+          <i className="ph ph-map-pin text-base text-cw-warm" />
+          {consentStatus === "declined" ? "Times Square (default)" : "Near Columbia University"}
         </div>
       </div>
 

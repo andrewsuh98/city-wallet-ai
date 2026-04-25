@@ -3,10 +3,27 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
+import dynamic from "next/dynamic";
 import QRDisplay from "@/components/QRDisplay";
 import { getOffers, getWalletBalance } from "@/lib/api";
 import { getSessionId } from "@/lib/session";
 import type { Offer } from "@/lib/types";
+
+const MerchantMiniMap = dynamic(() => import("@/components/MerchantMiniMap"), {
+  ssr: false,
+  loading: () => <div className="h-[200px] animate-pulse rounded-3 bg-card-soft" />,
+});
+
+const MERCHANT_LOCATIONS: Record<string, { lat: number; lng: number }> = {
+  m_001: { lat: 40.8038, lng: -73.9630 },
+  m_002: { lat: 40.8055, lng: -73.9659 },
+  m_003: { lat: 40.8063, lng: -73.9651 },
+  m_004: { lat: 40.8029, lng: -73.9671 },
+  m_005: { lat: 40.8047, lng: -73.9665 },
+  m_006: { lat: 40.8069, lng: -73.9643 },
+  m_007: { lat: 40.8081, lng: -73.9616 },
+  m_008: { lat: 40.8035, lng: -73.9580 },
+};
 
 const POLL_INTERVAL_MS = 2000;
 
@@ -155,6 +172,17 @@ export default function RedeemPage() {
           <p className="mt-1 text-micro text-fg-4">
             Waiting for merchant scan...
           </p>
+
+          {MERCHANT_LOCATIONS[offer.merchant_id] && (
+            <div className="mt-8 w-full">
+              <MerchantMiniMap
+                latitude={MERCHANT_LOCATIONS[offer.merchant_id].lat}
+                longitude={MERCHANT_LOCATIONS[offer.merchant_id].lng}
+                merchantName={offer.merchant_name}
+                emoji={offer.style.emoji}
+              />
+            </div>
+          )}
         </div>
       ) : (
         <div className="mx-auto max-w-md text-center text-small text-fg-3">
