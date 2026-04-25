@@ -1,0 +1,21 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin:0; padding:30px; background:var(--cw-paper-50); }
+  .label { font-family:var(--font-body); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--fg-3); margin-bottom:18px; font-weight:600; }
+  .grid { display:grid; grid-template-columns: repeat(4,1fr); gap:18px; }
+  .item { display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .box { width:90px; height:54px; background:#fff; border-radius:10px; }
+  .name { font-family:var(--font-mono); font-size:10px; color:var(--fg-3); }
+  .use { font-family:var(--font-body); font-size:11px; color:var(--fg-2); }
+</style></head>
+<body>
+  <div class="label">Elevation · paper-stack shadows</div>
+  <div class="grid">
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-1)"></div><span class="name">--shadow-1</span><span class="use">resting row</span></div>
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-2)"></div><span class="name">--shadow-2</span><span class="use">card resting</span></div>
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-3)"></div><span class="name">--shadow-3</span><span class="use">card hover</span></div>
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-4)"></div><span class="name">--shadow-4</span><span class="use">sheet / float</span></div>
+  </div>
+</body></html>

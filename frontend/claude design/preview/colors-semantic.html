@@ -1,0 +1,29 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/>
+<link rel="stylesheet" href="../colors_and_type.css"/>
+<style>
+  body { margin:0; padding:24px; background:var(--bg-card); }
+  .grid { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; }
+  .row { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px; border:1px solid var(--border-1); background:var(--cw-paper-50); }
+  .row .swatch { width:18px; height:18px; border-radius:4px; flex:none; border:1px solid var(--border-1); }
+  .row .name { font-family:var(--font-body); font-size:12px; font-weight:600; color:var(--fg-1); }
+  .row .var { font-family:var(--font-mono); font-size:10px; color:var(--fg-3); }
+  .label { font-family:var(--font-body); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--fg-3); margin-bottom:12px; font-weight:600; }
+</style></head>
+<body>
+  <div class="label">Semantic tokens · text, surface, action</div>
+  <div class="grid">
+    <div class="row"><div class="swatch" style="background:var(--fg-1)"></div><div><div class="name">Primary ink</div><div class="var">--fg-1</div></div></div>
+    <div class="row"><div class="swatch" style="background:var(--fg-2)"></div><div><div class="name">Secondary</div><div class="var">--fg-2</div></div></div>
+    <div class="row"><div class="swatch" style="background:var(--fg-3)"></div><div><div class="name">Tertiary / meta</div><div class="var">--fg-3</div></div></div>
+    <div class="row"><div class="swatch" style="background:var(--bg-page)"></div><div><div class="name">Page</div><div class="var">--bg-page</div></div></div>
+    <div class="row"><div class="swatch" style="background:var(--bg-card)"></div><div><div class="name">Card</div><div class="var">--bg-card</div></div></div>
+    <div class="row"><div class="swatch" style="background:var(--bg-sunken)"></div><div><div class="name">Sunken</div><div class="var">--bg-sunken</div></div></div>
+    <div class="row"><div class="swatch" style="background:var(--action-primary)"></div><div><div class="name">Action primary</div><div class="var">--action-primary</div></div></div>
+    <div class="row"><div class="swatch" style="background:var(--action-secondary)"></div><div><div class="name">Action secondary</div><div class="var">--action-secondary</div></div></div>
+    <div class="row"><div class="swatch" style="background:var(--fg-link)"></div><div><div class="name">Link</div><div class="var">--fg-link</div></div></div>
+    <div class="row"><div class="swatch" style="background:var(--status-success)"></div><div><div class="name">Success</div><div class="var">--status-success</div></div></div>
+    <div class="row"><div class="swatch" style="background:var(--status-warning)"></div><div><div class="name">Warning</div><div class="var">--status-warning</div></div></div>
+    <div class="row"><div class="swatch" style="background:var(--status-danger)"></div><div><div class="name">Danger</div><div class="var">--status-danger</div></div></div>
+  </div>
+</body></html>
