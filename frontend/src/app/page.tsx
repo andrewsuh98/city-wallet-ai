@@ -153,8 +153,10 @@ function SwipeableOfferCard({
   onOpenDetails: (id: string) => void;
 }) {
   const x = useMotionValue(0);
+  const [isExiting, setIsExiting] = useState(false);
   const suppressOpenRef = useRef(false);
   const suppressOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const actionTakenRef = useRef(false);
   const rotate = useTransform(x, [-180, 0, 180], [-2.5, 0, 2.5]);
   const dismissOpacity = useTransform(x, [-110, -24], [1, 0]);
   const claimOpacity = useTransform(x, [24, 110], [0, 1]);
@@ -192,17 +194,21 @@ function SwipeableOfferCard({
   };
 
   const dismiss = () => {
+    if (actionTakenRef.current) return;
+    actionTakenRef.current = true;
+    setIsExiting(true);
     const offscreen = typeof window === "undefined" ? 480 : window.innerWidth + 120;
-    animate(x, -offscreen, { type: "spring", stiffness: 360, damping: 36 }).then(() => {
-      onDismiss(offer.id);
-    });
+    void animate(x, -offscreen, { type: "spring", stiffness: 360, damping: 36 });
+    onDismiss(offer.id);
   };
 
   const accept = () => {
+    if (actionTakenRef.current) return;
+    actionTakenRef.current = true;
+    setIsExiting(true);
     const offscreen = typeof window === "undefined" ? 480 : window.innerWidth + 120;
-    animate(x, offscreen, { type: "spring", stiffness: 360, damping: 36 }).then(() => {
-      onAccept(offer.id);
-    });
+    void animate(x, offscreen, { type: "spring", stiffness: 360, damping: 36 });
+    onAccept(offer.id);
   };
 
   const handleDragStart = () => {
@@ -236,11 +242,15 @@ function SwipeableOfferCard({
       layout
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+      exit={{ opacity: 0, scale: 0.98, height: 0, marginBottom: 0 }}
       transition={{ type: "spring", stiffness: 420, damping: 36 }}
       className="relative mb-3 overflow-hidden rounded-4"
     >
-      <div className="absolute inset-0 overflow-hidden rounded-4 bg-cw-paper-100 shadow-inner">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 overflow-hidden rounded-4 bg-cw-paper-100 shadow-inner"
+        style={{ visibility: isExiting ? "hidden" : "visible" }}
+      >
         <motion.div
           aria-hidden="true"
           className="absolute inset-0"
@@ -268,9 +278,7 @@ function SwipeableOfferCard({
           }}
         />
         <div className="relative grid h-full grid-cols-2">
-          <motion.button
-            type="button"
-            onClick={accept}
+          <motion.div
             className="flex items-center justify-start gap-2 px-5 text-small font-bold text-white"
             style={{ opacity: claimOpacity }}
           >
@@ -280,10 +288,8 @@ function SwipeableOfferCard({
               </span>
               <span>Claim</span>
             </motion.span>
-          </motion.button>
-          <motion.button
-            type="button"
-            onClick={dismiss}
+          </motion.div>
+          <motion.div
             className="flex items-center justify-end gap-2 px-5 text-small font-bold text-white"
             style={{ opacity: dismissOpacity }}
           >
@@ -293,7 +299,7 @@ function SwipeableOfferCard({
                 <i className="ph ph-x text-lg" />
               </span>
             </motion.span>
-          </motion.button>
+          </motion.div>
         </div>
       </div>
 
@@ -437,6 +443,7 @@ export default function Home() {
   const [consentStatus, handleConsent] = useConsentStatus();
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+  const [removedOfferIds, setRemovedOfferIds] = useState<Set<string>>(new Set());
   const [demoMode] = useState<DemoMode | null>(() => getDemoModeFromUrl());
 
   useEffect(() => {
@@ -468,7 +475,7 @@ export default function Home() {
   );
 
   const offersReady = consentStatus !== "loading" && consentStatus !== "none" && geo.status !== "loading";
-  const { offers, status, errorMessage, acceptOffer, dismissOffer } = useOffers({
+  const { offers, status, acceptOffer, dismissOffer } = useOffers({
     enabled: offersReady,
     latitude: geo.latitude,
     longitude: geo.longitude,
@@ -481,9 +488,9 @@ export default function Home() {
   const allActive = useMemo<DisplayOffer[]>(
     () =>
       offers
-        .filter((offer) => offer.status === "active")
+        .filter((offer) => offer.status === "active" && !removedOfferIds.has(offer.id))
         .map((offer) => ({ ...offer, taste_tag: tasteTagForOffer(offer) })),
-    [offers],
+    [offers, removedOfferIds],
   );
 
   const selectedOffer = allActive.find((o) => o.id === selectedOfferId) ?? null;
@@ -504,11 +511,15 @@ export default function Home() {
   };
 
   const handleAccept = async (id: string) => {
+    setSelectedOfferId(null);
+    setRemovedOfferIds((prev) => new Set(prev).add(id));
     const updated = await acceptOffer(id);
     if (updated) router.push(`/redeem/${id}`);
   };
 
   const handleDismiss = async (id: string) => {
+    setSelectedOfferId(null);
+    setRemovedOfferIds((prev) => new Set(prev).add(id));
     await dismissOffer(id);
   };
 
@@ -544,11 +555,6 @@ export default function Home() {
             <i className="ph ph-map-pin text-base text-cw-warm" />
             {geo.isDefault ? `${DEFAULT_LOCATION.label} (default)` : "Near Columbia University"}
           </div>
-          {status === "fallback" && errorMessage && (
-            <div className="text-micro text-fg-4" title={errorMessage}>
-              offline mode
-            </div>
-          )}
         </div>
       </div>
 
