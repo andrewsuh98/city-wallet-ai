@@ -243,3 +243,11 @@ export interface TokenValidationResponse {
   offer: Offer | null;
   merchant_name: string | null;
 }
+
+export interface WalletRedemption {
+  id: string;
+  offer_id: string;
+  merchant_name: string;
+  cashback_amount: number;
+  redeemed_at: string;
+}
