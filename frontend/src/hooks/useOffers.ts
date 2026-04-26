@@ -5,6 +5,7 @@ import { generateOffers, getContext, updateOffer } from "@/lib/api";
 import { mockOffers } from "@/lib/mockOffers";
 import type { ContextState, Offer } from "@/lib/types";
 import { getSessionId } from "@/lib/session";
+import { buildCustomerIntent, trackDeclinedCategory } from "@/lib/intent";
 import type { DemoMode } from "@/lib/demo";
 
 export type OffersStatus = "idle" | "loading" | "ready" | "error" | "fallback";
@@ -25,12 +26,10 @@ interface UseOffersInput {
   longitude: number;
   accuracy: number | null;
   demoMode: DemoMode | null;
-  intentTags?: string[];
-  pastCategories?: string[];
 }
 
 export function useOffers(input: UseOffersInput): UseOffersResult {
-  const { enabled, latitude, longitude, accuracy, demoMode, intentTags, pastCategories } = input;
+  const { enabled, latitude, longitude, accuracy, demoMode } = input;
   const [offers, setOffers] = useState<Offer[]>([]);
   const [context, setContext] = useState<ContextState | null>(null);
   const [status, setStatus] = useState<OffersStatus>("idle");
@@ -57,17 +56,16 @@ export function useOffers(input: UseOffersInput): UseOffersResult {
         session_id: sid,
         context: ctx,
         max_offers: 6,
-        user_preferences: {
-          intent_tags: intentTags ?? [],
-          past_categories: pastCategories ?? [],
-        },
+        customer_intent: buildCustomerIntent(),
       });
 
       if (myRequest !== requestId.current) return;
       if (res.offers.length === 0) {
         setOffers(mockOffers);
         setStatus("fallback");
-        setErrorMessage("No live offers matched your context. Showing examples.");
+        setErrorMessage(
+          "No live offers matched your context. Showing examples.",
+        );
       } else {
         setOffers(res.offers);
         setStatus("ready");
@@ -79,47 +77,59 @@ export function useOffers(input: UseOffersInput): UseOffersResult {
       setStatus("fallback");
       setErrorMessage(message);
     }
-  }, [latitude, longitude, accuracy, demoMode, intentTags, pastCategories]);
+  }, [latitude, longitude, accuracy, demoMode]);
 
   useEffect(() => {
     if (!enabled) return;
     void fetchOffers();
   }, [enabled, fetchOffers]);
 
-  const acceptOffer = useCallback(async (id: string): Promise<Offer | null> => {
-    const target = offers.find((o) => o.id === id);
-    if (!target) return null;
+  const acceptOffer = useCallback(
+    async (id: string): Promise<Offer | null> => {
+      const target = offers.find((o) => o.id === id);
+      if (!target) return null;
 
-    if (status === "fallback" || target.id.startsWith("off_mock_")) {
-      const updated: Offer = { ...target, status: "accepted", redemption_token: "mock_token" };
-      setOffers((curr) => curr.map((o) => (o.id === id ? updated : o)));
-      return updated;
-    }
+      if (status === "fallback" || target.id.startsWith("off_mock_")) {
+        const updated: Offer = {
+          ...target,
+          status: "accepted",
+          redemption_token: "mock_token",
+        };
+        setOffers((curr) => curr.map((o) => (o.id === id ? updated : o)));
+        return updated;
+      }
 
-    try {
-      const res = await updateOffer(id, { action: "accept" });
-      setOffers((curr) => curr.map((o) => (o.id === id ? res.offer : o)));
-      return res.offer;
-    } catch (err) {
-      console.error("Accept offer failed", err);
-      return null;
-    }
-  }, [offers, status]);
+      try {
+        const res = await updateOffer(id, { action: "accept" });
+        setOffers((curr) => curr.map((o) => (o.id === id ? res.offer : o)));
+        return res.offer;
+      } catch (err) {
+        console.error("Accept offer failed", err);
+        return null;
+      }
+    },
+    [offers, status],
+  );
 
-  const dismissOffer = useCallback(async (id: string): Promise<void> => {
-    const target = offers.find((o) => o.id === id);
-    if (!target) return;
+  const dismissOffer = useCallback(
+    async (id: string): Promise<void> => {
+      const target = offers.find((o) => o.id === id);
+      if (!target) return;
 
-    setOffers((curr) => curr.filter((o) => o.id !== id));
+      setOffers((curr) => curr.filter((o) => o.id !== id));
 
-    if (status === "fallback" || target.id.startsWith("off_mock_")) return;
+      if (status === "fallback" || target.id.startsWith("off_mock_")) return;
 
-    try {
-      await updateOffer(id, { action: "dismiss" });
-    } catch (err) {
-      console.error("Dismiss offer failed", err);
-    }
-  }, [offers, status]);
+      trackDeclinedCategory(target.merchant_category);
+
+      try {
+        await updateOffer(id, { action: "dismiss" });
+      } catch (err) {
+        console.error("Dismiss offer failed", err);
+      }
+    },
+    [offers, status],
+  );
 
   return {
     offers,
