@@ -7,6 +7,7 @@ import ContextBar from "@/components/ContextBar";
 import OfferCard from "@/components/OfferCard";
 import BottomNav from "@/components/BottomNav";
 import MapView from "@/components/MapView";
+import DemoSwitcher from "@/components/DemoSwitcher";
 import ConsentModal, {
   getConsent,
   setConsent,
@@ -144,6 +145,10 @@ export default function Home() {
   useEffect(() => {
     setDemoMode(getDemoModeFromUrl());
   }, []);
+
+  const handleDemoChange = (mode: DemoMode | null) => {
+    setDemoMode(mode);
+  };
 
   const locationEnabled = consentStatus === "granted";
   const geo = useGeolocation(locationEnabled);
@@ -306,6 +311,7 @@ export default function Home() {
         )}
       </div>
 
+      <DemoSwitcher current={demoMode} onChange={handleDemoChange} />
       <BottomNav />
     </div>
   );
