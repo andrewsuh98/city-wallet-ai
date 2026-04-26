@@ -326,7 +326,7 @@ async def call_claude(user_prompt: str) -> dict:
         messages=[{"role": "user", "content": user_prompt}],
         tools=[_OFFER_TOOL],  # type: ignore[arg-type]
         tool_choice={"type": "tool", "name": "emit_offers"},
-        timeout=5.0,
+        timeout=30.0,
     )
     for block in response.content:
         if isinstance(block, ToolUseBlock):
