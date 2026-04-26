@@ -14,29 +14,22 @@ import ConsentModal, {
   getProfile,
 } from "@/components/ConsentModal";
 import { getMerchants } from "@/lib/api";
-import { DEFAULT_LOCATION, getDemoModeFromUrl, type DemoMode } from "@/lib/demo";
+import {
+  DEFAULT_LOCATION,
+  getDemoModeFromUrl,
+  type DemoMode,
+} from "@/lib/demo";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useOffers } from "@/hooks/useOffers";
-import type { ContextState, Merchant, MerchantCategory } from "@/lib/types";
-
-const TASTE_TO_MERCHANT: Record<string, MerchantCategory> = {
-  coffee: "cafe",
-  bubble_tea: "cafe",
-  pizza: "restaurant",
-  sushi: "restaurant",
-  burgers: "restaurant",
-  brunch: "restaurant",
-  tacos: "restaurant",
-  ramen: "restaurant",
-  bakery: "bakery",
-  desserts: "bakery",
-  cocktails: "restaurant",
-  healthy: "restaurant",
-};
+import { TASTE_TO_MERCHANT } from "@/lib/intent";
+import type { ContextState, Merchant } from "@/lib/types";
 
 type ConsentStatus = "loading" | "none" | "granted" | "declined";
 
-function useConsentStatus(): [ConsentStatus, (locationEnabled: boolean) => void] {
+function useConsentStatus(): [
+  ConsentStatus,
+  (locationEnabled: boolean) => void,
+] {
   const [status, setStatus] = useState<ConsentStatus>("loading");
 
   useEffect(() => {
@@ -89,29 +82,47 @@ function DemoBadge({ mode }: { mode: DemoMode }) {
 
 function buildBadges(context: ContextState | null) {
   if (!context) return undefined;
-  const badges: { icon: string; label: string; variant: "cool" | "warm" | "fresh" | "dusk" | "neutral" }[] = [];
+  const badges: {
+    icon: string;
+    label: string;
+    variant: "cool" | "warm" | "fresh" | "dusk" | "neutral";
+  }[] = [];
 
   const w = context.weather;
   const tempStr = `${Math.round(w.temp_celsius)}\u00b0C`;
   const weatherIcon =
-    w.condition === "rain" ? "ph-cloud-rain"
-    : w.condition === "snow" ? "ph-snowflake"
-    : w.condition === "storm" ? "ph-cloud-lightning"
-    : w.condition === "cloudy" ? "ph-cloud"
-    : "ph-sun";
+    w.condition === "rain"
+      ? "ph-cloud-rain"
+      : w.condition === "snow"
+        ? "ph-snowflake"
+        : w.condition === "storm"
+          ? "ph-cloud-lightning"
+          : w.condition === "cloudy"
+            ? "ph-cloud"
+            : "ph-sun";
   const weatherVariant =
-    w.condition === "rain" || w.condition === "snow" || w.condition === "storm" ? "cool"
-    : w.condition === "clear" ? "warm"
-    : "neutral";
+    w.condition === "rain" || w.condition === "snow" || w.condition === "storm"
+      ? "cool"
+      : w.condition === "clear"
+        ? "warm"
+        : "neutral";
   badges.push({
     icon: weatherIcon,
     label: `${w.description} \u00b7 ${tempStr}`,
     variant: weatherVariant,
   });
 
-  const dayCap = context.day_of_week.charAt(0).toUpperCase() + context.day_of_week.slice(1);
-  const time = new Date(context.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  badges.push({ icon: "ph-clock", label: `${dayCap} \u00b7 ${time}`, variant: "neutral" });
+  const dayCap =
+    context.day_of_week.charAt(0).toUpperCase() + context.day_of_week.slice(1);
+  const time = new Date(context.timestamp).toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  badges.push({
+    icon: "ph-clock",
+    label: `${dayCap} \u00b7 ${time}`,
+    variant: "neutral",
+  });
 
   if (context.nearby_events.length > 0) {
     badges.push({
@@ -121,7 +132,9 @@ function buildBadges(context: ContextState | null) {
     });
   }
 
-  const quietCount = context.merchant_densities.filter((d) => d.trend === "quiet").length;
+  const quietCount = context.merchant_densities.filter(
+    (d) => d.trend === "quiet",
+  ).length;
   if (quietCount > 0) {
     badges.push({
       icon: "ph-coffee",
@@ -137,7 +150,9 @@ export default function Home() {
   const router = useRouter();
   const [consentStatus, handleConsent] = useConsentStatus();
   const [merchants, setMerchants] = useState<Merchant[]>([]);
-  const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
+  const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(
+    null,
+  );
   const [demoMode, setDemoMode] = useState<DemoMode | null>(null);
   const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
@@ -151,36 +166,29 @@ export default function Home() {
   const taste = useMemo(() => getTaste(), [consentStatus]);
   const profile = useMemo(() => getProfile(), [consentStatus]);
 
-  const intentTags = useMemo(() => taste?.categories ?? [], [taste]);
-  const pastCategories = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          (taste?.categories ?? [])
-            .map((c) => TASTE_TO_MERCHANT[c])
-            .filter((c): c is MerchantCategory => Boolean(c)),
-        ),
-      ),
-    [taste],
-  );
-
-  const offersReady = consentStatus !== "loading" && consentStatus !== "none" && geo.status !== "loading";
-  const { offers, context, status, errorMessage, acceptOffer, dismissOffer } = useOffers({
-    enabled: offersReady,
-    latitude: geo.latitude,
-    longitude: geo.longitude,
-    accuracy: geo.accuracy,
-    demoMode,
-    intentTags,
-    pastCategories,
-  });
+  const offersReady =
+    consentStatus !== "loading" &&
+    consentStatus !== "none" &&
+    geo.status !== "loading";
+  const { offers, context, status, errorMessage, acceptOffer, dismissOffer } =
+    useOffers({
+      enabled: offersReady,
+      latitude: geo.latitude,
+      longitude: geo.longitude,
+      accuracy: geo.accuracy,
+      demoMode,
+    });
 
   useEffect(() => {
     let alive = true;
     getMerchants()
-      .then((res) => { if (alive) setMerchants(res.merchants); })
+      .then((res) => {
+        if (alive) setMerchants(res.merchants);
+      })
       .catch(() => {});
-    return () => { alive = false; };
+    return () => {
+      alive = false;
+    };
   }, []);
 
   const visibleOffers = useMemo(() => {
@@ -239,9 +247,11 @@ export default function Home() {
         : "Near you";
 
   const subheading =
-    status === "loading" ? "Reading the city\u2026"
-    : status === "fallback" ? `${visibleOffers.length} sample offers`
-    : `${visibleOffers.length} ${taste ? "matching" : ""} offers`;
+    status === "loading"
+      ? "Reading the city\u2026"
+      : status === "fallback"
+        ? `${visibleOffers.length} sample offers`
+        : `${visibleOffers.length} ${taste ? "matching" : ""} offers`;
 
   const badges = buildBadges(context);
 
