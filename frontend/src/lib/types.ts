@@ -71,7 +71,11 @@ export type MerchantCategory =
   | "cafe"
   | "restaurant"
   | "bakery"
-  | "bar";
+  | "bar"
+  | "bookstore"
+  | "retail"
+  | "grocery"
+  | "fitness";
 
 export interface MerchantRule {
   id: string | null;
@@ -115,9 +119,9 @@ export type OfferStatus =
 
 export interface OfferStyle {
   background_gradient: string[];
+  emoji?: string;
   tone: "warm" | "urgent" | "playful" | "sophisticated";
   headline_style: "emotional";
-  emoji?: string;
 }
 
 export interface Offer {
