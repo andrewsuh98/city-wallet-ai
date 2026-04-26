@@ -21,8 +21,10 @@ async def seed():
 
         for m in merchants:
             await db.execute(
-                """INSERT INTO merchants (id, name, category, description, latitude, longitude, address, image_url)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                """INSERT INTO merchants (
+                       id, name, category, description, latitude, longitude, address, image_url,
+                       brand_voice, signature_items, target_demographics, primary_goal, daily_budget_usd
+                   ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     m["id"],
                     m["name"],
@@ -32,6 +34,11 @@ async def seed():
                     m["longitude"],
                     m.get("address", ""),
                     m.get("image_url"),
+                    m.get("brand_voice"),
+                    json.dumps(m.get("signature_items", [])),
+                    json.dumps(m.get("target_demographics", [])),
+                    m.get("primary_goal"),
+                    m.get("daily_budget_usd"),
                 ),
             )
 

@@ -1,29 +1,15 @@
 "use client";
 
-import L from "leaflet";
-import { MapContainer, Marker, TileLayer } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import { Map, Marker } from "react-map-gl/mapbox";
+import "mapbox-gl/dist/mapbox-gl.css";
+
+const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 
 interface MerchantMiniMapProps {
   latitude: number;
   longitude: number;
   merchantName: string;
   emoji?: string;
-}
-
-const CATEGORY_PIN_COLOR = "#E30018";
-
-function pinIcon(emoji?: string) {
-  return L.divIcon({
-    className: "",
-    html: `
-      <div style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:${CATEGORY_PIN_COLOR};border:3px solid white;box-shadow:0 2px 6px rgba(0,0,0,0.2)">
-        <span style="font-size:16px;line-height:1">${emoji || "📍"}</span>
-      </div>
-    `,
-    iconSize: [36, 36],
-    iconAnchor: [18, 36],
-  });
 }
 
 function getDirectionsUrl(lat: number, lng: number, name: string): string {
@@ -39,20 +25,38 @@ export default function MerchantMiniMap({ latitude, longitude, merchantName, emo
   return (
     <div className="overflow-hidden rounded-3 border border-border-1 shadow-1">
       <div className="h-[160px] w-full">
-        <MapContainer
-          center={[latitude, longitude]}
-          zoom={16}
-          scrollWheelZoom={false}
-          dragging={false}
-          zoomControl={false}
-          doubleClickZoom={false}
-          touchZoom={false}
-          attributionControl={false}
+        <Map
+          mapboxAccessToken={MAPBOX_TOKEN}
+          initialViewState={{ longitude, latitude, zoom: 16 }}
           style={{ width: "100%", height: "100%" }}
+          mapStyle="mapbox://styles/mapbox/streets-v12"
+          scrollZoom={false}
+          dragPan={false}
+          dragRotate={false}
+          doubleClickZoom={false}
+          touchZoomRotate={false}
+          attributionControl={false}
         >
-          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-          <Marker position={[latitude, longitude]} icon={pinIcon(emoji)} />
-        </MapContainer>
+          <Marker longitude={longitude} latitude={latitude} anchor="bottom">
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: 36,
+                height: 36,
+                borderRadius: "50%",
+                background: "#E30018",
+                border: "3px solid white",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                fontSize: 16,
+                lineHeight: 1,
+              }}
+            >
+              {emoji || "📍"}
+            </div>
+          </Marker>
+        </Map>
       </div>
       <a
         href={getDirectionsUrl(latitude, longitude, merchantName)}
