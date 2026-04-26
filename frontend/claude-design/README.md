@@ -24,7 +24,7 @@ There is no pre-existing City Wallet codebase, Figma, or brand guideline. Visual
 | Path | What it is |
 |---|---|
 | `colors_and_type.css` | All foundational tokens — color ramps, semantic vars, type scale, spacing, radii, shadows, motion. Import this into anything you build. |
-| `fonts/` | Webfont references. Currently uses Google Fonts (Fraunces, Inter Tight, JetBrains Mono); see *Font substitutions* below. |
+| `fonts/` | Webfont references. Currently uses Google Fonts (Fraunces, Plus Jakarta Sans, JetBrains Mono); see *Font substitutions* below. |
 | `assets/` | Logos, brand marks, illustrations, sample contextual imagery, icon references. |
 | `preview/` | Small HTML cards that render in the Design System tab — color swatches, type specimens, components, etc. |
 | `ui_kits/consumer/` | Mobile consumer UI kit — JSX components + an interactive `index.html` click-thru. |
@@ -93,9 +93,9 @@ We are a **one-hue brand with a paper-warm neutral**. The red is used sparingly 
 - **Situational accents:** sunny `#F59E0B`, rainy `#1E6FB8`, fresh `#2F7D4F`, dusk `#7A4CA8`. Each has a paired tinted background. Used on chips, never on primary surfaces.
 
 ### Type
-Two voices: **Fraunces** (humanist serif, variable optical-size & softness) for situational/emotional moments — the hero copy on an offer card, the headline on a marketing surface. **Inter Tight** for everything UI: buttons, lists, settings, merchant dashboards. **JetBrains Mono** only for token codes, transaction IDs, and the redemption code itself.
+Two voices: **Fraunces** (humanist serif, variable optical-size & softness) for situational/emotional moments — the hero copy on an offer card, the headline on a marketing surface. **Plus Jakarta Sans** for everything UI: buttons, lists, settings, merchant dashboards. **JetBrains Mono** only for token codes, transaction IDs, and the redemption code itself.
 
-The trick: in the consumer app, situational copy is set in Fraunces; data and UI sit in Inter Tight. So *"Cold outside?"* is serif, but *"80m · −20% · until 13:00"* is sans. The contrast is the design.
+The trick: in the consumer app, situational copy is set in Fraunces; data and UI sit in Plus Jakarta Sans. So *"Cold outside?"* is serif, but *"80m · −20% · until 13:00"* is sans. The contrast is the design.
 
 ### Spacing & layout
 - **4-point grid.** Half-steps (2px) only for hairline-level adjustments inside chips.
@@ -193,7 +193,7 @@ City Wallet has no existing font licenses. The current stack uses:
 | Role | Family | Why |
 |---|---|---|
 | Display / situational | **Fraunces** (Google Fonts) | Variable opsz + SOFT axes give us a warm humanist serif that scales from 11px metadata to 60px hero gracefully. |
-| UI / body | **Inter Tight** (Google Fonts) | Inter's tighter sibling — slightly more characterful at small sizes, still legible. We chose this over plain Inter to lean a touch more European. |
+| UI / body | **Plus Jakarta Sans** (Google Fonts) | Inter's tighter sibling — slightly more characterful at small sizes, still legible. We chose this over plain Inter to lean a touch more European. |
 | Mono | **JetBrains Mono** (Google Fonts) | Clear at small sizes, common in fintech for transaction IDs. |
 
 **Ask:** if DSV has licensed display/UI faces (e.g. a brand-house grotesque), please send `.woff2` files and I'll wire them into `/fonts/` and update `colors_and_type.css`.

@@ -65,6 +65,10 @@ const CATEGORY_STYLES: Record<MerchantCategory, OfferStyle> = {
   restaurant:{ background_gradient: ["#1a3a2a", "#2d6a4f"], emoji: "🍽️", tone: "warm",          headline_style: "emotional" },
   bakery:    { background_gradient: ["#3d2310", "#c4a265"], emoji: "🥐",  tone: "warm",          headline_style: "emotional" },
   bar:       { background_gradient: ["#1a1a2e", "#16213e"], emoji: "🍺",  tone: "playful",       headline_style: "emotional" },
+  bookstore: { background_gradient: ["#1f2937", "#374151"], emoji: "📚",  tone: "sophisticated", headline_style: "emotional" },
+  retail:    { background_gradient: ["#0891b2", "#0e7490"], emoji: "🛍️", tone: "playful",       headline_style: "emotional" },
+  grocery:   { background_gradient: ["#15803d", "#166534"], emoji: "🥦",  tone: "warm",          headline_style: "emotional" },
+  fitness:   { background_gradient: ["#be123c", "#9f1239"], emoji: "💪",  tone: "urgent",        headline_style: "emotional" },
 };
 
 const CATEGORIES: { id: MerchantCategory; label: string; icon: string }[] = [
