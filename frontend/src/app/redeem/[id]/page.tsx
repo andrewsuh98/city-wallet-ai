@@ -31,12 +31,14 @@ export default function RedeemPage() {
   const [offer, setOffer] = useState<Offer | null>(null);
   const [cashback, setCashback] = useState<number | null>(null);
   const [tick, setTick] = useState(0);
+  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
     const sid = getSessionId();
     if (!sid || !offerId) return;
     let alive = true;
     let interval: ReturnType<typeof setInterval> | null = null;
+    let attempts = 0;
 
     const stop = () => {
       if (interval !== null) {
@@ -50,13 +52,23 @@ export default function RedeemPage() {
         const res = await getOffers(sid);
         const found = res.offers.find((o) => o.id === offerId) ?? null;
         if (!alive) return;
-        setOffer(found);
-        if (found?.status === "redeemed") {
-          stop();
-          const wallet = await getWalletBalance(sid);
-          if (!alive) return;
-          const matched = wallet.redemptions.find((r) => r.offer_id === offerId);
-          setCashback(matched?.cashback_amount ?? 0);
+        if (found) {
+          setOffer(found);
+          setNotFound(false);
+          if (found.status === "redeemed") {
+            stop();
+            const wallet = await getWalletBalance(sid);
+            if (!alive) return;
+            const matched = wallet.redemptions.find((r) => r.offer_id === offerId);
+            setCashback(matched?.cashback_amount ?? 0);
+          }
+        } else {
+          attempts += 1;
+          // After ~3 polls (6s) with no match, surface an error instead of looping forever.
+          if (attempts >= 3 && !offer) {
+            setNotFound(true);
+            stop();
+          }
         }
       } catch {
         // network blip; keep last known offer state
@@ -70,7 +82,7 @@ export default function RedeemPage() {
       alive = false;
       stop();
     };
-  }, [offerId]);
+  }, [offerId, offer]);
 
   useEffect(() => {
     const t = setInterval(() => setTick((n) => n + 1), 1000);
@@ -155,6 +167,21 @@ export default function RedeemPage() {
           <p className="mt-1 text-micro text-fg-4">
             Waiting for merchant scan...
           </p>
+        </div>
+      ) : notFound ? (
+        <div className="mx-auto max-w-md text-center">
+          <p className="text-body text-fg-2">
+            This offer is not available for redemption.
+          </p>
+          <p className="mt-2 text-small text-fg-3">
+            It may have expired or been generated in demo fallback mode.
+          </p>
+          <button
+            onClick={() => router.push("/")}
+            className="mt-6 rounded-2 bg-action-primary px-6 py-3 text-small font-semibold text-fg-on-red hover:bg-action-primary-hover"
+          >
+            Back to offers
+          </button>
         </div>
       ) : (
         <div className="mx-auto max-w-md text-center text-small text-fg-3">

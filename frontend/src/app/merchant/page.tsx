@@ -666,8 +666,11 @@ function TimingScreen({ data, update, onNext }: { data: OnboardingData, update: 
         </button>
 
         {/* Manual Button */}
-        <button
+        <div
+          role="button"
+          tabIndex={0}
           onClick={() => update({ timingMode: "manual" })}
+          onKeyDown={(e) => e.key === "Enter" && update({ timingMode: "manual" })}
           style={strategyBtnStyle(data.timingMode === "manual", "var(--cw-cool)", "var(--cw-cool-bg)")}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: data.timingMode === "manual" ? "16px" : "0" }}>
@@ -704,7 +707,7 @@ function TimingScreen({ data, update, onNext }: { data: OnboardingData, update: 
                </button>
             </div>
           )}
-        </button>
+        </div>
       </div>
 
       <button onClick={onNext} disabled={!canProceed} style={{ ...primaryBtn, opacity: canProceed ? 1 : 0.4, cursor: canProceed ? "pointer" : "default" }}>
@@ -906,6 +909,11 @@ export default function MerchantPage() {
 
   const handlePublish = () => {
     setPublishing(true);
+    try {
+      localStorage.setItem("merchant_onboarding", JSON.stringify(data));
+    } catch {
+      // storage unavailable — settings page will fall back to API values
+    }
     setTimeout(() => {
       router.push(
         `/merchant/scan?id=m_001&name=${encodeURIComponent(data.businessName)}&category=${data.category}`

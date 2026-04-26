@@ -15,7 +15,7 @@ export function getDemoModeFromUrl(): DemoMode | null {
 }
 
 export const DEFAULT_LOCATION = {
-  latitude: 40.8118,
-  longitude: -73.9609,
-  label: "Columbia",
+  latitude: 40.7549,
+  longitude: -73.9840,
+  label: "Midtown Manhattan",
 };

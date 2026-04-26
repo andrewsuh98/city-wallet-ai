@@ -2,10 +2,9 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { generateOffers, getContext, updateOffer } from "@/lib/api";
-import { mockOffers } from "@/lib/mockOffers";
 import type { ContextState, Offer } from "@/lib/types";
 import { getSessionId } from "@/lib/session";
-import type { DemoMode } from "@/lib/demo";
+import { DEFAULT_LOCATION, type DemoMode } from "@/lib/demo";
 
 export type OffersStatus = "idle" | "loading" | "ready" | "error" | "fallback";
 
@@ -44,12 +43,13 @@ export function useOffers(input: UseOffersInput): UseOffersResult {
     const myRequest = ++requestId.current;
     setStatus("loading");
     setErrorMessage(null);
+    setOffers([]);
 
     try {
-      const ctx = await getContext(
-        { latitude, longitude, accuracy_meters: accuracy ?? undefined },
-        demoMode,
-      );
+      const loc = demoMode
+        ? { latitude: DEFAULT_LOCATION.latitude, longitude: DEFAULT_LOCATION.longitude, accuracy_meters: undefined }
+        : { latitude, longitude, accuracy_meters: accuracy ?? undefined };
+      const ctx = await getContext(loc, demoMode);
       if (myRequest !== requestId.current) return;
       setContext(ctx);
 
@@ -65,9 +65,9 @@ export function useOffers(input: UseOffersInput): UseOffersResult {
 
       if (myRequest !== requestId.current) return;
       if (res.offers.length === 0) {
-        setOffers(mockOffers);
-        setStatus("fallback");
-        setErrorMessage("No live offers matched your context. Showing examples.");
+        setOffers([]);
+        setStatus("ready");
+        setErrorMessage("No offers available for the current context.");
       } else {
         setOffers(res.offers);
         setStatus("ready");
@@ -75,8 +75,8 @@ export function useOffers(input: UseOffersInput): UseOffersResult {
     } catch (err) {
       if (myRequest !== requestId.current) return;
       const message = err instanceof Error ? err.message : "Unknown error";
-      setOffers(mockOffers);
-      setStatus("fallback");
+      setOffers([]);
+      setStatus("error");
       setErrorMessage(message);
     }
   }, [latitude, longitude, accuracy, demoMode, intentTags, pastCategories]);
@@ -90,12 +90,6 @@ export function useOffers(input: UseOffersInput): UseOffersResult {
     const target = offers.find((o) => o.id === id);
     if (!target) return null;
 
-    if (status === "fallback" || target.id.startsWith("off_mock_")) {
-      const updated: Offer = { ...target, status: "accepted", redemption_token: "mock_token" };
-      setOffers((curr) => curr.map((o) => (o.id === id ? updated : o)));
-      return updated;
-    }
-
     try {
       const res = await updateOffer(id, { action: "accept" });
       setOffers((curr) => curr.map((o) => (o.id === id ? res.offer : o)));
@@ -104,7 +98,7 @@ export function useOffers(input: UseOffersInput): UseOffersResult {
       console.error("Accept offer failed", err);
       return null;
     }
-  }, [offers, status]);
+  }, [offers]);
 
   const dismissOffer = useCallback(async (id: string): Promise<void> => {
     const target = offers.find((o) => o.id === id);
@@ -112,14 +106,12 @@ export function useOffers(input: UseOffersInput): UseOffersResult {
 
     setOffers((curr) => curr.filter((o) => o.id !== id));
 
-    if (status === "fallback" || target.id.startsWith("off_mock_")) return;
-
     try {
       await updateOffer(id, { action: "dismiss" });
     } catch (err) {
       console.error("Dismiss offer failed", err);
     }
-  }, [offers, status]);
+  }, [offers]);
 
   return {
     offers,

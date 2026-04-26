@@ -170,14 +170,35 @@ function SettingsContent() {
   };
 
   useEffect(() => {
+    // Seed from onboarding data first, then overlay with live API values
+    try {
+      const saved = localStorage.getItem("merchant_onboarding");
+      if (saved) {
+        const onboarding = JSON.parse(saved);
+        if (onboarding.offerTypes?.length) setOfferTypes(onboarding.offerTypes);
+        if (onboarding.maxDiscountPercent != null) setMaxDiscount(onboarding.maxDiscountPercent);
+        if (onboarding.minSpend != null) setMinSpend(onboarding.minSpend);
+        if (onboarding.maxOffersPerDay != null) setMaxOffersPerDay(onboarding.maxOffersPerDay);
+        if (onboarding.bogoDetails) setBogoDetails(onboarding.bogoDetails);
+        if (onboarding.freeItemDetails) setFreeItemDetails(onboarding.freeItemDetails);
+        if (onboarding.freeItemCondition) setFreeItemCondition(onboarding.freeItemCondition);
+        if (onboarding.blockHolidays != null) setBlockHolidays(onboarding.blockHolidays);
+        if (onboarding.blockoutDates?.length) setBlockoutDates(onboarding.blockoutDates);
+        if (onboarding.timingMode === "manual" && onboarding.manualSchedule?.length) {
+          setStrategy("manual");
+          setManualSchedule(onboarding.manualSchedule);
+        } else if (onboarding.timingMode === "automatic") {
+          setStrategy("autopilot");
+        }
+      }
+    } catch {
+      // corrupt storage — ignore
+    }
+
     getMerchantDashboard(merchantId)
       .then((data) => {
         setStats(data);
         setIsPaused(data.is_paused);
-        setStrategy(data.strategy as "autopilot" | "manual");
-        setMaxDiscount(data.max_discount_percent);
-        setMinSpend(Math.round(data.min_spend_usd));
-        setMaxOffersPerDay(data.max_offers_per_day);
       })
       .catch((e) => console.error(e))
       .finally(() => setLoading(false));

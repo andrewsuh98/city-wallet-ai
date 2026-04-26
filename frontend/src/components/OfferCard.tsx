@@ -1,83 +1,32 @@
-import type { CSSProperties } from "react";
+"use client";
+
+import { useState, useEffect } from "react";
 import type { Offer } from "@/lib/types";
 
 interface OfferCardProps {
   offer: Offer;
-  highlighted?: boolean;
   onAccept?: (id: string) => void;
   onDismiss?: (id: string) => void;
   onShowQR?: (id: string) => void;
 }
 
-type ChipVariant = "cool" | "warm" | "fresh" | "dusk" | "neutral";
-
-const TAG_VARIANT: Record<string, ChipVariant> = {
-  rainy: "cool",
-  rain: "cool",
-  cold: "cool",
-  snow: "cool",
-  storm: "cool",
-  sunny: "warm",
-  warm: "warm",
-  hot: "warm",
-  fresh: "fresh",
-  available: "fresh",
-  quiet: "fresh",
-  quiet_cafes: "fresh",
-  quiet_period: "fresh",
-  evening: "dusk",
-  dusk: "dusk",
-  events: "dusk",
-  concert: "dusk",
-  weekend: "dusk",
+const CATEGORY_LABEL: Record<string, string> = {
+  cafe: "Coffee",
+  restaurant: "Food",
+  bakery: "Bakery",
+  retail: "Shopping",
+  bar: "Nightlife",
+  bookstore: "Books",
+  grocery: "Grocery",
+  fitness: "Fitness",
 };
 
-const TAG_ICON: Record<string, string> = {
-  rainy: "ph-cloud-rain",
-  rain: "ph-cloud-rain",
-  cold: "ph-thermometer-cold",
-  snow: "ph-snowflake",
-  storm: "ph-cloud-lightning",
-  sunny: "ph-sun",
-  warm: "ph-sun",
-  hot: "ph-sun",
-  fresh: "ph-coffee",
-  quiet: "ph-chart-bar",
-  quiet_cafes: "ph-coffee",
-  quiet_period: "ph-chart-bar",
-  lunch_hour: "ph-fork-knife",
-  weekend: "ph-calendar",
-  evening: "ph-moon",
-  dusk: "ph-moon",
-  events: "ph-music-notes",
-  concert: "ph-music-notes",
-};
-
-const CHIP_CLASSES: Record<ChipVariant, string> = {
-  cool:    "bg-cw-cool-bg text-cw-cool",
-  warm:    "bg-cw-warm-bg text-cw-warm",
-  fresh:   "bg-cw-fresh-bg text-cw-fresh",
-  dusk:    "bg-cw-dusk-bg text-cw-dusk",
-  neutral: "bg-cw-paper-100 text-fg-2",
-};
-
-const CHIP_BASE =
-  "inline-flex items-center gap-1 whitespace-nowrap rounded-pill px-2.5 py-1 font-body text-[10px] font-semibold uppercase tracking-[0.04em]";
-
-function pickPrimaryTag(tags: string[]): string | null {
-  for (const tag of tags) {
-    if (TAG_VARIANT[tag] || TAG_ICON[tag]) return tag;
-  }
-  return tags[0] ?? null;
-}
-
-function formatExpiry(expiresAt: string): string {
-  const target = new Date(expiresAt);
-  const diff = target.getTime() - Date.now();
-  if (diff <= 0) return "closed";
-  const h = target.getHours().toString().padStart(2, "0");
-  const m = target.getMinutes().toString().padStart(2, "0");
-  return `until ${h}:${m}`;
+function formatMinutes(ms: number): string {
+  if (ms <= 0) return "Ended";
+  const mins = Math.ceil(ms / 60000);
+  if (mins < 60) return `${mins}m left`;
+  const hrs = Math.floor(mins / 60);
+  return `${hrs}h ${mins % 60}m`;
 }
 
 function formatDistance(meters: number): string {
@@ -86,152 +35,177 @@ function formatDistance(meters: number): string {
 }
 
 function formatDiscount(value: string): string {
-  if (!value) return "Accept";
-  if (value.startsWith("\u2212") || value.startsWith("-")) return value;
-  if (value.endsWith("%")) return `\u2212${value}`;
+  if (!value) return "Deal";
+  if (value.endsWith("%")) return `${value} off`;
   return value;
 }
 
-function hasGradient(gradient: string[] | undefined): gradient is string[] {
-  return Array.isArray(gradient) && gradient.length >= 2;
+function urgencyLevel(ms: number): "ok" | "warning" | "danger" {
+  if (ms <= 0) return "danger";
+  const mins = ms / 60000;
+  if (mins < 5) return "danger";
+  if (mins < 15) return "warning";
+  return "ok";
 }
 
-export default function OfferCard({ offer, highlighted, onAccept, onDismiss, onShowQR }: OfferCardProps) {
-  const expiresMs = new Date(offer.expires_at).getTime() - Date.now();
+function extractNeighborhood(subtext: string): string {
+  const parts = subtext.split("·");
+  return parts.length > 1 ? parts[1].trim() : subtext;
+}
+
+export default function OfferCard({ offer, onAccept, onDismiss, onShowQR }: OfferCardProps) {
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 30000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const expiresMs = new Date(offer.expires_at).getTime() - now;
   const isExpired = expiresMs <= 0;
   const isActive = !isExpired && offer.status === "active";
+  const urgency = urgencyLevel(expiresMs);
 
-  const primaryTag = pickPrimaryTag(offer.context_tags);
-  const variant: ChipVariant = (primaryTag ? TAG_VARIANT[primaryTag] : undefined) ?? "neutral";
-  const tagIcon = (primaryTag ? TAG_ICON[primaryTag] : undefined) ?? "ph-tag";
-  const tagLabel = (primaryTag ?? "").replace(/_/g, " ");
-
-  const merchantInitial = offer.merchant_name.charAt(0).toUpperCase();
-  const expiry = formatExpiry(offer.expires_at);
+  const expiryLabel = formatMinutes(expiresMs);
   const discountLabel = formatDiscount(offer.discount_value);
+  const hasEmoji = offer.style.emoji && offer.style.emoji.length > 0;
+  const categoryLabel = CATEGORY_LABEL[offer.merchant_category] ?? offer.merchant_category;
+  const neighborhood = extractNeighborhood(offer.subtext);
 
-  const gradient = offer.style?.background_gradient;
-  const useGradient = hasGradient(gradient) && !isExpired;
-  const cardStyle: CSSProperties = useGradient
-    ? { backgroundImage: `linear-gradient(135deg, ${gradient[0]}, ${gradient[1]})`, color: "#FFFFFF" }
-    : {};
-
-  const headlineCls = useGradient
-    ? "mb-2 font-display text-[26px] font-medium leading-[1.05] text-white"
-    : "mb-2 font-display text-[26px] font-medium leading-[1.05] text-fg-1";
-  const subtextCls = useGradient
-    ? "mb-4 text-small text-white/80"
-    : "mb-4 text-small text-fg-3";
-  const merchantNameCls = useGradient
-    ? "truncate text-small font-semibold text-white"
-    : "truncate text-small font-semibold text-fg-1";
-  const merchantCategoryCls = useGradient ? "text-micro text-white/70" : "text-micro text-fg-3";
-  const merchantBadgeCls = useGradient
-    ? "flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-white/20 font-display text-[14px] font-semibold text-white"
-    : "flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-cw-paper-200 font-display text-[14px] font-semibold text-fg-2";
-  const dismissCls = useGradient
-    ? "text-small text-white/70 hover:text-white"
-    : "text-small text-fg-3 hover:text-fg-2";
-
-  const baseCls = useGradient
-    ? "rounded-4 p-[18px] transition-all duration-200"
-    : `rounded-4 border border-border-1 bg-card p-[18px] transition-all duration-200 ${
-        isActive ? "shadow-2" : "shadow-1"
-      }`;
-  const stateCls = isExpired ? "opacity-50" : "";
-  const highlightCls = highlighted
-    ? "ring-2 ring-action-primary ring-offset-2 ring-offset-page shadow-lg scale-[1.01]"
-    : "";
+  const timerColor =
+    urgency === "danger" ? "bg-cw-red-100 text-status-danger" :
+    urgency === "warning" ? "bg-cw-warm-bg text-status-warning" :
+    "bg-cw-paper-100 text-fg-3";
 
   return (
     <article
-      id={`offer-card-${offer.id}`}
-      data-merchant-id={offer.merchant_id}
-      className={`${baseCls} ${stateCls} ${highlightCls}`}
-      style={cardStyle}
+      className={`group relative overflow-hidden rounded-4 bg-card transition-all duration-200 ${
+        isActive ? "shadow-2 hover:-translate-y-0.5 hover:shadow-3 active:translate-y-0 active:shadow-press cursor-pointer" : "shadow-1"
+      } ${isExpired ? "opacity-50" : ""}`}
+      style={{ transitionTimingFunction: "var(--ease-out)" }}
     >
-      <div className="mb-3 flex flex-wrap gap-1.5">
-        {primaryTag && !useGradient && (
-          <span className={`${CHIP_BASE} ${CHIP_CLASSES[variant]}`}>
-            <i className={`ph ${tagIcon} text-xs`} />
-            {tagLabel}
+      {/* === TOP ZONE: Info === */}
+      <div className="p-4 pb-3" onClick={() => isActive && onAccept?.(offer.id)}>
+        {/* Row 1: Category tag + Timer */}
+        <div className="mb-3 flex items-center justify-between">
+          <span className="inline-flex items-center gap-1.5 rounded-2 border border-border-1 bg-cw-paper-50 px-2.5 py-1 text-small font-semibold text-fg-2">
+            {hasEmoji && <span className="text-base leading-none">{offer.style.emoji}</span>}
+            {categoryLabel}
           </span>
-        )}
-        {primaryTag && useGradient && (
-          <span className={`${CHIP_BASE} bg-white/20 text-white`}>
-            <i className={`ph ${tagIcon} text-xs`} />
-            {tagLabel}
-          </span>
-        )}
-        {offer.distance_meters != null && (
-          <span
-            className={`${CHIP_BASE} ${
-              useGradient ? "bg-white/20 text-white" : CHIP_CLASSES.neutral
-            }`}
-          >
-            <i className="ph ph-map-pin text-xs" />
-            {formatDistance(offer.distance_meters)}
-          </span>
-        )}
-      </div>
 
-      <h3
-        className={headlineCls}
-        style={{ letterSpacing: "var(--ls-tight)", textWrap: "balance", fontVariationSettings: '"opsz" 96, "SOFT" 50' }}
-      >
-        {offer.headline}
-      </h3>
-
-      <div className={subtextCls}>
-        {offer.subtext}
-        {!isExpired && <> {"\u00b7"} {expiry}</>}
-      </div>
-
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <div className={merchantBadgeCls}>{merchantInitial}</div>
-          <div className="min-w-0">
-            <div className={merchantNameCls}>{offer.merchant_name}</div>
-            <div className={merchantCategoryCls}>{offer.merchant_category}</div>
-          </div>
+          {!isExpired && (
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-2 px-2.5 py-1 font-mono text-[12px] font-semibold ${timerColor} ${
+                urgency === "danger" ? "animate-[wiggle_0.5s_ease-in-out_3]" : ""
+              }`}
+            >
+              <i className="ph ph-clock text-xs" />
+              {expiryLabel}
+              {urgency === "danger" && (
+                <span className="relative ml-0.5 flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-cw-red-500 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-cw-red-500" />
+                </span>
+              )}
+            </span>
+          )}
         </div>
 
-        {isActive ? (
-          <button
-            onClick={() => onAccept?.(offer.id)}
-            className={
-              useGradient
-                ? "inline-flex shrink-0 items-center gap-1.5 rounded-2 bg-white px-3.5 py-2 text-small font-semibold text-fg-1 transition-colors duration-150 hover:bg-white/90"
-                : "inline-flex shrink-0 items-center gap-1.5 rounded-2 bg-action-primary px-3.5 py-2 text-small font-semibold text-fg-on-red transition-colors duration-150 hover:bg-action-primary-hover active:bg-action-primary-press"
-            }
-          >
+        {/* Row 2: Merchant name */}
+        <h3 className="mb-1 text-h3 font-semibold text-fg-1">
+          {offer.merchant_name}
+        </h3>
+
+        {/* Row 3: Headline */}
+        <p
+          className="mb-3 font-display text-[17px] font-medium leading-snug text-fg-2"
+          style={{ fontVariationSettings: '"opsz" 60, "SOFT" 40', textWrap: "balance" }}
+        >
+          {offer.headline}
+        </p>
+
+        {/* Row 4: Info pills */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {offer.distance_meters != null && (
+            <span className="inline-flex items-center gap-1 rounded-pill bg-cw-paper-100 px-2.5 py-1 text-micro font-semibold text-fg-3">
+              <i className="ph ph-map-pin text-[11px]" />
+              {formatDistance(offer.distance_meters)}
+            </span>
+          )}
+          <span className="inline-flex items-center gap-1 rounded-pill bg-cw-paper-100 px-2.5 py-1 text-micro font-semibold text-fg-3">
+            <i className="ph ph-map-trifold text-[11px]" />
+            {neighborhood}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-pill bg-cw-red-50 px-2.5 py-1 text-micro font-bold text-cw-red-600">
+            <i className="ph ph-tag text-[11px]" />
             {discountLabel}
-            <i className="ph ph-arrow-right text-sm" />
-          </button>
-        ) : offer.status === "accepted" && onShowQR ? (
-          <button
-            onClick={() => onShowQR(offer.id)}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-2 bg-action-secondary px-3.5 py-2 text-small font-semibold text-fg-on-dark"
-          >
-            <i className="ph ph-qr-code text-sm" />
-            Show QR
-          </button>
-        ) : offer.status === "accepted" ? (
-          <span className="rounded-pill bg-cw-fresh-bg px-3 py-1.5 text-small font-semibold text-status-success">
-            Accepted
           </span>
-        ) : (
-          <span className={useGradient ? "text-small text-white/70" : "text-small text-fg-3"}>
-            Window closed
-          </span>
-        )}
+        </div>
       </div>
 
+      {/* === TEAR LINE === */}
       {isActive && (
-        <div className="mt-2.5 text-right">
-          <button onClick={() => onDismiss?.(offer.id)} className={dismissCls}>
-            Maybe later
-          </button>
+        <>
+          <div className="ticket-tear relative border-t-2 border-dashed border-cw-paper-200" />
+
+          {/* === BOTTOM ZONE: Stub === */}
+          <div className="flex items-center justify-between bg-cw-paper-50 px-4 py-3">
+            <button
+              onClick={(e) => { e.stopPropagation(); onDismiss?.(offer.id); }}
+              className="text-small text-fg-4 transition-colors duration-150 hover:text-fg-2"
+            >
+              Not now
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onAccept?.(offer.id); }}
+              className="group/cta inline-flex items-center gap-2 rounded-3 bg-action-primary px-5 py-2.5 text-body font-bold text-fg-on-red shadow-1 transition-all duration-200 hover:bg-action-primary-hover hover:shadow-2 active:bg-action-primary-press active:shadow-press"
+              style={{
+                backgroundImage: "linear-gradient(110deg, transparent 30%, rgba(255,255,255,0.15) 50%, transparent 70%)",
+                backgroundSize: "200% 100%",
+                backgroundPosition: "-200% center",
+              }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.animation = "shimmer 0.8s ease-out forwards";
+              }}
+              onAnimationEnd={(e) => {
+                (e.currentTarget as HTMLElement).style.animation = "";
+                (e.currentTarget as HTMLElement).style.backgroundPosition = "-200% center";
+              }}
+            >
+              <i className="ph ph-ticket text-lg" />
+              Claim this deal
+              <i className="ph ph-arrow-right text-base transition-transform duration-150 group-hover/cta:translate-x-0.5" />
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* === Accepted state === */}
+      {offer.status === "accepted" && (
+        <>
+          <div className="ticket-tear relative border-t-2 border-dashed border-cw-paper-200" />
+          <div className="flex items-center justify-between bg-cw-fresh-bg/50 px-4 py-3">
+            <span className="inline-flex items-center gap-1.5 text-small font-semibold text-status-success">
+              <i className="ph ph-check-circle text-base" />
+              Claimed
+            </span>
+            {onShowQR && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onShowQR(offer.id); }}
+                className="inline-flex items-center gap-1.5 rounded-2 bg-action-secondary px-3.5 py-2 text-small font-semibold text-fg-on-dark transition-colors duration-150 hover:bg-action-secondary-hover"
+              >
+                <i className="ph ph-qr-code text-sm" />
+                Show QR
+              </button>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* === Expired: no stub === */}
+      {isExpired && offer.status !== "accepted" && (
+        <div className="border-t border-border-1 px-4 py-2.5">
+          <span className="text-micro text-fg-4">This offer has ended</span>
         </div>
       )}
     </article>

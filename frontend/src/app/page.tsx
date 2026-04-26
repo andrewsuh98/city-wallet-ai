@@ -301,7 +301,6 @@ export default function Home() {
               >
                 <OfferCard
                   offer={offer}
-                  highlighted={selectedMerchantId === offer.merchant_id}
                   onAccept={handleAccept}
                   onDismiss={handleDismiss}
                 />

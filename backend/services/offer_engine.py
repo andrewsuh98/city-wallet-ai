@@ -223,6 +223,21 @@ async def match_merchants(
 
     context_tag_set = set(context.context_tags)
     matched: list[tuple[Merchant, MerchantRule, Optional[TransactionDensity]]] = []
+    # Relaxed pool: merchants in radius with budget, used only if strict matching yields nothing.
+    relaxed: list[tuple[Merchant, MerchantRule, Optional[TransactionDensity]]] = []
+
+    def _build_merchant(row, rule):
+        return Merchant(
+            id=row["id"],
+            name=row["name"],
+            category=row["category"],
+            description=row["description"] or "",
+            latitude=row["latitude"],
+            longitude=row["longitude"],
+            address=row["address"] or "",
+            image_url=row["image_url"],
+            rules=[rule],
+        )
 
     for row in merchant_rows:
         merchant_id = row["id"]
@@ -231,7 +246,14 @@ async def match_merchants(
         if distance > radius:
             continue
 
-        for rule in rules_by_merchant.get(merchant_id, []):
+        rules = rules_by_merchant.get(merchant_id, [])
+        if not rules:
+            continue
+        if today_counts.get(merchant_id, 0) >= rules[0].max_offers_per_day:
+            continue
+
+        matched_strict = False
+        for rule in rules:
             if not (rule.active_hours_start <= now_hhmm <= rule.active_hours_end):
                 continue
             if rule.trigger_conditions and not (set(rule.trigger_conditions) & context_tag_set):
@@ -239,24 +261,26 @@ async def match_merchants(
             if today_counts.get(merchant_id, 0) >= rule.max_offers_per_day:
                 continue
 
-            merchant = Merchant(
-                id=merchant_id,
-                name=row["name"],
-                category=row["category"],
-                description=row["description"] or "",
-                latitude=row["latitude"],
-                longitude=row["longitude"],
-                address=row["address"] or "",
-                image_url=row["image_url"],
-                rules=[rule],
-            )
-            matched.append((merchant, rule, density_map.get(merchant_id)))
+            matched.append((_build_merchant(row, rule), rule, density_map.get(merchant_id)))
+            matched_strict = True
             break
+
+        if not matched_strict and len(relaxed) < 8:
+            rule = rules[0]
+            relaxed.append((_build_merchant(row, rule), rule, density_map.get(merchant_id)))
 
         if len(matched) >= 8:
             break
 
-    return matched
+    if matched:
+        return matched
+
+    if relaxed:
+        logger.info(
+            "match_merchants: no strict matches, returning relaxed pool",
+            extra={"relaxed_count": len(relaxed), "tags": list(context_tag_set)},
+        )
+    return relaxed
 
 
 def _build_prompt(
@@ -326,7 +350,7 @@ async def call_claude(user_prompt: str) -> dict:
         messages=[{"role": "user", "content": user_prompt}],
         tools=[_OFFER_TOOL],  # type: ignore[arg-type]
         tool_choice={"type": "tool", "name": "emit_offers"},
-        timeout=5.0,
+        timeout=20.0,
     )
     for block in response.content:
         if isinstance(block, ToolUseBlock):

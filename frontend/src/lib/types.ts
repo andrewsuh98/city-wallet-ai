@@ -117,6 +117,7 @@ export interface OfferStyle {
   background_gradient: string[];
   tone: "warm" | "urgent" | "playful" | "sophisticated";
   headline_style: "emotional";
+  emoji?: string;
 }
 
 export interface Offer {
