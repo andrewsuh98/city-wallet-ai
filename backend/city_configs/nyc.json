@@ -6,10 +6,10 @@
   "timezone": "America/New_York",
   "language": "en",
   "center": {
-    "latitude": 40.8118,
-    "longitude": -73.9609
+    "latitude": 40.8075,
+    "longitude": -73.9626
   },
-  "default_radius_meters": 1500,
+  "default_radius_meters": 3000,
   "weather": {
     "openweathermap_city_id": 5128581
   },

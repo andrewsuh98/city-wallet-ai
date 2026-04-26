@@ -48,11 +48,6 @@ function urgencyLevel(ms: number): "ok" | "warning" | "danger" {
   return "ok";
 }
 
-function extractNeighborhood(subtext: string): string {
-  const parts = subtext.split("·");
-  return parts.length > 1 ? parts[1].trim() : subtext;
-}
-
 export default function OfferCard({ offer, onAccept, onDismiss, onShowQR }: OfferCardProps) {
   const [now, setNow] = useState(Date.now());
 
@@ -70,7 +65,6 @@ export default function OfferCard({ offer, onAccept, onDismiss, onShowQR }: Offe
   const discountLabel = formatDiscount(offer.discount_value);
   const hasEmoji = offer.style.emoji && offer.style.emoji.length > 0;
   const categoryLabel = CATEGORY_LABEL[offer.merchant_category] ?? offer.merchant_category;
-  const neighborhood = extractNeighborhood(offer.subtext);
 
   const timerColor =
     urgency === "danger" ? "bg-cw-red-100 text-status-danger" :
@@ -132,10 +126,6 @@ export default function OfferCard({ offer, onAccept, onDismiss, onShowQR }: Offe
               {formatDistance(offer.distance_meters)}
             </span>
           )}
-          <span className="inline-flex items-center gap-1 rounded-pill bg-cw-paper-100 px-2.5 py-1 text-micro font-semibold text-fg-3">
-            <i className="ph ph-map-trifold text-[11px]" />
-            {neighborhood}
-          </span>
           <span className="inline-flex items-center gap-1 rounded-pill bg-cw-red-50 px-2.5 py-1 text-micro font-bold text-cw-red-600">
             <i className="ph ph-tag text-[11px]" />
             {discountLabel}
