@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AnimatePresence, animate, motion, useMotionValue, useTransform, type PanInfo } from "motion/react";
 import OfferCard from "@/components/OfferCard";
 import BottomNav from "@/components/BottomNav";
@@ -386,6 +386,8 @@ function SwipeableOfferCard({
   onOpenDetails: (id: string) => void;
 }) {
   const x = useMotionValue(0);
+  const suppressOpenRef = useRef(false);
+  const suppressOpenTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rotate = useTransform(x, [-180, 0, 180], [-2.5, 0, 2.5]);
   const dismissOpacity = useTransform(x, [-110, -24], [1, 0]);
   const claimOpacity = useTransform(x, [24, 110], [0, 1]);
@@ -393,6 +395,30 @@ function SwipeableOfferCard({
   const claimScale = useTransform(x, [40, 130], [0.92, 1]);
   const dismissContentX = useTransform(x, [-150, -36], [0, 22]);
   const claimContentX = useTransform(x, [36, 150], [-22, 0]);
+
+  useEffect(() => {
+    return () => {
+      if (suppressOpenTimerRef.current) {
+        clearTimeout(suppressOpenTimerRef.current);
+      }
+    };
+  }, []);
+
+  const clearSuppressOpenTimer = () => {
+    if (suppressOpenTimerRef.current) {
+      clearTimeout(suppressOpenTimerRef.current);
+      suppressOpenTimerRef.current = null;
+    }
+  };
+
+  const suppressOpenBriefly = () => {
+    suppressOpenRef.current = true;
+    clearSuppressOpenTimer();
+    suppressOpenTimerRef.current = setTimeout(() => {
+      suppressOpenRef.current = false;
+      suppressOpenTimerRef.current = null;
+    }, 250);
+  };
 
   const resetPosition = () => {
     animate(x, 0, { type: "spring", stiffness: 420, damping: 34 });
@@ -412,7 +438,14 @@ function SwipeableOfferCard({
     });
   };
 
+  const handleDragStart = () => {
+    suppressOpenRef.current = true;
+    clearSuppressOpenTimer();
+  };
+
   const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    suppressOpenBriefly();
+
     if (info.offset.x <= -SWIPE_ACTION_THRESHOLD || info.velocity.x <= -SWIPE_VELOCITY_THRESHOLD) {
       dismiss();
       return;
@@ -424,6 +457,11 @@ function SwipeableOfferCard({
     }
 
     resetPosition();
+  };
+
+  const handleOpenDetails = (id: string) => {
+    if (suppressOpenRef.current) return;
+    onOpenDetails(id);
   };
 
   return (
@@ -496,6 +534,7 @@ function SwipeableOfferCard({
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.18}
+        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
         style={{ x, rotate, touchAction: "pan-y" }}
         whileTap={{ scale: 0.995 }}
@@ -505,7 +544,7 @@ function SwipeableOfferCard({
           offer={offer}
           onAccept={accept}
           onDismiss={dismiss}
-          onOpenDetails={onOpenDetails}
+          onOpenDetails={handleOpenDetails}
         />
       </motion.div>
     </motion.div>
