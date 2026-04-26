@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from time import perf_counter
 from typing import Optional
+from zoneinfo import ZoneInfo
 
 import anthropic
 from anthropic.types import ToolUseBlock
@@ -179,7 +180,8 @@ async def match_merchants(
     radius = city_config.get("default_radius_meters", 1000)
     user_lat = context.location.latitude
     user_lng = context.location.longitude
-    now_hhmm = context.timestamp.strftime("%H:%M")
+    tz = ZoneInfo(city_config.get("timezone", "UTC"))
+    now_hhmm = context.timestamp.astimezone(tz).strftime("%H:%M")
 
     cursor = await db.execute("SELECT * FROM merchants")
     merchant_rows = await cursor.fetchall()

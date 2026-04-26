@@ -28,8 +28,12 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 // Context
 
-export async function getContext(req: ContextRequest): Promise<ContextState> {
-  return request("/context", {
+export async function getContext(
+  req: ContextRequest,
+  demoMode?: string | null,
+): Promise<ContextState> {
+  const path = demoMode ? `/context?demo=${encodeURIComponent(demoMode)}` : "/context";
+  return request(path, {
     method: "POST",
     body: JSON.stringify(req),
   });
