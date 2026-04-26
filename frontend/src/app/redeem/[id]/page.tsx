@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import dynamic from "next/dynamic";
@@ -53,6 +53,7 @@ export default function RedeemPage() {
   const [cashback, setCashback] = useState<number | null>(null);
   const [tick, setTick] = useState(0);
   const [notFound, setNotFound] = useState(false);
+  const seenOfferRef = useRef(false);
 
   useEffect(() => {
     const sid = getSessionId();
@@ -60,6 +61,7 @@ export default function RedeemPage() {
     let alive = true;
     let interval: ReturnType<typeof setInterval> | null = null;
     let attempts = 0;
+    seenOfferRef.current = false;
 
     const stop = () => {
       if (interval !== null) {
@@ -74,6 +76,7 @@ export default function RedeemPage() {
         const found = res.offers.find((o) => o.id === offerId) ?? null;
         if (!alive) return;
         if (found) {
+          seenOfferRef.current = true;
           setOffer(found);
           setNotFound(false);
           if (found.status === "redeemed") {
@@ -85,8 +88,7 @@ export default function RedeemPage() {
           }
         } else {
           attempts += 1;
-          // After ~3 polls (6s) with no match, surface an error instead of looping forever.
-          if (attempts >= 3 && !offer) {
+          if (attempts >= 3 && !seenOfferRef.current) {
             setNotFound(true);
             stop();
           }
@@ -103,7 +105,7 @@ export default function RedeemPage() {
       alive = false;
       stop();
     };
-  }, [offerId, offer]);
+  }, [offerId]);
 
   useEffect(() => {
     const t = setInterval(() => setTick((n) => n + 1), 1000);

@@ -78,6 +78,16 @@ async def get_db() -> aiosqlite.Connection:
     return db
 
 
+async def get_db_dep():
+    """FastAPI dependency: yields a connection and always closes it on teardown."""
+    db = await aiosqlite.connect(DB_PATH)
+    db.row_factory = aiosqlite.Row
+    try:
+        yield db
+    finally:
+        await db.close()
+
+
 MERCHANT_PROFILE_COLUMNS = [
     ("brand_voice", "TEXT"),
     ("signature_items", "TEXT"),

@@ -12,7 +12,6 @@ import anthropic
 from anthropic.types import ToolUseBlock
 
 from config import ANTHROPIC_API_KEY, city_config
-from database import get_db
 from models import (
     ContextState,
     GenerateOffersRequest,
@@ -456,32 +455,27 @@ async def process_response(
     return offers
 
 
-async def generate_offers(request: GenerateOffersRequest) -> GenerateOffersResponse:
+async def generate_offers(request: GenerateOffersRequest, db) -> GenerateOffersResponse:
     from services.slm import get_user_preferences
 
     start = perf_counter()
-    db = await get_db()
 
-    try:
-        user_preferences = await get_user_preferences(
-            db, request.session_id, request.context.context_tags
+    user_preferences = await get_user_preferences(
+        db, request.session_id, request.context.context_tags
+    )
+
+    merchant_rules = await match_merchants(request.context, db)
+
+    if not merchant_rules:
+        return GenerateOffersResponse(
+            offers=[],
+            generation_time_ms=int((perf_counter() - start) * 1000),
+            context_summary=_context_summary(request.context),
         )
 
-        merchant_rules = await match_merchants(request.context, db)
-
-        if not merchant_rules:
-            return GenerateOffersResponse(
-                offers=[],
-                generation_time_ms=int((perf_counter() - start) * 1000),
-                context_summary=_context_summary(request.context),
-            )
-
-        user_prompt = _build_prompt(request.context, merchant_rules, user_preferences)
-        raw = await call_claude(user_prompt)
-        offers = await process_response(raw, merchant_rules, request.context, request.session_id, db)
-
-    finally:
-        await db.close()
+    user_prompt = _build_prompt(request.context, merchant_rules, user_preferences)
+    raw = await call_claude(user_prompt)
+    offers = await process_response(raw, merchant_rules, request.context, request.session_id, db)
 
     return GenerateOffersResponse(
         offers=offers,
