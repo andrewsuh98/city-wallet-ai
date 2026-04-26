@@ -7,18 +7,19 @@ interface OfferCardProps {
   offer: Offer;
   onAccept?: (id: string) => void;
   onDismiss?: (id: string) => void;
+  onOpenDetails?: (id: string) => void;
   onShowQR?: (id: string) => void;
 }
 
-const CATEGORY_LABEL: Record<string, string> = {
-  cafe: "Coffee",
-  restaurant: "Food",
-  bakery: "Bakery",
-  retail: "Shopping",
-  bar: "Nightlife",
-  bookstore: "Books",
-  grocery: "Grocery",
-  fitness: "Fitness",
+const CATEGORY_META: Record<string, { label: string; icon: string }> = {
+  cafe: { label: "Coffee", icon: "ph-coffee" },
+  restaurant: { label: "Food", icon: "ph-fork-knife" },
+  bakery: { label: "Bakery", icon: "ph-cookie" },
+  retail: { label: "Shopping", icon: "ph-storefront" },
+  bar: { label: "Nightlife", icon: "ph-wine" },
+  bookstore: { label: "Books", icon: "ph-book-open-text" },
+  grocery: { label: "Grocery", icon: "ph-basket" },
+  fitness: { label: "Fitness", icon: "ph-barbell" },
 };
 
 function formatMinutes(ms: number): string {
@@ -53,8 +54,8 @@ function extractNeighborhood(subtext: string): string {
   return parts.length > 1 ? parts[1].trim() : subtext;
 }
 
-export default function OfferCard({ offer, onAccept, onDismiss, onShowQR }: OfferCardProps) {
-  const [now, setNow] = useState(Date.now());
+export default function OfferCard({ offer, onAccept, onDismiss, onOpenDetails, onShowQR }: OfferCardProps) {
+  const [now, setNow] = useState(() => Date.now());
 
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 30000);
@@ -68,8 +69,9 @@ export default function OfferCard({ offer, onAccept, onDismiss, onShowQR }: Offe
 
   const expiryLabel = formatMinutes(expiresMs);
   const discountLabel = formatDiscount(offer.discount_value);
-  const hasEmoji = offer.style.emoji && offer.style.emoji.length > 0;
-  const categoryLabel = CATEGORY_LABEL[offer.merchant_category] ?? offer.merchant_category;
+  const meta = CATEGORY_META[offer.merchant_category];
+  const categoryLabel = meta?.label ?? offer.merchant_category;
+  const categoryIcon = meta?.icon ?? "ph-storefront";
   const neighborhood = extractNeighborhood(offer.subtext);
 
   const timerColor =
@@ -79,17 +81,17 @@ export default function OfferCard({ offer, onAccept, onDismiss, onShowQR }: Offe
 
   return (
     <article
-      className={`group relative overflow-hidden rounded-4 bg-card transition-all duration-200 ${
+      className={`group relative overflow-hidden rounded-4 border border-border-1 bg-card transition-all duration-200 ${
         isActive ? "shadow-2 hover:-translate-y-0.5 hover:shadow-3 active:translate-y-0 active:shadow-press cursor-pointer" : "shadow-1"
       } ${isExpired ? "opacity-50" : ""}`}
       style={{ transitionTimingFunction: "var(--ease-out)" }}
     >
       {/* === TOP ZONE: Info === */}
-      <div className="p-4 pb-3" onClick={() => isActive && onAccept?.(offer.id)}>
+      <div className="p-4 pb-3" onClick={() => isActive && onOpenDetails?.(offer.id)}>
         {/* Row 1: Category tag + Timer */}
         <div className="mb-3 flex items-center justify-between">
           <span className="inline-flex items-center gap-1.5 rounded-2 border border-border-1 bg-cw-paper-50 px-2.5 py-1 text-small font-semibold text-fg-2">
-            {hasEmoji && <span className="text-base leading-none">{offer.style.emoji}</span>}
+            <i className={`ph ${categoryIcon} text-sm`} />
             {categoryLabel}
           </span>
 

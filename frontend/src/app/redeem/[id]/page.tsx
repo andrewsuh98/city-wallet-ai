@@ -23,6 +23,10 @@ const MERCHANT_LOCATIONS: Record<string, { lat: number; lng: number }> = {
   m_006: { lat: 40.8069, lng: -73.9643 },
   m_007: { lat: 40.8081, lng: -73.9616 },
   m_008: { lat: 40.8035, lng: -73.9580 },
+  m_009: { lat: 40.8052, lng: -73.9640 },
+  m_010: { lat: 40.8045, lng: -73.9612 },
+  m_011: { lat: 40.8060, lng: -73.9625 },
+  m_012: { lat: 40.8042, lng: -73.9655 },
 };
 
 const POLL_INTERVAL_MS = 2000;
