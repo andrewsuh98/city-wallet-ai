@@ -7,9 +7,9 @@ import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
 import CashbackBalance from "@/components/CashbackBalance";
 import OfferCard from "@/components/OfferCard";
-import { getOffers, getWalletBalance, type WalletRedemption } from "@/lib/api";
+import { getOffers, getWalletBalance } from "@/lib/api";
 import { getSessionId } from "@/lib/session";
-import type { Offer } from "@/lib/types";
+import type { Offer, WalletRedemption } from "@/lib/types";
 
 export default function WalletPage() {
   const router = useRouter();

@@ -92,10 +92,10 @@ class ContextState(BaseModel):
 class MerchantCategory(str, Enum):
     CAFE = "cafe"
     RESTAURANT = "restaurant"
-    RETAIL = "retail"
     BAKERY = "bakery"
     BAR = "bar"
     BOOKSTORE = "bookstore"
+    RETAIL = "retail"
     GROCERY = "grocery"
     FITNESS = "fitness"
 

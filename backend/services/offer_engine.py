@@ -180,8 +180,8 @@ async def match_merchants(
     radius = city_config.get("default_radius_meters", 1000)
     user_lat = context.location.latitude
     user_lng = context.location.longitude
-    city_tz = ZoneInfo(city_config.get("timezone", "UTC"))
-    now_hhmm = context.timestamp.astimezone(city_tz).strftime("%H:%M")
+    tz = ZoneInfo(city_config.get("timezone", "UTC"))
+    now_hhmm = context.timestamp.astimezone(tz).strftime("%H:%M")
 
     cursor = await db.execute("SELECT * FROM merchants")
     merchant_rows = await cursor.fetchall()

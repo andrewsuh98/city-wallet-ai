@@ -1,21 +1,23 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import ContextBar from "@/components/ContextBar";
 import OfferCard from "@/components/OfferCard";
 import BottomNav from "@/components/BottomNav";
+import MapView from "@/components/MapView";
 import ConsentModal, {
   getConsent,
   setConsent,
   getTaste,
   getProfile,
 } from "@/components/ConsentModal";
-import { getContext, generateOffers, updateOffer } from "@/lib/api";
-import { getSessionId } from "@/lib/session";
-import type { Offer, MerchantCategory } from "@/lib/types";
-
-const NYC_FALLBACK = { latitude: 40.758, longitude: -73.9855 };
+import { getMerchants } from "@/lib/api";
+import { DEFAULT_LOCATION, getDemoModeFromUrl, type DemoMode } from "@/lib/demo";
+import { useGeolocation } from "@/hooks/useGeolocation";
+import { useOffers } from "@/hooks/useOffers";
+import type { ContextState, Merchant, MerchantCategory } from "@/lib/types";
 
 const TASTE_TO_MERCHANT: Record<string, MerchantCategory> = {
   coffee: "cafe",
@@ -34,39 +36,7 @@ const TASTE_TO_MERCHANT: Record<string, MerchantCategory> = {
 
 type ConsentStatus = "loading" | "none" | "granted" | "declined";
 
-async function resolveLocation(consentGranted: boolean): Promise<{
-  latitude: number;
-  longitude: number;
-  accuracy_meters?: number;
-}> {
-  if (!consentGranted) return NYC_FALLBACK;
-  return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      resolve(NYC_FALLBACK);
-      return;
-    }
-    const timeout = setTimeout(() => resolve(NYC_FALLBACK), 5000);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        clearTimeout(timeout);
-        resolve({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          accuracy_meters: pos.coords.accuracy,
-        });
-      },
-      () => {
-        clearTimeout(timeout);
-        resolve(NYC_FALLBACK);
-      },
-    );
-  });
-}
-
-function useConsentStatus(): [
-  ConsentStatus,
-  (locationEnabled: boolean) => void,
-] {
+function useConsentStatus(): [ConsentStatus, (locationEnabled: boolean) => void] {
   const [status, setStatus] = useState<ConsentStatus>("loading");
 
   useEffect(() => {
@@ -104,74 +74,154 @@ function LocationBanner({ onEnable }: { onEnable: () => void }) {
   );
 }
 
-function HomeContent() {
-  const searchParams = useSearchParams();
-  const demo = searchParams.get("demo") ?? undefined;
+function DemoBadge({ mode }: { mode: DemoMode }) {
+  const labels: Record<DemoMode, string> = {
+    rainy_afternoon: "Demo \u00b7 Rainy afternoon",
+    hot_weekend: "Demo \u00b7 Hot weekend",
+    event_night: "Demo \u00b7 Event night",
+  };
+  return (
+    <div className="border-b border-border-1 bg-cw-dusk-bg px-5 py-2 text-center text-micro font-semibold uppercase tracking-[0.08em] text-cw-dusk">
+      {labels[mode]}
+    </div>
+  );
+}
 
+function buildBadges(context: ContextState | null) {
+  if (!context) return undefined;
+  const badges: { icon: string; label: string; variant: "cool" | "warm" | "fresh" | "dusk" | "neutral" }[] = [];
+
+  const w = context.weather;
+  const tempStr = `${Math.round(w.temp_celsius)}\u00b0C`;
+  const weatherIcon =
+    w.condition === "rain" ? "ph-cloud-rain"
+    : w.condition === "snow" ? "ph-snowflake"
+    : w.condition === "storm" ? "ph-cloud-lightning"
+    : w.condition === "cloudy" ? "ph-cloud"
+    : "ph-sun";
+  const weatherVariant =
+    w.condition === "rain" || w.condition === "snow" || w.condition === "storm" ? "cool"
+    : w.condition === "clear" ? "warm"
+    : "neutral";
+  badges.push({
+    icon: weatherIcon,
+    label: `${w.description} \u00b7 ${tempStr}`,
+    variant: weatherVariant,
+  });
+
+  const dayCap = context.day_of_week.charAt(0).toUpperCase() + context.day_of_week.slice(1);
+  const time = new Date(context.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  badges.push({ icon: "ph-clock", label: `${dayCap} \u00b7 ${time}`, variant: "neutral" });
+
+  if (context.nearby_events.length > 0) {
+    badges.push({
+      icon: "ph-ticket",
+      label: context.nearby_events[0].name,
+      variant: "dusk",
+    });
+  }
+
+  const quietCount = context.merchant_densities.filter((d) => d.trend === "quiet").length;
+  if (quietCount > 0) {
+    badges.push({
+      icon: "ph-coffee",
+      label: `${quietCount} quiet ${quietCount === 1 ? "spot" : "spots"}`,
+      variant: "fresh",
+    });
+  }
+
+  return badges;
+}
+
+export default function Home() {
+  const router = useRouter();
   const [consentStatus, handleConsent] = useConsentStatus();
-  const [offers, setOffers] = useState<Offer[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [merchants, setMerchants] = useState<Merchant[]>([]);
+  const [selectedMerchantId, setSelectedMerchantId] = useState<string | null>(null);
+  const [demoMode, setDemoMode] = useState<DemoMode | null>(null);
+  const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   useEffect(() => {
-    if (consentStatus === "loading" || consentStatus === "none") return;
+    setDemoMode(getDemoModeFromUrl());
+  }, []);
 
-    let cancelled = false;
+  const locationEnabled = consentStatus === "granted";
+  const geo = useGeolocation(locationEnabled);
 
-    async function load() {
-      setLoading(true);
-      setError(null);
-      try {
-        const location = await resolveLocation(consentStatus === "granted");
-        const context = await getContext(location, demo);
-        const sessionId = getSessionId();
-        const { offers: fresh } = await generateOffers({
-          session_id: sessionId,
-          context,
-          max_offers: 3,
-        });
-        if (!cancelled) setOffers(fresh);
-      } catch (err: unknown) {
-        if (!cancelled) {
-          const message =
-            err instanceof Error && err.message.includes("503")
-              ? "Offers are unavailable right now. Try again in a moment."
-              : "Something went wrong loading offers.";
-          setError(message);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    }
+  const taste = useMemo(() => getTaste(), [consentStatus]);
+  const profile = useMemo(() => getProfile(), [consentStatus]);
 
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [consentStatus, demo]);
+  const intentTags = useMemo(() => taste?.categories ?? [], [taste]);
+  const pastCategories = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          (taste?.categories ?? [])
+            .map((c) => TASTE_TO_MERCHANT[c])
+            .filter((c): c is MerchantCategory => Boolean(c)),
+        ),
+      ),
+    [taste],
+  );
+
+  const offersReady = consentStatus !== "loading" && consentStatus !== "none" && geo.status !== "loading";
+  const { offers, context, status, errorMessage, acceptOffer, dismissOffer } = useOffers({
+    enabled: offersReady,
+    latitude: geo.latitude,
+    longitude: geo.longitude,
+    accuracy: geo.accuracy,
+    demoMode,
+    intentTags,
+    pastCategories,
+  });
+
+  useEffect(() => {
+    let alive = true;
+    getMerchants()
+      .then((res) => { if (alive) setMerchants(res.merchants); })
+      .catch(() => {});
+    return () => { alive = false; };
+  }, []);
+
+  const visibleOffers = useMemo(() => {
+    if (!taste || taste.categories.length === 0) return offers;
+    const cats = new Set(
+      taste.categories.map((c) => TASTE_TO_MERCHANT[c]).filter(Boolean),
+    );
+    const filtered = offers.filter((o) => cats.has(o.merchant_category));
+    return filtered.length > 0 ? filtered : offers;
+  }, [offers, taste]);
+
+  const offerMerchantIds = useMemo(
+    () => new Set(visibleOffers.map((o) => o.merchant_id)),
+    [visibleOffers],
+  );
+  const mapMerchants = useMemo(
+    () => merchants.filter((m) => offerMerchantIds.has(m.id)),
+    [merchants, offerMerchantIds],
+  );
 
   const handleEnableFromBanner = () => {
     setConsent(true);
     handleConsent(true);
   };
 
-  async function handleAccept(id: string) {
-    try {
-      const { offer } = await updateOffer(id, { action: "accept" });
-      setOffers((prev) => prev.map((o) => (o.id === id ? offer : o)));
-    } catch (err) {
-      console.error("Failed to accept offer", err);
-    }
-  }
+  const handleAccept = async (offerId: string) => {
+    const updated = await acceptOffer(offerId);
+    if (updated) router.push(`/redeem/${offerId}`);
+  };
 
-  async function handleDismiss(id: string) {
-    try {
-      await updateOffer(id, { action: "dismiss" });
-      setOffers((prev) => prev.filter((o) => o.id !== id));
-    } catch (err) {
-      console.error("Failed to dismiss offer", err);
-    }
-  }
+  const handleDismiss = async (offerId: string) => {
+    await dismissOffer(offerId);
+  };
+
+  const handleMerchantClick = (merchantId: string) => {
+    setSelectedMerchantId(merchantId);
+    const offer = visibleOffers.find((o) => o.merchant_id === merchantId);
+    if (!offer) return;
+    const el = document.getElementById(`offer-card-${offer.id}`);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "center" });
+  };
 
   if (consentStatus === "loading") {
     return <div className="min-h-screen bg-page" />;
@@ -181,81 +231,76 @@ function HomeContent() {
     return <ConsentModal onConsent={handleConsent} />;
   }
 
-  const taste = getTaste();
-  const profile = getProfile();
-
-  const visibleOffers = (() => {
-    if (!taste || taste.categories.length === 0) return offers;
-    const cats = new Set(
-      taste.categories.map((c) => TASTE_TO_MERCHANT[c]).filter(Boolean),
-    );
-    const filtered = offers.filter((o) => cats.has(o.merchant_category));
-    return filtered.length > 0 ? filtered : offers;
-  })();
-
   const heading =
     consentStatus === "declined"
-      ? "Times Square"
+      ? DEFAULT_LOCATION.label
       : profile
         ? `For you, ${profile.first_name}`
         : "Near you";
 
+  const subheading =
+    status === "loading" ? "Reading the city\u2026"
+    : status === "fallback" ? `${visibleOffers.length} sample offers`
+    : `${visibleOffers.length} ${taste ? "matching" : ""} offers`;
+
+  const badges = buildBadges(context);
+
   return (
     <div className="flex min-h-screen flex-col bg-page pb-24">
+      {demoMode && <DemoBadge mode={demoMode} />}
+
       {consentStatus === "declined" && (
         <LocationBanner onEnable={handleEnableFromBanner} />
       )}
 
-      <ContextBar />
+      <ContextBar badges={badges} />
 
-      <div className="flex h-[35vh] min-h-[200px] items-center justify-center border-b border-border-1 bg-sunken">
-        <div className="text-center text-small font-semibold uppercase tracking-[0.08em] text-fg-4">
-          {consentStatus === "declined"
-            ? "Map · Times Square (default)"
-            : "Map · Mapbox goes here"}
-        </div>
+      <div className="border-b border-border-1">
+        <MapView
+          userLocation={{ latitude: geo.latitude, longitude: geo.longitude }}
+          merchants={mapMerchants}
+          height="35vh"
+          selectedMerchantId={selectedMerchantId}
+          onMerchantClick={handleMerchantClick}
+          fitBounds={mapMerchants.length > 0}
+        />
       </div>
 
       <div className="flex-1 px-5 pt-5">
-        <div className="mb-4 text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
-          {heading} {"·"}{" "}
-          {loading
-            ? "loading..."
-            : `${visibleOffers.length} ${taste ? "matching" : ""} offers`}
+        <div className="mb-4 flex items-baseline justify-between gap-2">
+          <div className="text-micro font-semibold uppercase tracking-[0.08em] text-fg-3">
+            {heading} {"\u00b7"} {subheading}
+          </div>
+          {status === "fallback" && errorMessage && (
+            <div className="text-micro text-fg-4" title={errorMessage}>
+              offline mode
+            </div>
+          )}
         </div>
 
-        {loading && (
-          <div className="flex flex-col gap-3">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-32 animate-pulse rounded-4 border border-border-1 bg-card"
-              />
-            ))}
+        {status === "loading" && visibleOffers.length === 0 ? (
+          <div className="space-y-3">
+            <div className="h-32 animate-pulse rounded-4 bg-card-soft" />
+            <div className="h-32 animate-pulse rounded-4 bg-card-soft" />
+            <div className="h-32 animate-pulse rounded-4 bg-card-soft" />
           </div>
-        )}
-
-        {!loading && error && (
-          <div className="rounded-4 border border-border-1 bg-card p-4 text-small text-fg-3">
-            {error}
-          </div>
-        )}
-
-        {!loading && !error && visibleOffers.length === 0 && (
-          <div className="rounded-4 border border-border-1 bg-card p-6 text-center text-small text-fg-3">
-            No offers nearby right now. Check back soon.
-          </div>
-        )}
-
-        {!loading && !error && (
+        ) : (
           <div className="flex flex-col gap-3">
             {visibleOffers.map((offer) => (
-              <OfferCard
+              <div
                 key={offer.id}
-                offer={offer}
-                onAccept={handleAccept}
-                onDismiss={handleDismiss}
-              />
+                ref={(el) => {
+                  if (el) cardRefs.current.set(offer.id, el);
+                  else cardRefs.current.delete(offer.id);
+                }}
+              >
+                <OfferCard
+                  offer={offer}
+                  highlighted={selectedMerchantId === offer.merchant_id}
+                  onAccept={handleAccept}
+                  onDismiss={handleDismiss}
+                />
+              </div>
             ))}
           </div>
         )}
@@ -263,13 +308,5 @@ function HomeContent() {
 
       <BottomNav />
     </div>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense>
-      <HomeContent />
-    </Suspense>
   );
 }

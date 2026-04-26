@@ -6,10 +6,10 @@
   "timezone": "America/New_York",
   "language": "en",
   "center": {
-    "latitude": 40.758,
-    "longitude": -73.9855
+    "latitude": 40.8118,
+    "longitude": -73.9609
   },
-  "default_radius_meters": 1000,
+  "default_radius_meters": 1500,
   "weather": {
     "openweathermap_city_id": 5128581
   },
@@ -23,516 +23,705 @@
   "merchants": [
     {
       "id": "m_001",
-      "name": "Blue Bottle Coffee",
+      "name": "Joe Coffee Company",
       "category": "cafe",
-      "description": "Specialty coffee roaster known for single-origin pour-overs",
-      "latitude": 40.7562,
-      "longitude": -73.987,
-      "address": "1 Rockefeller Plaza, New York, NY 10020",
+      "description": "Specialty coffee bar popular with Columbia students and faculty",
+      "latitude": 40.8068,
+      "longitude": -73.9618,
+      "address": "1163 Amsterdam Ave, New York, NY 10027",
       "image_url": null,
       "brand_voice": "warm",
-      "signature_items": [
-        "cappuccino",
-        "single-origin pour-over",
-        "almond croissant"
-      ],
-      "target_demographics": ["young_professional", "tourist", "office_worker"],
+      "signature_items": ["cappuccino", "cold brew", "almond croissant"],
+      "target_demographics": ["student", "young_professional", "faculty"],
       "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 50.0,
-      "rules": [
-        {
-          "max_discount_percent": 20,
-          "min_discount_percent": 10,
-          "active_hours_start": "08:00",
-          "active_hours_end": "21:00",
-          "trigger_conditions": [
-            "quiet_period",
-            "rainy",
-            "cold",
-            "evening",
-            "weekend",
-            "event_nearby"
-          ],
-          "goal": "Drive walk-in traffic during quiet periods and evenings",
-          "max_offers_per_day": 15,
-          "offer_type": "percentage_discount",
-          "budget_daily_usd": 50.0
-        }
-      ],
-      "transaction_pattern": {
-        "peak_hours": [8, 9, 10],
-        "quiet_hours": [14, 15, 16],
-        "avg_hourly_txns": 25,
-        "weekend_modifier": 0.7
-      }
-    },
-    {
-      "id": "m_002",
-      "name": "Joe's Pizza",
-      "category": "restaurant",
-      "description": "Iconic New York slice joint since 1975",
-      "latitude": 40.7306,
-      "longitude": -74.0021,
-      "address": "7 Carmine St, New York, NY 10014",
-      "image_url": null,
-      "brand_voice": "neighborly",
-      "signature_items": [
-        "pepperoni slice",
-        "margherita slice",
-        "fresh mozzarella slice"
-      ],
-      "target_demographics": ["local", "student", "tourist"],
-      "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 40.0,
-      "rules": [
-        {
-          "max_discount_percent": 15,
-          "min_discount_percent": 5,
-          "active_hours_start": "11:00",
-          "active_hours_end": "15:00",
-          "trigger_conditions": ["rainy", "lunch_hour", "weekday"],
-          "goal": "Rainy day lunch specials to maintain foot traffic",
-          "max_offers_per_day": 20,
-          "offer_type": "percentage_discount",
-          "budget_daily_usd": 40.0
-        }
-      ],
-      "transaction_pattern": {
-        "peak_hours": [12, 13, 18, 19],
-        "quiet_hours": [10, 15, 16],
-        "avg_hourly_txns": 40,
-        "weekend_modifier": 1.2
-      }
-    },
-    {
-      "id": "m_003",
-      "name": "The Strand Bookstore",
-      "category": "bookstore",
-      "description": "18 miles of books in the heart of NYC since 1927",
-      "latitude": 40.7333,
-      "longitude": -73.9909,
-      "address": "828 Broadway, New York, NY 10003",
-      "image_url": null,
-      "brand_voice": "sophisticated",
-      "signature_items": [
-        "rare first editions",
-        "Strand tote bag",
-        "staff picks"
-      ],
-      "target_demographics": ["local", "tourist", "student"],
-      "primary_goal": "loyalty_reward",
-      "daily_budget_usd": 30.0,
-      "rules": [
-        {
-          "max_discount_percent": 20,
-          "min_discount_percent": 10,
-          "active_hours_start": "10:00",
-          "active_hours_end": "20:00",
-          "trigger_conditions": ["weekend", "rainy", "quiet_period"],
-          "goal": "Weekend browse-and-buy incentive",
-          "max_offers_per_day": 10,
-          "offer_type": "percentage_discount",
-          "budget_daily_usd": 30.0
-        }
-      ],
-      "transaction_pattern": {
-        "peak_hours": [14, 15, 16],
-        "quiet_hours": [10, 11, 19],
-        "avg_hourly_txns": 15,
-        "weekend_modifier": 1.4
-      }
-    },
-    {
-      "id": "m_004",
-      "name": "Levain Bakery",
-      "category": "bakery",
-      "description": "Famous for giant, gooey chocolate chip cookies",
-      "latitude": 40.78,
-      "longitude": -73.9804,
-      "address": "167 W 74th St, New York, NY 10023",
-      "image_url": null,
-      "brand_voice": "playful",
-      "signature_items": [
-        "chocolate chip walnut cookie",
-        "dark chocolate peanut butter cookie"
-      ],
-      "target_demographics": ["tourist", "family", "young_professional"],
-      "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 35.0,
-      "rules": [
-        {
-          "max_discount_percent": 15,
-          "min_discount_percent": 5,
-          "active_hours_start": "14:00",
-          "active_hours_end": "18:00",
-          "trigger_conditions": ["cold", "rainy", "afternoon"],
-          "goal": "Cold weather warm treats to boost afternoon sales",
-          "max_offers_per_day": 12,
-          "offer_type": "free_item",
-          "budget_daily_usd": 35.0
-        }
-      ],
-      "transaction_pattern": {
-        "peak_hours": [11, 12, 13],
-        "quiet_hours": [15, 16, 17],
-        "avg_hourly_txns": 30,
-        "weekend_modifier": 1.3
-      }
-    },
-    {
-      "id": "m_005",
-      "name": "Shake Shack",
-      "category": "restaurant",
-      "description": "Modern day roadside burger stand in Madison Square Park",
-      "latitude": 40.7408,
-      "longitude": -73.9881,
-      "address": "Madison Square Park, New York, NY 10010",
-      "image_url": null,
-      "brand_voice": "playful",
-      "signature_items": [
-        "ShackBurger",
-        "crinkle-cut fries",
-        "chocolate shake"
-      ],
-      "target_demographics": ["tourist", "office_worker", "family"],
-      "primary_goal": "event_capture",
-      "daily_budget_usd": 60.0,
-      "rules": [
-        {
-          "max_discount_percent": 15,
-          "min_discount_percent": 5,
-          "active_hours_start": "11:00",
-          "active_hours_end": "21:00",
-          "trigger_conditions": ["event_nearby", "weekend", "lunch_hour"],
-          "goal": "Post-event crowd deals and weekend lunch boost",
-          "max_offers_per_day": 25,
-          "offer_type": "percentage_discount",
-          "budget_daily_usd": 60.0
-        }
-      ],
-      "transaction_pattern": {
-        "peak_hours": [12, 13, 18, 19],
-        "quiet_hours": [10, 15, 16],
-        "avg_hourly_txns": 50,
-        "weekend_modifier": 1.5
-      }
-    },
-    {
-      "id": "m_006",
-      "name": "McNally Jackson Books",
-      "category": "bookstore",
-      "description": "Independent bookstore and cafe in Nolita",
-      "latitude": 40.7234,
-      "longitude": -73.9959,
-      "address": "52 Prince St, New York, NY 10012",
-      "image_url": null,
-      "brand_voice": "sophisticated",
-      "signature_items": ["staff picks", "literary fiction", "espresso"],
-      "target_demographics": ["local", "young_professional", "tourist"],
-      "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 25.0,
-      "rules": [
-        {
-          "max_discount_percent": 20,
-          "min_discount_percent": 10,
-          "active_hours_start": "13:00",
-          "active_hours_end": "18:00",
-          "trigger_conditions": ["quiet_period", "weekday", "afternoon"],
-          "goal": "Quiet weekday afternoon foot traffic",
-          "max_offers_per_day": 8,
-          "offer_type": "percentage_discount",
-          "budget_daily_usd": 25.0
-        }
-      ],
-      "transaction_pattern": {
-        "peak_hours": [11, 12, 15],
-        "quiet_hours": [13, 14, 17],
-        "avg_hourly_txns": 12,
-        "weekend_modifier": 1.3
-      }
-    },
-    {
-      "id": "m_007",
-      "name": "Cha Cha Matcha",
-      "category": "cafe",
-      "description": "Trendy matcha bar with vibrant aesthetic",
-      "latitude": 40.7437,
-      "longitude": -73.9882,
-      "address": "373 Broome St, New York, NY 10013",
-      "image_url": null,
-      "brand_voice": "playful",
-      "signature_items": [
-        "iced matcha latte",
-        "pink drink",
-        "matcha soft serve"
-      ],
-      "target_demographics": ["young_professional", "student", "tourist"],
-      "primary_goal": "loyalty_reward",
-      "daily_budget_usd": 40.0,
-      "rules": [
-        {
-          "max_discount_percent": 15,
-          "min_discount_percent": 5,
-          "active_hours_start": "07:00",
-          "active_hours_end": "11:00",
-          "trigger_conditions": ["morning", "early_morning", "weekday"],
-          "goal": "Morning energy boost for commuters",
-          "max_offers_per_day": 20,
-          "offer_type": "percentage_discount",
-          "budget_daily_usd": 40.0
-        }
-      ],
-      "transaction_pattern": {
-        "peak_hours": [8, 9, 10],
-        "quiet_hours": [14, 15, 16],
-        "avg_hourly_txns": 20,
-        "weekend_modifier": 0.6
-      }
-    },
-    {
-      "id": "m_008",
-      "name": "The Smith",
-      "category": "restaurant",
-      "description": "American brasserie with upscale comfort food",
-      "latitude": 40.7527,
-      "longitude": -73.9772,
-      "address": "956 2nd Ave, New York, NY 10022",
-      "image_url": null,
-      "brand_voice": "sophisticated",
-      "signature_items": ["truffle mac & cheese", "burger", "ricotta gnocchi"],
-      "target_demographics": ["young_professional", "couple", "tourist"],
-      "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 45.0,
-      "rules": [
-        {
-          "max_discount_percent": 20,
-          "min_discount_percent": 10,
-          "active_hours_start": "16:00",
-          "active_hours_end": "22:00",
-          "trigger_conditions": [
-            "evening",
-            "quiet_period",
-            "weekday",
-            "weekend",
-            "event_nearby"
-          ],
-          "goal": "Evening dinner deals to fill tables before and after peak",
-          "max_offers_per_day": 10,
-          "offer_type": "percentage_discount",
-          "budget_daily_usd": 45.0
-        }
-      ],
-      "transaction_pattern": {
-        "peak_hours": [12, 13, 19, 20],
-        "quiet_hours": [15, 16, 17],
-        "avg_hourly_txns": 35,
-        "weekend_modifier": 1.2
-      }
-    },
-    {
-      "id": "m_009",
-      "name": "Whole Foods Market",
-      "category": "grocery",
-      "description": "Organic and natural grocery at Columbus Circle",
-      "latitude": 40.7688,
-      "longitude": -73.983,
-      "address": "10 Columbus Cir, New York, NY 10019",
-      "image_url": null,
-      "brand_voice": "friendly",
-      "signature_items": ["hot bar", "365 brand basics", "prepared salads"],
-      "target_demographics": ["local", "office_worker", "family"],
-      "primary_goal": "loyalty_reward",
-      "daily_budget_usd": 80.0,
-      "rules": [
-        {
-          "max_discount_percent": 10,
-          "min_discount_percent": 5,
-          "active_hours_start": "17:00",
-          "active_hours_end": "20:00",
-          "trigger_conditions": ["evening", "weekday"],
-          "goal": "Evening commuter quick-stop incentive",
-          "max_offers_per_day": 30,
-          "offer_type": "percentage_discount",
-          "budget_daily_usd": 80.0
-        }
-      ],
-      "transaction_pattern": {
-        "peak_hours": [12, 17, 18],
-        "quiet_hours": [9, 10, 15],
-        "avg_hourly_txns": 60,
-        "weekend_modifier": 0.8
-      }
-    },
-    {
-      "id": "m_010",
-      "name": "Equinox",
-      "category": "fitness",
-      "description": "Premium fitness club in Midtown",
-      "latitude": 40.7571,
-      "longitude": -73.9712,
-      "address": "897 Broadway, New York, NY 10003",
-      "image_url": null,
-      "brand_voice": "sophisticated",
-      "signature_items": [
-        "spin class",
-        "personal training session",
-        "recovery suite"
-      ],
-      "target_demographics": ["young_professional", "couple"],
-      "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 30.0,
-      "rules": [
-        {
-          "max_discount_percent": 20,
-          "min_discount_percent": 10,
-          "active_hours_start": "10:00",
-          "active_hours_end": "15:00",
-          "trigger_conditions": ["quiet_period", "weekday", "morning"],
-          "goal": "Off-peak class promo to fill midday slots",
-          "max_offers_per_day": 8,
-          "offer_type": "free_item",
-          "budget_daily_usd": 30.0
-        }
-      ],
-      "transaction_pattern": {
-        "peak_hours": [7, 8, 17, 18],
-        "quiet_hours": [11, 12, 13, 14],
-        "avg_hourly_txns": 20,
-        "weekend_modifier": 0.9
-      }
-    },
-    {
-      "id": "m_011",
-      "name": "Beecher's Handmade Cheese",
-      "category": "retail",
-      "description": "Artisan cheese shop and cafe in the Flatiron District",
-      "latitude": 40.7421,
-      "longitude": -73.9891,
-      "address": "900 Broadway, New York, NY 10003",
-      "image_url": null,
-      "brand_voice": "neighborly",
-      "signature_items": [
-        "Flagship cheddar",
-        "world's best mac & cheese",
-        "cheese flight"
-      ],
-      "target_demographics": ["tourist", "office_worker", "couple"],
-      "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 25.0,
-      "rules": [
-        {
-          "max_discount_percent": 15,
-          "min_discount_percent": 5,
-          "active_hours_start": "11:00",
-          "active_hours_end": "14:00",
-          "trigger_conditions": ["lunch_hour", "quiet_period"],
-          "goal": "Lunchtime tasting offer to drive walk-ins",
-          "max_offers_per_day": 12,
-          "offer_type": "free_item",
-          "budget_daily_usd": 25.0
-        }
-      ],
-      "transaction_pattern": {
-        "peak_hours": [12, 13, 17],
-        "quiet_hours": [10, 14, 15],
-        "avg_hourly_txns": 18,
-        "weekend_modifier": 1.1
-      }
-    },
-    {
-      "id": "m_012",
-      "name": "Stumptown Coffee Roasters",
-      "category": "cafe",
-      "description": "Portland-born coffee roaster in Greenwich Village",
-      "latitude": 40.734,
-      "longitude": -74.0023,
-      "address": "30 W 8th St, New York, NY 10011",
-      "image_url": null,
-      "brand_voice": "warm",
-      "signature_items": [
-        "Hair Bender espresso",
-        "cold brew",
-        "Stumptown drip"
-      ],
-      "target_demographics": ["local", "young_professional", "student"],
-      "primary_goal": "fill_quiet_hours",
-      "daily_budget_usd": 45.0,
+      "daily_budget_usd": 50.00,
       "rules": [
         {
           "max_discount_percent": 20,
           "min_discount_percent": 10,
           "active_hours_start": "13:00",
           "active_hours_end": "17:00",
-          "trigger_conditions": ["rainy", "afternoon", "quiet_period"],
-          "goal": "Rainy afternoon refuge for neighborhood walkers",
+          "trigger_conditions": ["quiet_period", "rainy", "cold"],
+          "goal": "Fill afternoon study hours between class blocks",
           "max_offers_per_day": 15,
           "offer_type": "percentage_discount",
-          "budget_daily_usd": 45.0
+          "budget_daily_usd": 50.00
         }
       ],
       "transaction_pattern": {
-        "peak_hours": [8, 9, 10],
+        "peak_hours": [8, 9, 10, 12],
         "quiet_hours": [14, 15, 16],
+        "avg_hourly_txns": 28,
+        "weekend_modifier": 0.7
+      }
+    },
+    {
+      "id": "m_002",
+      "name": "Tom's Restaurant",
+      "category": "restaurant",
+      "description": "Iconic Morningside Heights diner from Seinfeld, open 24 hours on weekends",
+      "latitude": 40.8053,
+      "longitude": -73.9658,
+      "address": "2880 Broadway, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "neighborly",
+      "signature_items": ["Greek omelet", "milkshake", "cheeseburger deluxe"],
+      "target_demographics": ["student", "local", "tourist"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 40.00,
+      "rules": [
+        {
+          "max_discount_percent": 15,
+          "min_discount_percent": 5,
+          "active_hours_start": "14:00",
+          "active_hours_end": "17:00",
+          "trigger_conditions": ["quiet_period", "rainy", "weekday"],
+          "goal": "Pull in afternoon study sessions and tourist walk-ins",
+          "max_offers_per_day": 20,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 40.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [9, 10, 12, 13, 19, 20],
+        "quiet_hours": [14, 15, 16],
+        "avg_hourly_txns": 35,
+        "weekend_modifier": 1.3
+      }
+    },
+    {
+      "id": "m_003",
+      "name": "Koronet Pizza",
+      "category": "restaurant",
+      "description": "Late-night Columbia institution famous for oversized slices",
+      "latitude": 40.8045,
+      "longitude": -73.9663,
+      "address": "2848 Broadway, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "neighborly",
+      "signature_items": ["jumbo cheese slice", "pepperoni slice", "Sicilian square"],
+      "target_demographics": ["student", "local"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 35.00,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "14:00",
+          "active_hours_end": "17:00",
+          "trigger_conditions": ["quiet_period", "cold", "rainy"],
+          "goal": "Fill the gap between lunch and the late-night rush",
+          "max_offers_per_day": 25,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 35.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [12, 13, 21, 22, 23],
+        "quiet_hours": [15, 16, 17],
+        "avg_hourly_txns": 45,
+        "weekend_modifier": 1.4
+      }
+    },
+    {
+      "id": "m_004",
+      "name": "Book Culture",
+      "category": "bookstore",
+      "description": "Independent bookstore steps from Columbia's Morningside campus",
+      "latitude": 40.8055,
+      "longitude": -73.9645,
+      "address": "536 W 112th St, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "sophisticated",
+      "signature_items": ["staff picks", "academic titles", "Book Culture tote"],
+      "target_demographics": ["student", "faculty", "local"],
+      "primary_goal": "loyalty_reward",
+      "daily_budget_usd": 30.00,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "11:00",
+          "active_hours_end": "19:00",
+          "trigger_conditions": ["rainy", "weekend", "quiet_period"],
+          "goal": "Convert browsers into buyers on slow indoor days",
+          "max_offers_per_day": 12,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 30.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [13, 14, 15, 16],
+        "quiet_hours": [11, 12, 19],
+        "avg_hourly_txns": 14,
+        "weekend_modifier": 1.3
+      }
+    },
+    {
+      "id": "m_005",
+      "name": "The Hungarian Pastry Shop",
+      "category": "cafe",
+      "description": "Cash-only cafe across from St. John the Divine, beloved by writers and grad students",
+      "latitude": 40.8027,
+      "longitude": -73.9626,
+      "address": "1030 Amsterdam Ave, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "sophisticated",
+      "signature_items": ["cherry strudel", "linzer cookie", "drip coffee"],
+      "target_demographics": ["student", "faculty", "local"],
+      "primary_goal": "loyalty_reward",
+      "daily_budget_usd": 25.00,
+      "rules": [
+        {
+          "max_discount_percent": 15,
+          "min_discount_percent": 5,
+          "active_hours_start": "15:00",
+          "active_hours_end": "19:00",
+          "trigger_conditions": ["cold", "rainy", "afternoon"],
+          "goal": "Late-afternoon pastry-and-coffee pairing for long study sessions",
+          "max_offers_per_day": 15,
+          "offer_type": "free_item",
+          "budget_daily_usd": 25.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [10, 11, 14, 15],
+        "quiet_hours": [16, 17, 18],
         "avg_hourly_txns": 22,
+        "weekend_modifier": 1.2
+      }
+    },
+    {
+      "id": "m_006",
+      "name": "Sweetgreen",
+      "category": "restaurant",
+      "description": "Build-your-own salad and bowl spot on upper Broadway",
+      "latitude": 40.8079,
+      "longitude": -73.9646,
+      "address": "2937 Broadway, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "friendly",
+      "signature_items": ["harvest bowl", "guacamole greens", "kale caesar"],
+      "target_demographics": ["student", "young_professional", "office_worker"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 60.00,
+      "rules": [
+        {
+          "max_discount_percent": 15,
+          "min_discount_percent": 5,
+          "active_hours_start": "14:00",
+          "active_hours_end": "17:00",
+          "trigger_conditions": ["quiet_period", "weekday", "afternoon"],
+          "goal": "Capture late-lunch grad-school crowd before evening classes",
+          "max_offers_per_day": 30,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 60.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [12, 13, 18],
+        "quiet_hours": [14, 15, 16],
+        "avg_hourly_txns": 50,
         "weekend_modifier": 0.8
+      }
+    },
+    {
+      "id": "m_007",
+      "name": "Mel's Burger Bar",
+      "category": "restaurant",
+      "description": "Casual burger and beer spot popular with Columbia undergrads",
+      "latitude": 40.8047,
+      "longitude": -73.9661,
+      "address": "2850 Broadway, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "playful",
+      "signature_items": ["Mel's classic burger", "truffle fries", "draft beer flight"],
+      "target_demographics": ["student", "local", "young_professional"],
+      "primary_goal": "event_capture",
+      "daily_budget_usd": 50.00,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "16:00",
+          "active_hours_end": "19:00",
+          "trigger_conditions": ["evening", "event_nearby", "weekday"],
+          "goal": "Pre-game and happy-hour crowd before evening events",
+          "max_offers_per_day": 20,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 50.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [12, 13, 19, 20, 21],
+        "quiet_hours": [15, 16, 17],
+        "avg_hourly_txns": 38,
+        "weekend_modifier": 1.4
+      }
+    },
+    {
+      "id": "m_008",
+      "name": "Community Food & Juice",
+      "category": "restaurant",
+      "description": "Farm-to-table brunch favorite near Columbia's main gates",
+      "latitude": 40.8059,
+      "longitude": -73.9656,
+      "address": "2893 Broadway, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "friendly",
+      "signature_items": ["lemon ricotta pancakes", "farm egg sandwich", "fresh-pressed juice"],
+      "target_demographics": ["faculty", "couple", "family"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 45.00,
+      "rules": [
+        {
+          "max_discount_percent": 15,
+          "min_discount_percent": 5,
+          "active_hours_start": "14:00",
+          "active_hours_end": "17:00",
+          "trigger_conditions": ["quiet_period", "weekday", "rainy"],
+          "goal": "Bridge brunch and dinner with an afternoon snack offer",
+          "max_offers_per_day": 12,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 45.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [10, 11, 12, 13, 19],
+        "quiet_hours": [15, 16, 17],
+        "avg_hourly_txns": 32,
+        "weekend_modifier": 1.5
+      }
+    },
+    {
+      "id": "m_009",
+      "name": "Silver Moon Bakery",
+      "category": "bakery",
+      "description": "Neighborhood bakery known for sourdough and morning buns",
+      "latitude": 40.7997,
+      "longitude": -73.9683,
+      "address": "2740 Broadway, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "warm",
+      "signature_items": ["morning bun", "olive sourdough loaf", "almond financier"],
+      "target_demographics": ["local", "family", "young_professional"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 30.00,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "15:00",
+          "active_hours_end": "18:00",
+          "trigger_conditions": ["afternoon", "cold", "rainy"],
+          "goal": "Move end-of-day pastries before close",
+          "max_offers_per_day": 18,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 30.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [8, 9, 10, 11],
+        "quiet_hours": [15, 16, 17],
+        "avg_hourly_txns": 24,
+        "weekend_modifier": 1.2
+      }
+    },
+    {
+      "id": "m_010",
+      "name": "Westside Market NYC",
+      "category": "grocery",
+      "description": "Family-run grocery and prepared-foods market on the Upper West Side",
+      "latitude": 40.8042,
+      "longitude": -73.9663,
+      "address": "2840 Broadway, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "friendly",
+      "signature_items": ["hot bar", "prepared salads", "cheese counter"],
+      "target_demographics": ["local", "family", "office_worker"],
+      "primary_goal": "loyalty_reward",
+      "daily_budget_usd": 70.00,
+      "rules": [
+        {
+          "max_discount_percent": 10,
+          "min_discount_percent": 5,
+          "active_hours_start": "17:00",
+          "active_hours_end": "20:00",
+          "trigger_conditions": ["evening", "weekday", "rainy"],
+          "goal": "Evening commuter quick-stop incentive",
+          "max_offers_per_day": 35,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 70.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [12, 17, 18, 19],
+        "quiet_hours": [9, 10, 14],
+        "avg_hourly_txns": 55,
+        "weekend_modifier": 1.1
+      }
+    },
+    {
+      "id": "m_011",
+      "name": "Insomnia Cookies",
+      "category": "bakery",
+      "description": "Late-night warm cookie delivery beloved by Columbia students",
+      "latitude": 40.8055,
+      "longitude": -73.9659,
+      "address": "2884 Broadway, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "playful",
+      "signature_items": ["classic chocolate chunk", "snickerdoodle", "cookiewich"],
+      "target_demographics": ["student", "young_professional"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 25.00,
+      "rules": [
+        {
+          "max_discount_percent": 25,
+          "min_discount_percent": 10,
+          "active_hours_start": "14:00",
+          "active_hours_end": "18:00",
+          "trigger_conditions": ["quiet_period", "afternoon", "cold"],
+          "goal": "Drive afternoon walk-ins between lunch and the late-night rush",
+          "max_offers_per_day": 20,
+          "offer_type": "free_item",
+          "budget_daily_usd": 25.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [13, 21, 22, 23],
+        "quiet_hours": [15, 16, 17],
+        "avg_hourly_txns": 26,
+        "weekend_modifier": 1.4
+      }
+    },
+    {
+      "id": "m_012",
+      "name": "Pisticci",
+      "category": "restaurant",
+      "description": "Cozy Italian trattoria a short walk from CBS's Manhattanville campus",
+      "latitude": 40.8120,
+      "longitude": -73.9627,
+      "address": "125 La Salle St, New York, NY 10027",
+      "image_url": null,
+      "brand_voice": "neighborly",
+      "signature_items": ["handmade pappardelle", "wood-fired pizza", "tiramisu"],
+      "target_demographics": ["faculty", "couple", "young_professional"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 55.00,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "16:00",
+          "active_hours_end": "18:00",
+          "trigger_conditions": ["evening", "quiet_period", "weekday"],
+          "goal": "Early-dinner fill before the 7pm rush",
+          "max_offers_per_day": 12,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 55.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [12, 13, 19, 20, 21],
+        "quiet_hours": [15, 16, 17],
+        "avg_hourly_txns": 28,
+        "weekend_modifier": 1.3
+      }
+    },
+    {
+      "id": "m_013",
+      "name": "Friedman's",
+      "category": "restaurant",
+      "description": "Allergy-friendly American comfort food on Amsterdam Avenue",
+      "latitude": 40.8077,
+      "longitude": -73.9613,
+      "address": "1187 Amsterdam Ave, New York, NY 10027",
+      "image_url": null,
+      "brand_voice": "friendly",
+      "signature_items": ["short rib hash", "buttermilk fried chicken", "gluten-free pancakes"],
+      "target_demographics": ["student", "family", "faculty"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 45.00,
+      "rules": [
+        {
+          "max_discount_percent": 15,
+          "min_discount_percent": 5,
+          "active_hours_start": "14:30",
+          "active_hours_end": "17:00",
+          "trigger_conditions": ["quiet_period", "weekday", "rainy"],
+          "goal": "Pull mid-afternoon traffic between brunch and dinner",
+          "max_offers_per_day": 15,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 45.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [10, 11, 12, 13, 19],
+        "quiet_hours": [14, 15, 16],
+        "avg_hourly_txns": 30,
+        "weekend_modifier": 1.4
+      }
+    },
+    {
+      "id": "m_014",
+      "name": "Dinosaur Bar-B-Que",
+      "category": "restaurant",
+      "description": "Honky-tonk barbecue joint on the Hudson, two blocks from CBS Manhattanville",
+      "latitude": 40.8166,
+      "longitude": -73.9602,
+      "address": "700 W 125th St, New York, NY 10027",
+      "image_url": null,
+      "brand_voice": "playful",
+      "signature_items": ["brisket plate", "pulled pork sandwich", "mac and cheese"],
+      "target_demographics": ["student", "tourist", "local"],
+      "primary_goal": "event_capture",
+      "daily_budget_usd": 65.00,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "15:00",
+          "active_hours_end": "18:00",
+          "trigger_conditions": ["event_nearby", "quiet_period", "weekday"],
+          "goal": "Capture post-class CBS crowd before the dinner rush",
+          "max_offers_per_day": 20,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 65.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [12, 13, 18, 19, 20],
+        "quiet_hours": [15, 16, 17],
+        "avg_hourly_txns": 42,
+        "weekend_modifier": 1.5
+      }
+    },
+    {
+      "id": "m_015",
+      "name": "Pret A Manger",
+      "category": "cafe",
+      "description": "Grab-and-go sandwiches, salads, and coffee on upper Broadway",
+      "latitude": 40.8053,
+      "longitude": -73.9659,
+      "address": "2875 Broadway, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "friendly",
+      "signature_items": ["chicken avocado sandwich", "flat white", "mac and cheese pot"],
+      "target_demographics": ["student", "office_worker", "young_professional"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 40.00,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "14:00",
+          "active_hours_end": "16:30",
+          "trigger_conditions": ["quiet_period", "weekday", "afternoon"],
+          "goal": "Move freshly made items before end-of-day shrink",
+          "max_offers_per_day": 25,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 40.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [8, 9, 12, 13],
+        "quiet_hours": [14, 15, 16],
+        "avg_hourly_txns": 45,
+        "weekend_modifier": 0.7
+      }
+    },
+    {
+      "id": "m_016",
+      "name": "Bank Street Bookstore",
+      "category": "bookstore",
+      "description": "Children's and education-focused bookstore tied to Bank Street College",
+      "latitude": 40.8019,
+      "longitude": -73.9676,
+      "address": "2780 Broadway, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "friendly",
+      "signature_items": ["picture book bestsellers", "teacher resource titles", "story-time picks"],
+      "target_demographics": ["family", "faculty", "local"],
+      "primary_goal": "loyalty_reward",
+      "daily_budget_usd": 20.00,
+      "rules": [
+        {
+          "max_discount_percent": 15,
+          "min_discount_percent": 5,
+          "active_hours_start": "11:00",
+          "active_hours_end": "16:00",
+          "trigger_conditions": ["weekend", "rainy", "quiet_period"],
+          "goal": "Pull families in for indoor activities on slow days",
+          "max_offers_per_day": 10,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 20.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [13, 14, 15],
+        "quiet_hours": [11, 12, 17],
+        "avg_hourly_txns": 10,
+        "weekend_modifier": 1.6
+      }
+    },
+    {
+      "id": "m_017",
+      "name": "Massawa",
+      "category": "restaurant",
+      "description": "Long-running Ethiopian and Eritrean restaurant on Amsterdam",
+      "latitude": 40.8094,
+      "longitude": -73.9601,
+      "address": "1239 Amsterdam Ave, New York, NY 10027",
+      "image_url": null,
+      "brand_voice": "neighborly",
+      "signature_items": ["doro wat", "veggie combo platter", "injera"],
+      "target_demographics": ["student", "local", "couple"],
+      "primary_goal": "fill_quiet_hours",
+      "daily_budget_usd": 35.00,
+      "rules": [
+        {
+          "max_discount_percent": 20,
+          "min_discount_percent": 10,
+          "active_hours_start": "14:00",
+          "active_hours_end": "17:30",
+          "trigger_conditions": ["quiet_period", "weekday", "cold"],
+          "goal": "Bring in groups for shared platters during off-peak hours",
+          "max_offers_per_day": 12,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 35.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [12, 13, 19, 20],
+        "quiet_hours": [15, 16, 17],
+        "avg_hourly_txns": 18,
+        "weekend_modifier": 1.3
+      }
+    },
+    {
+      "id": "m_018",
+      "name": "1020 Bar",
+      "category": "bar",
+      "description": "Dive bar on Amsterdam Ave, the unofficial Columbia grad-student living room",
+      "latitude": 40.8023,
+      "longitude": -73.9633,
+      "address": "1020 Amsterdam Ave, New York, NY 10025",
+      "image_url": null,
+      "brand_voice": "playful",
+      "signature_items": ["draft pint", "well whiskey", "pool table"],
+      "target_demographics": ["student", "young_professional", "local"],
+      "primary_goal": "event_capture",
+      "daily_budget_usd": 40.00,
+      "rules": [
+        {
+          "max_discount_percent": 25,
+          "min_discount_percent": 10,
+          "active_hours_start": "17:00",
+          "active_hours_end": "20:00",
+          "trigger_conditions": ["evening", "event_nearby", "weekday"],
+          "goal": "Build the happy-hour crowd before the late-night surge",
+          "max_offers_per_day": 20,
+          "offer_type": "percentage_discount",
+          "budget_daily_usd": 40.00
+        }
+      ],
+      "transaction_pattern": {
+        "peak_hours": [21, 22, 23, 0],
+        "quiet_hours": [17, 18, 19],
+        "avg_hourly_txns": 30,
+        "weekend_modifier": 1.6
       }
     }
   ],
   "events": [
     {
       "id": "e_001",
-      "name": "Broadway Week Spring 2026",
-      "venue": "Times Square Area",
-      "category": "festival",
-      "start_time": "2026-04-20T00:00:00",
-      "end_time": "2026-04-27T23:59:59",
-      "latitude": 40.758,
-      "longitude": -73.9855,
-      "expected_attendance": 50000
+      "name": "Columbia Business School Spring Networking Night",
+      "venue": "Kravis Hall, Columbia Business School",
+      "category": "conference",
+      "start_time": "2026-04-25T17:30:00",
+      "end_time": "2026-04-25T21:00:00",
+      "latitude": 40.8166,
+      "longitude": -73.9606,
+      "expected_attendance": 600
     },
     {
       "id": "e_002",
-      "name": "Smorgasburg",
-      "venue": "World Trade Center",
-      "category": "market",
-      "start_time": "2026-04-25T11:00:00",
-      "end_time": "2026-04-25T18:00:00",
-      "latitude": 40.7127,
-      "longitude": -74.0134,
-      "expected_attendance": 10000
+      "name": "Columbia Lions vs Yale Bulldogs Baseball",
+      "venue": "Robertson Field at Satow Stadium",
+      "category": "sports",
+      "start_time": "2026-04-25T13:00:00",
+      "end_time": "2026-04-25T16:30:00",
+      "latitude": 40.8721,
+      "longitude": -73.9165,
+      "expected_attendance": 1500
     },
     {
       "id": "e_003",
-      "name": "Knicks vs Celtics",
-      "venue": "Madison Square Garden",
-      "category": "sports",
-      "start_time": "2026-04-25T19:30:00",
-      "end_time": "2026-04-25T22:00:00",
-      "latitude": 40.7505,
-      "longitude": -73.9934,
-      "expected_attendance": 20000
+      "name": "Manhattanville Spring Block Party",
+      "venue": "12th Avenue between 130th and 133rd",
+      "category": "festival",
+      "start_time": "2026-04-26T11:00:00",
+      "end_time": "2026-04-26T18:00:00",
+      "latitude": 40.8181,
+      "longitude": -73.9620,
+      "expected_attendance": 4000
     },
     {
       "id": "e_004",
-      "name": "Central Park Spring Concert",
-      "venue": "Central Park SummerStage",
+      "name": "Apollo Theater: Amateur Night",
+      "venue": "Apollo Theater",
       "category": "music",
-      "start_time": "2026-04-26T14:00:00",
-      "end_time": "2026-04-26T20:00:00",
-      "latitude": 40.7694,
-      "longitude": -73.9712,
-      "expected_attendance": 5000
+      "start_time": "2026-04-25T19:30:00",
+      "end_time": "2026-04-25T22:30:00",
+      "latitude": 40.8101,
+      "longitude": -73.9504,
+      "expected_attendance": 1500
     },
     {
       "id": "e_005",
-      "name": "Union Square Greenmarket",
-      "venue": "Union Square",
-      "category": "market",
-      "start_time": "2026-04-25T08:00:00",
-      "end_time": "2026-04-25T18:00:00",
-      "latitude": 40.7359,
-      "longitude": -73.9911,
-      "expected_attendance": 8000
+      "name": "Riverside Park Spring Festival",
+      "venue": "Riverside Park (W 116th St entrance)",
+      "category": "festival",
+      "start_time": "2026-04-26T12:00:00",
+      "end_time": "2026-04-26T17:00:00",
+      "latitude": 40.8088,
+      "longitude": -73.9707,
+      "expected_attendance": 3000
+    },
+    {
+      "id": "e_006",
+      "name": "Miller Theatre Composer Portraits",
+      "venue": "Miller Theatre at Columbia University",
+      "category": "music",
+      "start_time": "2026-04-25T20:00:00",
+      "end_time": "2026-04-25T22:00:00",
+      "latitude": 40.8094,
+      "longitude": -73.9618,
+      "expected_attendance": 700
+    },
+    {
+      "id": "e_007",
+      "name": "Low Library Lecture: AI and Cities",
+      "venue": "Low Memorial Library, Columbia University",
+      "category": "lecture",
+      "start_time": "2026-04-25T16:00:00",
+      "end_time": "2026-04-25T17:30:00",
+      "latitude": 40.8086,
+      "longitude": -73.9619,
+      "expected_attendance": 400
+    },
+    {
+      "id": "e_008",
+      "name": "Cathedral of St. John the Divine Choral Evensong",
+      "venue": "Cathedral of St. John the Divine",
+      "category": "music",
+      "start_time": "2026-04-26T16:00:00",
+      "end_time": "2026-04-26T17:30:00",
+      "latitude": 40.8038,
+      "longitude": -73.9618,
+      "expected_attendance": 800
     }
   ]
 }

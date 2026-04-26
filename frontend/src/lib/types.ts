@@ -67,17 +67,11 @@ export interface ContextState {
   urgency_score: number;
 }
 
-// Merchant types
-
 export type MerchantCategory =
   | "cafe"
   | "restaurant"
-  | "retail"
   | "bakery"
-  | "bar"
-  | "bookstore"
-  | "grocery"
-  | "fitness";
+  | "bar";
 
 export interface MerchantRule {
   id: string | null;
@@ -167,6 +161,52 @@ export interface OfferAnalytics {
   redemption_rate: number;
   top_context_triggers: string[];
   revenue_impact_estimate: number;
+}
+
+export interface DailyMetric {
+  date: string;
+  redemptions: number;
+  revenue_usd: number;
+  avg_discount_pct: number;
+}
+
+export interface HourlyRedemption {
+  hour: number;
+  count: number;
+}
+
+export interface MerchantDashboardStats {
+  merchant_id: string;
+  period_days: number;
+  incremental_revenue_usd: number;
+  total_redemptions: number;
+  avg_ticket_usd: number;
+  avg_discount_pct: number;
+  campaign_active: boolean;
+  is_paused: boolean;
+  strategy: string;
+  max_discount_percent: number;
+  min_spend_usd: number;
+  max_offers_per_day: number;
+  total_generated: number;
+  total_accepted: number;
+  acceptance_rate: number;
+  redemption_rate: number;
+  daily_series: DailyMetric[];
+  hourly_redemptions: HourlyRedemption[];
+  dead_hour_ranges: [number, number][];
+  top_context_triggers: string[];
+}
+
+export interface CampaignPatchRequest {
+  paused: boolean;
+}
+
+export interface RulesPatchRequest {
+  max_discount_percent?: number;
+  min_spend_usd?: number;
+  max_offers_per_day?: number;
+  goal?: string;
 }
 
 // Request / Response types
