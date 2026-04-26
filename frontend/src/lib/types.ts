@@ -29,6 +29,24 @@ export interface TransactionDensity {
   trend: "quiet" | "normal" | "busy" | "surging";
 }
 
+export interface MerchantLiveSignal {
+  merchant_id: string;
+  recent_txns_60min: number[];
+  inventory_flags: string[];
+  staff_capacity: "low" | "normal" | "high";
+  daily_budget_burned_pct: number;
+  active_offer_count: number;
+}
+
+export interface CustomerIntent {
+  intent_tags: string[];
+  preferred_categories: string[];
+  price_sensitivity?: "low" | "mid" | "high" | null;
+  movement_state?: "stationary" | "walking" | "transit" | null;
+  session_dwell_seconds?: number | null;
+  declined_categories_today: string[];
+}
+
 export interface UserLocation {
   latitude: number;
   longitude: number;
@@ -44,21 +62,16 @@ export interface ContextState {
   is_weekend: boolean;
   nearby_events: EventData[];
   merchant_densities: TransactionDensity[];
+  merchant_live_signals: MerchantLiveSignal[];
   context_tags: string[];
   urgency_score: number;
 }
 
-// Merchant types
-
 export type MerchantCategory =
   | "cafe"
   | "restaurant"
-  | "retail"
   | "bakery"
-  | "bar"
-  | "bookstore"
-  | "grocery"
-  | "fitness";
+  | "bar";
 
 export interface MerchantRule {
   id: string | null;
@@ -83,6 +96,11 @@ export interface Merchant {
   longitude: number;
   address: string;
   image_url: string | null;
+  brand_voice: string | null;
+  signature_items: string[];
+  target_demographics: string[];
+  primary_goal: string | null;
+  daily_budget_usd: number | null;
   rules: MerchantRule[];
 }
 
@@ -97,9 +115,8 @@ export type OfferStatus =
 
 export interface OfferStyle {
   background_gradient: string[];
-  emoji: string;
   tone: "warm" | "urgent" | "playful" | "sophisticated";
-  headline_style: "emotional" | "factual";
+  headline_style: "emotional";
 }
 
 export interface Offer {
@@ -146,6 +163,52 @@ export interface OfferAnalytics {
   revenue_impact_estimate: number;
 }
 
+export interface DailyMetric {
+  date: string;
+  redemptions: number;
+  revenue_usd: number;
+  avg_discount_pct: number;
+}
+
+export interface HourlyRedemption {
+  hour: number;
+  count: number;
+}
+
+export interface MerchantDashboardStats {
+  merchant_id: string;
+  period_days: number;
+  incremental_revenue_usd: number;
+  total_redemptions: number;
+  avg_ticket_usd: number;
+  avg_discount_pct: number;
+  campaign_active: boolean;
+  is_paused: boolean;
+  strategy: string;
+  max_discount_percent: number;
+  min_spend_usd: number;
+  max_offers_per_day: number;
+  total_generated: number;
+  total_accepted: number;
+  acceptance_rate: number;
+  redemption_rate: number;
+  daily_series: DailyMetric[];
+  hourly_redemptions: HourlyRedemption[];
+  dead_hour_ranges: [number, number][];
+  top_context_triggers: string[];
+}
+
+export interface CampaignPatchRequest {
+  paused: boolean;
+}
+
+export interface RulesPatchRequest {
+  max_discount_percent?: number;
+  min_spend_usd?: number;
+  max_offers_per_day?: number;
+  goal?: string;
+}
+
 // Request / Response types
 
 export interface ContextRequest {
@@ -155,8 +218,10 @@ export interface ContextRequest {
 }
 
 export interface GenerateOffersRequest {
+  session_id: string;
   context: ContextState;
   max_offers?: number;
+  customer_intent?: CustomerIntent;
   user_preferences?: {
     intent_tags?: string[];
     past_categories?: string[];

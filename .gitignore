@@ -27,3 +27,12 @@ out/
 # Build
 dist/
 build/
+
+# Private Docs
+.private_docs/
+
+# Claude
+.claude
+
+# env
+.env
