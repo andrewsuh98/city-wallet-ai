@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+from datetime import datetime, timezone
 
 import anthropic
 from fastapi import APIRouter, HTTPException, Query
@@ -43,6 +44,14 @@ async def list_offers(
 ):
     db = await get_db()
     try:
+        now_iso = datetime.now(timezone.utc).isoformat()
+        await db.execute(
+            "UPDATE offers SET status = ? "
+            "WHERE user_session_id = ? AND status = ? AND expires_at IS NOT NULL AND expires_at <= ?",
+            (OfferStatus.EXPIRED.value, session_id, OfferStatus.ACCEPTED.value, now_iso),
+        )
+        await db.commit()
+
         if status is not None:
             cursor = await db.execute(
                 "SELECT * FROM offers WHERE user_session_id = ? AND status = ? ORDER BY created_at DESC",
