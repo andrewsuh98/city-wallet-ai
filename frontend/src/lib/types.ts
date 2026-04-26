@@ -71,7 +71,9 @@ export type MerchantCategory =
   | "cafe"
   | "restaurant"
   | "bakery"
-  | "bar";
+  | "bar"
+  | "bookstore"
+  | "boutique";
 
 export interface MerchantRule {
   id: string | null;

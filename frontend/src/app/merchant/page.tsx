@@ -61,10 +61,12 @@ const DSV_MOCK: Partial<OnboardingData> = {
 };
 
 const CATEGORY_STYLES: Record<MerchantCategory, OfferStyle> = {
-  cafe:      { background_gradient: ["#4A2C2A", "#D4A574"], emoji: "☕",  tone: "warm",          headline_style: "emotional" },
-  restaurant:{ background_gradient: ["#1a3a2a", "#2d6a4f"], emoji: "🍽️", tone: "warm",          headline_style: "emotional" },
-  bakery:    { background_gradient: ["#3d2310", "#c4a265"], emoji: "🥐",  tone: "warm",          headline_style: "emotional" },
-  bar:       { background_gradient: ["#1a1a2e", "#16213e"], emoji: "🍺",  tone: "playful",       headline_style: "emotional" },
+  cafe:       { background_gradient: ["#4A2C2A", "#D4A574"], tone: "warm",          headline_style: "emotional" },
+  restaurant: { background_gradient: ["#1a3a2a", "#2d6a4f"], tone: "warm",          headline_style: "emotional" },
+  bakery:     { background_gradient: ["#3d2310", "#c4a265"], tone: "warm",          headline_style: "emotional" },
+  bar:        { background_gradient: ["#1a1a2e", "#16213e"], tone: "playful",       headline_style: "emotional" },
+  bookstore:  { background_gradient: ["#1a1a2e", "#16213e"], tone: "sophisticated", headline_style: "emotional" },
+  boutique:   { background_gradient: ["#1a1a2e", "#16213e"], tone: "sophisticated", headline_style: "emotional" },
 };
 
 const CATEGORIES: { id: MerchantCategory; label: string; icon: string }[] = [
@@ -252,6 +254,52 @@ const strategyBtnStyle = (isSelected: boolean, fgAccent: string, bgAccent: strin
   width: "100%",
   textAlign: "left",
 });
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+function createPreviewOffer(data: OnboardingData, type: "discount" | "bogo" | "free_item"): Offer {
+  let headline = "";
+  let subtext = "2 min walk \u00b7 Midtown";
+  let discountValue = "";
+  let tags = ["quiet_period"];
+
+  if (type === "discount") {
+    headline = `Quiet afternoon? Enjoy ${data.maxDiscountPercent}% off your order.`;
+    discountValue = `${data.maxDiscountPercent}%`;
+  } else if (type === "bogo") {
+    headline = `Slow day? Grab a friend and get ${data.bogoDetails}.`;
+    discountValue = "BOGO";
+  } else {
+    headline = `Rainy day? Warm up with a ${data.freeItemDetails}.`;
+    discountValue = "FREE";
+  }
+
+  // Use tagline as headline if we have it and it's step 2+
+  if (data.tagline && data.tagline.length > 5) {
+    headline = data.tagline;
+  }
+
+  return {
+    id: `preview-${type}`,
+    merchant_id: "preview",
+    merchant_name: data.businessName || "Your Business",
+    merchant_category: data.category,
+    headline,
+    subtext,
+    description: data.description || "Fresh local offerings.",
+    discount_value: discountValue,
+    discount_type: "percentage_discount",
+    context_tags: tags,
+    why_now: "Slow period detected \u2014 your deal is now live.",
+    created_at: new Date().toISOString(),
+    expires_at: new Date(Date.now() + 60 * 60000).toISOString(),
+    style: CATEGORY_STYLES[data.category],
+    status: "active",
+    distance_meters: 120,
+    redemption_token: null,
+  };
+}
+
 
 // ─── Screens ──────────────────────────────────────────────────────────────────
 
@@ -844,45 +892,7 @@ function OfferScreen({ data, update, onNext }: { data: OnboardingData, update: (
 
 function ReviewScreen({ data, onPublish, publishing }: { data: OnboardingData, onPublish: () => void, publishing: boolean }) {
   
-  const previewOffers = data.offerTypes.map((type) => {
-    let headline = "";
-    let subtext = "";
-    let discountValue = "";
-
-    if (type === "discount") {
-      headline = `Quiet afternoon? Drop in for ${data.maxDiscountPercent}% off.`;
-      subtext = `${data.maxDiscountPercent}% off at ${data.businessName} — limited time`;
-      discountValue = `${data.maxDiscountPercent}%`;
-    } else if (type === "bogo") {
-      headline = `Quiet afternoon? Drop in for ${data.bogoDetails}.`;
-      subtext = `${data.bogoDetails} at ${data.businessName} — limited time`;
-      discountValue = "BOGO";
-    } else {
-      headline = `Quiet afternoon? Drop in for a ${data.freeItemDetails} ${data.freeItemCondition}.`;
-      subtext = `${data.freeItemDetails} at ${data.businessName} — limited time`;
-      discountValue = "FREE";
-    }
-
-    return {
-      id: `preview-${type}`,
-      merchant_id: "preview",
-      merchant_name: data.businessName,
-      merchant_category: data.category,
-      headline,
-      subtext,
-      description: data.description || "Artisan coffee and pastries.",
-      discount_value: discountValue,
-      discount_type: "percentage_discount",
-      context_tags: ["quiet_period"],
-      why_now: "Slow period detected — your deal is now live.",
-      created_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 30 * 60000).toISOString(),
-      style: CATEGORY_STYLES[data.category],
-      status: "active",
-      distance_meters: 120,
-      redemption_token: null,
-    } as Offer;
-  });
+  const previewOffers = data.offerTypes.map((type) => createPreviewOffer(data, type));
 
   return (
     <div className="animate-fade-in" style={{ ...screen, justifyContent: "flex-start", paddingTop: "80px" }}>
@@ -891,12 +901,18 @@ function ReviewScreen({ data, onPublish, publishing }: { data: OnboardingData, o
       </div>
 
       <h1 style={hero}>Ready to launch.</h1>
-      <p style={subtitle}>Your campaign is configured. Here are the templates users might see.</p>
+      <p style={subtitle}>Your campaign is configured. Here is how your offers will look in the app feed.</p>
 
-      <div style={{ display: "flex", flexDirection: "column", gap: "16px", width: "100%", maxWidth: "340px", marginBottom: "40px", pointerEvents: "none", textAlign: "left" }}>
-        {previewOffers.map(offer => (
-          <OfferCard key={offer.id} offer={offer} />
-        ))}
+      <div style={{ width: "100%", maxWidth: "340px", marginBottom: "40px", textAlign: "left" }}>
+        <div style={{ marginBottom: "16px", fontSize: "11px", fontWeight: 600, color: "var(--fg-3)", textTransform: "uppercase", letterSpacing: "var(--ls-caps)" }}>
+          Near you {"\u00b7"} {previewOffers.length} offers
+        </div>
+        
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px", pointerEvents: "none" }}>
+          {previewOffers.map(offer => (
+            <OfferCard key={offer.id} offer={offer} />
+          ))}
+        </div>
       </div>
 
       <button onClick={onPublish} disabled={publishing} style={{ ...primaryBtn, opacity: publishing ? 0.6 : 1, cursor: publishing ? "default" : "pointer" }}>
