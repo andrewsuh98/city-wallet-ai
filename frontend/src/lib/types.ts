@@ -70,8 +70,12 @@ export interface ContextState {
 export type MerchantCategory =
   | "cafe"
   | "restaurant"
+  | "retail"
   | "bakery"
-  | "bar";
+  | "bar"
+  | "bookstore"
+  | "grocery"
+  | "fitness";
 
 export interface MerchantRule {
   id: string | null;
@@ -115,8 +119,9 @@ export type OfferStatus =
 
 export interface OfferStyle {
   background_gradient: string[];
+  emoji?: string;
   tone: "warm" | "urgent" | "playful" | "sophisticated";
-  headline_style: "emotional";
+  headline_style: "emotional" | "factual";
 }
 
 export interface Offer {
