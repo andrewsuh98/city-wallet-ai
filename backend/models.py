@@ -94,6 +94,10 @@ class MerchantCategory(str, Enum):
     RESTAURANT = "restaurant"
     BAKERY = "bakery"
     BAR = "bar"
+    BOOKSTORE = "bookstore"
+    RETAIL = "retail"
+    GROCERY = "grocery"
+    FITNESS = "fitness"
 
 
 class MerchantRule(BaseModel):
