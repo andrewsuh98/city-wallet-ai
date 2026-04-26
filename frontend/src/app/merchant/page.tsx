@@ -63,8 +63,12 @@ const DSV_MOCK: Partial<OnboardingData> = {
 const CATEGORY_STYLES: Record<MerchantCategory, OfferStyle> = {
   cafe:      { background_gradient: ["#4A2C2A", "#D4A574"], emoji: "☕",  tone: "warm",          headline_style: "emotional" },
   restaurant:{ background_gradient: ["#1a3a2a", "#2d6a4f"], emoji: "🍽️", tone: "warm",          headline_style: "emotional" },
+  retail:    { background_gradient: ["#164e63", "#22d3ee"], emoji: "🛍️", tone: "sophisticated", headline_style: "emotional" },
   bakery:    { background_gradient: ["#3d2310", "#c4a265"], emoji: "🥐",  tone: "warm",          headline_style: "emotional" },
   bar:       { background_gradient: ["#1a1a2e", "#16213e"], emoji: "🍺",  tone: "playful",       headline_style: "emotional" },
+  bookstore: { background_gradient: ["#1f2937", "#64748b"], emoji: "📚",  tone: "sophisticated", headline_style: "emotional" },
+  grocery:   { background_gradient: ["#14532d", "#22c55e"], emoji: "🥪",  tone: "warm",          headline_style: "emotional" },
+  fitness:   { background_gradient: ["#881337", "#fb7185"], emoji: "💪",  tone: "urgent",        headline_style: "emotional" },
 };
 
 const CATEGORIES: { id: MerchantCategory; label: string; icon: string }[] = [

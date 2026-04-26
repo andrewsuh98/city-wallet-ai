@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { clearConsent } from "@/components/ConsentModal";
+import { clearConsent, getConsent } from "@/components/ConsentModal";
 import { useRouter } from "next/navigation";
 
 const SECTION_TITLE = "mb-3 mt-8 font-body text-h3 font-semibold leading-snug text-fg-1";
@@ -12,6 +11,7 @@ const CARD_ICON = "shrink-0 mt-px text-xl text-fg-3";
 
 export default function PrivacyPage() {
   const router = useRouter();
+  const isOnboarded = getConsent() !== null;
 
   const handleClearData = () => {
     clearConsent();
@@ -20,13 +20,13 @@ export default function PrivacyPage() {
 
   return (
     <div className="mx-auto min-h-screen max-w-[480px] bg-page px-5 pt-10 pb-24">
-      <Link
-        href="/"
-        className="mb-6 inline-flex items-center gap-1 font-body text-small text-fg-link no-underline"
+      <button
+        onClick={() => router.back()}
+        className="mb-6 inline-flex items-center gap-1 border-none bg-transparent p-0 font-body text-small text-fg-link cursor-pointer"
       >
         <i className="ph ph-arrow-left text-sm" />
         Back
-      </Link>
+      </button>
 
       <h1
         className="mb-2 font-display text-h1 font-medium leading-snug text-fg-1"
@@ -138,17 +138,21 @@ export default function PrivacyPage() {
         ))}
       </div>
 
-      <h2 className={SECTION_TITLE}>Clear my data</h2>
-      <p className="mb-4 font-body text-body leading-normal text-fg-2">
-        This removes your consent, session, and all locally stored data. The app will show the welcome screen again.
-      </p>
+      {isOnboarded && (
+        <>
+          <h2 className={SECTION_TITLE}>Clear my data</h2>
+          <p className="mb-4 font-body text-body leading-normal text-fg-2">
+            This removes your consent, preferences, and all locally stored data. The app will show the welcome screen again.
+          </p>
 
-      <button
-        onClick={handleClearData}
-        className="w-full rounded-2 border border-status-danger bg-transparent px-6 py-3 font-body text-body font-semibold text-status-danger hover:bg-cw-red-50"
-      >
-        Clear all data and revoke consent
-      </button>
+          <button
+            onClick={handleClearData}
+            className="w-full rounded-2 border border-status-danger bg-transparent px-6 py-3 font-body text-body font-semibold text-status-danger hover:bg-cw-red-50"
+          >
+            Clear all data and revoke consent
+          </button>
+        </>
+      )}
     </div>
   );
 }

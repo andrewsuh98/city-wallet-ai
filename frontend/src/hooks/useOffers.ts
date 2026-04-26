@@ -90,8 +90,11 @@ export function useOffers(input: UseOffersInput): UseOffersResult {
     const target = offers.find((o) => o.id === id);
     if (!target) return null;
 
+    const optimistic: Offer = { ...target, status: "accepted" };
+    setOffers((curr) => curr.map((o) => (o.id === id ? optimistic : o)));
+
     if (status === "fallback" || target.id.startsWith("off_mock_")) {
-      const updated: Offer = { ...target, status: "accepted", redemption_token: "mock_token" };
+      const updated: Offer = { ...optimistic, redemption_token: "mock_token" };
       setOffers((curr) => curr.map((o) => (o.id === id ? updated : o)));
       return updated;
     }
@@ -102,6 +105,7 @@ export function useOffers(input: UseOffersInput): UseOffersResult {
       return res.offer;
     } catch (err) {
       console.error("Accept offer failed", err);
+      setOffers((curr) => curr.map((o) => (o.id === id ? target : o)));
       return null;
     }
   }, [offers, status]);
