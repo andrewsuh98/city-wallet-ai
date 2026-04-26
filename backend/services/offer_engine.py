@@ -15,10 +15,12 @@ from config import ANTHROPIC_API_KEY, city_config
 from database import get_db
 from models import (
     ContextState,
+    CustomerIntent,
     GenerateOffersRequest,
     GenerateOffersResponse,
     Merchant,
     MerchantCategory,
+    MerchantLiveSignal,
     MerchantRule,
     Offer,
     OfferStatus,
@@ -60,6 +62,11 @@ Do not default to the obvious execution — surprise is part of the value.
 - event nearby: energy, the crowd, the moment
 - evening / night: wind-down, reward, treat yourself
 - morning: fuel, start, momentum
+
+MERCHANT VOICE RULES:
+- Use the merchant's brand_voice to set the register: warm = cozy/inviting, playful = light/fun, sophisticated = understated/precise, neighborly = casual/local
+- Reference signature items by name where natural — not as a list, woven into copy
+- Do not invent items not in the signature list
 
 STYLE RULES:
 - background_gradient: two hex colors matching the offer's emotional tone
@@ -248,6 +255,11 @@ async def match_merchants(
                 longitude=row["longitude"],
                 address=row["address"] or "",
                 image_url=row["image_url"],
+                brand_voice=row["brand_voice"],
+                signature_items=json.loads(row["signature_items"] or "[]"),
+                target_demographics=json.loads(row["target_demographics"] or "[]"),
+                primary_goal=row["primary_goal"],
+                daily_budget_usd=row["daily_budget_usd"],
                 rules=[rule],
             )
             matched.append((merchant, rule, density_map.get(merchant_id)))
@@ -262,7 +274,7 @@ async def match_merchants(
 def _build_prompt(
     context: ContextState,
     merchant_rules: list[tuple[Merchant, MerchantRule, Optional[TransactionDensity]]],
-    user_preferences: dict,
+    intent: CustomerIntent,
 ) -> str:
     user_lat = context.location.latitude
     user_lng = context.location.longitude
@@ -282,9 +294,18 @@ def _build_prompt(
         f"- Urgency: {urgency}",
     ]
 
-    intent_tags = (user_preferences or {}).get("intent_tags", [])
-    if intent_tags:
-        lines.append(f"\nUSER INTENT SIGNALS (soft hint only): {', '.join(intent_tags)}")
+    if intent.intent_tags:
+        lines.append(f"\nUSER INTENT SIGNALS (soft hint only): {', '.join(intent.intent_tags)}")
+    if intent.preferred_categories:
+        lines.append(f"Preferred categories: {', '.join(intent.preferred_categories)}")
+    if intent.price_sensitivity:
+        lines.append(f"Price sensitivity: {intent.price_sensitivity}")
+    if intent.declined_categories_today:
+        lines.append(f"Declined categories today (deprioritize): {', '.join(intent.declined_categories_today)}")
+
+    live_signal_map: dict[str, MerchantLiveSignal] = {
+        s.merchant_id: s for s in context.merchant_live_signals
+    }
 
     lines.append("\nELIGIBLE MERCHANTS — generate one offer per merchant:")
 
@@ -308,6 +329,22 @@ def _build_prompt(
             f'   merchant_id: "{merchant.id}"',
         ]
 
+        if merchant.brand_voice:
+            lines.append(f"   Brand voice: {merchant.brand_voice}")
+        if merchant.signature_items:
+            lines.append(f"   Signature items: {', '.join(merchant.signature_items)}")
+        if merchant.target_demographics:
+            lines.append(f"   Target demographics: {', '.join(merchant.target_demographics)}")
+        if merchant.primary_goal:
+            lines.append(f"   Primary goal: {merchant.primary_goal}")
+
+        signal = live_signal_map.get(merchant.id)
+        if signal:
+            if signal.inventory_flags:
+                lines.append(f"   Inventory: {', '.join(signal.inventory_flags)}")
+            lines.append(f"   Staff capacity: {signal.staff_capacity}")
+            lines.append(f"   Budget burned today: {int(signal.daily_budget_burned_pct * 100)}%")
+
     return "\n".join(lines)
 
 
@@ -326,7 +363,7 @@ async def call_claude(user_prompt: str) -> dict:
         messages=[{"role": "user", "content": user_prompt}],
         tools=[_OFFER_TOOL],  # type: ignore[arg-type]
         tool_choice={"type": "tool", "name": "emit_offers"},
-        timeout=5.0,
+        timeout=20.0,
     )
     for block in response.content:
         if isinstance(block, ToolUseBlock):
@@ -439,9 +476,16 @@ async def generate_offers(request: GenerateOffersRequest) -> GenerateOffersRespo
     db = await get_db()
 
     try:
-        user_preferences = await get_user_preferences(
-            db, request.session_id, request.context.context_tags
-        )
+        if request.customer_intent is not None:
+            intent = request.customer_intent
+        else:
+            slm_result = await get_user_preferences(
+                db, request.session_id, request.context.context_tags
+            )
+            intent = CustomerIntent(
+                intent_tags=slm_result.get("intent_tags", []),
+                preferred_categories=slm_result.get("past_categories", []),
+            )
 
         merchant_rules = await match_merchants(request.context, db)
 
@@ -452,7 +496,7 @@ async def generate_offers(request: GenerateOffersRequest) -> GenerateOffersRespo
                 context_summary=_context_summary(request.context),
             )
 
-        user_prompt = _build_prompt(request.context, merchant_rules, user_preferences)
+        user_prompt = _build_prompt(request.context, merchant_rules, intent)
         raw = await call_claude(user_prompt)
         offers = await process_response(raw, merchant_rules, request.context, request.session_id, db)
 
